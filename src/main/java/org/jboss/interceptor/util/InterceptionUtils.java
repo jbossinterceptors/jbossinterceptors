@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.utils;
+package org.jboss.interceptor.util;
 
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 

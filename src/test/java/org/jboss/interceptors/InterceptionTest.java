@@ -23,7 +23,7 @@ import org.jboss.interceptor.proxy.SimpleInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.model.InterceptionModelImpl;
 import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.utils.InterceptionUtils;
+import org.jboss.interceptor.util.InterceptionUtils;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.Assert;
