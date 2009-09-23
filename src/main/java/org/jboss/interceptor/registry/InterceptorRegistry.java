@@ -29,14 +29,14 @@ import java.util.HashMap;
  */
 public class InterceptorRegistry<T>
 {
-   private Map<T, InterceptionModel> interceptionModelMap = new HashMap<T, InterceptionModel>();
+   private Map<T, InterceptionModel<T>> interceptionModelMap = new HashMap<T, InterceptionModel<T>>();
 
-   public void registerInterceptionModel(T interceptedEntity, InterceptionModel interceptionModel)
+   public void registerInterceptionModel(T interceptedEntity, InterceptionModel<T> interceptionModel)
    {
       this.interceptionModelMap.put(interceptedEntity, interceptionModel);
    }
 
-   public InterceptionModel getInterceptionModel(T interceptedEntity)
+   public InterceptionModel<T> getInterceptionModel(T interceptedEntity)
    {
       return this.interceptionModelMap.get(interceptedEntity);
    }

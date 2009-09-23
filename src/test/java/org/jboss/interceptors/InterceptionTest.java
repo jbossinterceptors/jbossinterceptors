@@ -23,6 +23,7 @@ import org.jboss.interceptor.proxy.SimpleInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.model.InterceptionModelImpl;
 import org.jboss.interceptor.model.InterceptionType;
+import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.junit.Test;
 import org.junit.Before;
@@ -37,79 +38,119 @@ import java.util.Arrays;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionTest {
-    private static final String TEAM_NAME = "Ajax Amsterdam";
+public class InterceptionTest
+{
+   private static final String TEAM_NAME = "Ajax Amsterdam";
 
-    private String[] expectedLoggedValues = {
-    "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_postConstruct",
-            "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
-            "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
-            "org.jboss.interceptors.FootballTeam_aroundInvokeBefore",
-            "org.jboss.interceptors.FootballTeam_getName",
-            "org.jboss.interceptors.FootballTeam_aroundInvokeAfter",
-            "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
-            "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
-            "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_preDestroy"
+   private String[] expectedLoggedValues = {
+         "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_postConstruct",
+         "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.FootballTeam_aroundInvokeBefore",
+         "org.jboss.interceptors.FootballTeam_getName",
+         "org.jboss.interceptors.FootballTeam_aroundInvokeAfter",
+         "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_preDestroy"
 
-    };
+   };
+   private InterceptorRegistry<Class<?>> interceptorRegistry;
+   private InterceptionModelBuilder builder;
+   private InterceptorProxyCreator interceptorProxyCreator;
 
-    @Before
-    public void resetLog() {
-        InterceptorTestLogger.reset();
-    }
+   @Before
+   public void resetLogAndSetupClasses() throws Exception
+   {
+      InterceptorTestLogger.reset();
+      interceptorRegistry = new InterceptorRegistry<Class<?>>();
 
-    @Test
-    public void testInterception() throws Exception {
+      builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class);
 
-        InterceptorRegistry<Class> interceptorRegistry = new InterceptorRegistry<Class>();
-        InterceptionModelImpl interceptionModel = new InterceptionModelImpl();
-        interceptionModel.setInterceptors(InterceptionType.AROUND_INVOKE, FootballTeam.class.getMethod("getName"), Arrays.asList(new Class<?>[]{MyFirstInterceptor.class, MySecondInterceptor.class, FootballTeam.class}));
-        interceptionModel.setInterceptors(InterceptionType.POST_CONSTRUCT, null, Arrays.asList(new Class<?>[]{MyFirstInterceptor.class}));
-        interceptionModel.setInterceptors(InterceptionType.PRE_DESTROY, null, Arrays.asList(new Class<?>[]{MySecondInterceptor.class}));
-        interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MyFirstInterceptor.class, MySecondInterceptor.class);
+      builder.interceptPostConstruct().with(MyFirstInterceptor.class);
+      builder.interceptPreDestroy().with(MySecondInterceptor.class);
+      interceptorRegistry.registerInterceptionModel(FootballTeam.class, builder.build());
 
-        InterceptorProxyCreator interceptorProxyCreator = new InterceptorProxyCreatorImpl(interceptorRegistry, new SimpleInterceptionHandlerFactory());
-        //SoccerTeam proxy = interceptorProxyCreator.createInstrumentedInstance(FootballTeam.class, new Class<?>[]{String.class}, new Object[]{"Poli Timisoara"});
-        FootballTeam proxy = interceptorProxyCreator.createProxyFromInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
-        InterceptionUtils.executePostConstruct(proxy);
-        Assert.assertEquals(TEAM_NAME, proxy.getName());
-        InterceptionUtils.executePredestroy(proxy);
-        Assert.assertArrayEquals(expectedLoggedValues, InterceptorTestLogger.getLog().toArray());
+      interceptorProxyCreator = new InterceptorProxyCreatorImpl(interceptorRegistry, new SimpleInterceptionHandlerFactory());
 
-    }
+   }
+
+   @Test
+   public void testInterceptionWithInstrumentedClass() throws Exception
+   {
+
+      FootballTeam proxy = interceptorProxyCreator.createInstrumentedInstance(FootballTeam.class, new Class<?>[]{String.class}, new Object[]{TEAM_NAME});
+      //FootballTeam proxy = interceptorProxyCreator.createProxyFromInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
+      executeAssertionsOnProxy(proxy);
+
+   }
 
 
-    public static class MyFirstInterceptor {
+   @Test
+   public void testInterceptionWithProxifiedObject() throws Exception
+   {
+      FootballTeam proxy = interceptorProxyCreator.createProxyFromInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
+      executeAssertionsOnProxy(proxy);
 
-        @AroundInvoke
-        public Object doAround2(InvocationContext invocationContext) throws Exception {
-            InterceptorTestLogger.add(MyFirstInterceptor.class,"aroundInvokeBefore");
-            Object result = invocationContext.proceed();
-            InterceptorTestLogger.add(MyFirstInterceptor.class, "aroundInvokeAfter");
-            return result;
-        }
+   }
 
-        @PostConstruct
-        public Object doAfterConstruction(InvocationContext invocationContext) throws Exception {
-            InterceptorTestLogger.add(MyFirstInterceptor.class, "postConstruct");
-            return invocationContext.proceed();
-        }
-    }
+   private void executeAssertionsOnProxy(FootballTeam proxy)
+   {
+      InterceptionUtils.executePostConstruct(proxy);
+      Assert.assertEquals(TEAM_NAME, proxy.getName());
+      InterceptionUtils.executePredestroy(proxy);
+      Object[] logValues = InterceptorTestLogger.getLog().toArray();
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
+   }
 
-    public static class MySecondInterceptor extends MyFirstInterceptor {
-        @AroundInvoke
-        public Object doAround(InvocationContext invocationContext) throws Exception {
-            InterceptorTestLogger.add(MySecondInterceptor.class, "aroundInvokeBefore");
-            Object result = invocationContext.proceed();
-            InterceptorTestLogger.add(MySecondInterceptor.class, "aroundInvokeAfter");
-            return result;
-        }
+   private String iterateAndDisplay(Object[] logValues)
+   {
+      StringBuffer buffer = new StringBuffer();
+      for (Object logValue: logValues)
+      {
+         buffer.append(logValue.toString() + "\n");
+      }
+      return buffer.toString();
+   }
 
-        @PreDestroy
-        public Object doneHere(InvocationContext invocationContext) throws Exception {
-            InterceptorTestLogger.add(MySecondInterceptor.class, "preDestroy");
-            return invocationContext.proceed();
-        }
-    }
+
+   public static class MyFirstInterceptor
+   {
+
+      @AroundInvoke
+      public Object doAround2(InvocationContext invocationContext) throws Exception
+      {
+         InterceptorTestLogger.add(MyFirstInterceptor.class, "aroundInvokeBefore");
+         Object result = invocationContext.proceed();
+         InterceptorTestLogger.add(MyFirstInterceptor.class, "aroundInvokeAfter");
+         return result;
+      }
+
+      @PostConstruct
+      public Object doAfterConstruction(InvocationContext invocationContext) throws Exception
+      {
+         InterceptorTestLogger.add(MyFirstInterceptor.class, "postConstruct");
+         return invocationContext.proceed();
+      }
+   }
+
+   public static class MySecondInterceptor extends MyFirstInterceptor
+   {
+      @AroundInvoke
+      public Object doAround(InvocationContext invocationContext) throws Exception
+      {
+         InterceptorTestLogger.add(MySecondInterceptor.class, "aroundInvokeBefore");
+         Object result = invocationContext.proceed();
+         InterceptorTestLogger.add(MySecondInterceptor.class, "aroundInvokeAfter");
+         return result;
+      }
+
+      @PreDestroy
+      public Object doneHere(InvocationContext invocationContext) throws Exception
+      {
+         InterceptorTestLogger.add(MySecondInterceptor.class, "preDestroy");
+         return invocationContext.proceed();
+      }
+   }
 }
 

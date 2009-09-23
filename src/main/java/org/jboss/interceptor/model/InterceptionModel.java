@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionModel
+public interface InterceptionModel<T>
 {
 
    /**
@@ -43,5 +43,7 @@ public interface InterceptionModel
     * @return
     */
    public Set<Class<?>> getAllInterceptors();
+
+   public T getInterceptedEntity();
 
 }

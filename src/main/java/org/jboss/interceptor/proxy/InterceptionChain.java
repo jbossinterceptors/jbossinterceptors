@@ -56,7 +56,7 @@ public class InterceptionChain
 
    public Object invokeNext(InvocationContext invocationContext) {
 
-      if (currentPosition < interceptorClasses.size())
+      if (hasNext())
       {
          return interceptionHandlerMap.get(interceptorClasses.get(currentPosition++)).invoke(target, interceptionType, invocationContext);
       }
@@ -77,5 +77,11 @@ public class InterceptionChain
             return null;
       }
    }
+
+   public boolean hasNext()
+   {
+      return currentPosition < interceptorClasses.size();
+   }
+
 
 }

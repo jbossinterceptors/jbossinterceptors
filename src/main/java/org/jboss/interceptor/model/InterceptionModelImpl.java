@@ -17,13 +17,15 @@
 
 package org.jboss.interceptor.model;
 
+import org.jboss.interceptor.proxy.InterceptorException;
+
 import java.lang.reflect.Method;
 import java.util.*;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionModelImpl implements InterceptionModel
+public class InterceptionModelImpl<T> implements InterceptionModel<T>
 {
 
    private Map<InterceptionType, List<Class<?>>> lifecycleInterceptors = new HashMap<InterceptionType, List<Class<?>>>();
@@ -32,6 +34,12 @@ public class InterceptionModelImpl implements InterceptionModel
 
    private Set<Class<?>> allInterceptors = new LinkedHashSet<Class<?>>();
 
+   private T interceptedEntity;
+
+   public InterceptionModelImpl(T interceptedEntity)
+   {
+      this.interceptedEntity = interceptedEntity;
+   }
 
    public List<Class<?>> getInterceptors(InterceptionType interceptionType, Method method)
    {
@@ -58,20 +66,47 @@ public class InterceptionModelImpl implements InterceptionModel
       return Collections.unmodifiableSet(allInterceptors);
    }
 
-   public void setInterceptors(InterceptionType interceptionType, Method method, List<Class<?>> interceptors)
+   public T getInterceptedEntity()
+   {
+      return this.interceptedEntity;
+   }
+
+   public void appendInterceptors(InterceptionType interceptionType, Method method, Class<?>... interceptors)
    {
       if (interceptionType.isLifecycleCallback())
       {
-         lifecycleInterceptors.put(interceptionType, interceptors);
+         List<Class<?>> interceptorsList = lifecycleInterceptors.get(interceptionType);
+         if (interceptorsList == null)
+         {
+            interceptorsList = new ArrayList<Class<?>>();
+            lifecycleInterceptors.put(interceptionType, interceptorsList);
+         }
+         appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
       } else
       {
          if (null == methodBoundInterceptors.get(interceptionType))
          {
             methodBoundInterceptors.put(interceptionType, new HashMap<Method, List<Class<?>>>());
          }
-         methodBoundInterceptors.get(interceptionType).put(method, interceptors);
+         List<Class<?>> interceptorsList = methodBoundInterceptors.get(interceptionType).get(method);
+         if (interceptorsList == null)
+         {
+            interceptorsList = new ArrayList<Class<?>>();
+            methodBoundInterceptors.get(interceptionType).put(method, interceptorsList);
+         }
+         appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
       }
-      allInterceptors.addAll(interceptors);
+      for (Class<?> interceptorClass: interceptors )
+          allInterceptors.add(interceptorClass);
+   }
+
+   private void appendInterceptorClassesToList(InterceptionType interceptionType, List<Class<?>> interceptorsList, Class<?>... interceptors)
+   {
+      for (Class<?> clazz: interceptors)
+         if (interceptorsList.contains(clazz))
+            throw new InterceptorException("Duplicate interceptor class definition when binding" + clazz.getName() + " on " + interceptionType.name());
+      else
+            interceptorsList.add(clazz);
    }
 
 }

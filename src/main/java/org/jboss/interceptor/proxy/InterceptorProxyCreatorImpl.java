@@ -19,9 +19,11 @@ package org.jboss.interceptor.proxy;
 
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.model.InterceptionType;
+import static org.jboss.interceptor.util.InterceptionUtils.isAroundInvokeInterceptionCandidate;
 import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.MethodHandler;
 
+import javax.interceptor.AroundInvoke;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -33,11 +35,11 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    public static final String POST_CONSTRUCT = "lifecycle_mixin_$$_postConstruct";
    public static final String PRE_DESTROY = "lifecycle_mixin_$$_preDestroy";
 
-   private InterceptorRegistry<Class> interceptorRegistry;
+   private InterceptorRegistry<Class<?>> interceptorRegistry;
 
    private InterceptionHandlerFactory interceptionHandlerFactory;
 
-   public InterceptorProxyCreatorImpl(InterceptorRegistry<Class> interceptorRegistry, InterceptionHandlerFactory interceptionHandlerFactory)
+   public InterceptorProxyCreatorImpl(InterceptorRegistry<Class<?>> interceptorRegistry, InterceptionHandlerFactory interceptionHandlerFactory)
    {
       this.interceptorRegistry = interceptorRegistry;
       this.interceptionHandlerFactory = interceptionHandlerFactory;
@@ -114,7 +116,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       private Map<Class<?>, InterceptionHandler> interceptorHandlerInstances = new HashMap<Class<?>, InterceptionHandler>();
       private Class<?> targetClazz;
 
-      public InstanceProxifyingMethodHandler(Object target, Class<?> targetClass, InterceptorRegistry registry)
+      public InstanceProxifyingMethodHandler(Object target, Class<?> targetClass, InterceptorRegistry<Class<?>> registry)
       {
          if (target == null)
             this.target = this;
@@ -130,25 +132,18 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
          for (Class<?> interceptorClazz : registry.getInterceptionModel(this.targetClazz).getAllInterceptors())
          {
-            if (!interceptorClazz.equals(targetClazz))
-               interceptorHandlerInstances.put(interceptorClazz, interceptionHandlerFactory.createForClass(interceptorClazz));
+            interceptorHandlerInstances.put(interceptorClazz, interceptionHandlerFactory.createForClass(interceptorClazz));
          }
 
          interceptorHandlerInstances.put(targetClazz, new SimpleInterceptionHandler(target, targetClazz));
       }
 
-//      public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
-//      {
-//         List<Class<?>> interceptorClasses = registry.getInterceptionModel(targetClazz).getInterceptors(InterceptionType.AROUND_INVOKE, thisMethod);
-//         List<Class<?>> interceptorClassesForMethod = interceptorClasses == null ? new ArrayList<Class<?>>() : interceptorClasses;
-//         InterceptionChain chain = new InterceptionChain(interceptorClassesForMethod, InterceptionType.AROUND_INVOKE, target, thisMethod, args, interceptorHandlerInstances);
-//         return chain.invokeNext(new InterceptorInvocationContext(chain, target, thisMethod, args));
-//      }
-
       public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
       {
          if (!thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
          {
+            if (!isAroundInvokeInterceptionCandidate(thisMethod))
+               return proceed.invoke(self, args);
             return executeInterception(thisMethod, args, InterceptionType.AROUND_INVOKE);
          } else
          {
@@ -164,10 +159,15 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
          return null;
       }
 
+
+
       private Object executeInterception(Method thisMethod, Object[] args, InterceptionType interceptionType)
       {
          List<Class<?>> interceptorClasses = registry.getInterceptionModel(targetClazz).getInterceptors(interceptionType, thisMethod);
          List<Class<?>> interceptorClassesForMethod = interceptorClasses == null ? new ArrayList<Class<?>>() : interceptorClasses;
+         //assume the list is immutable
+         interceptorClassesForMethod = new ArrayList(interceptorClassesForMethod);
+         interceptorClassesForMethod.add(targetClazz);
          InterceptionChain chain = new InterceptionChain(interceptorClassesForMethod, interceptionType, target, thisMethod, args, interceptorHandlerInstances);
          return chain.invokeNext(new InterceptorInvocationContext(chain, target, thisMethod, args));
       }
@@ -180,9 +180,8 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       private Map<Class<?>, InterceptionHandler> interceptorHandlerInstances = new HashMap<Class<?>, InterceptionHandler>();
       private Class<?> targetClazz;
 
-      public AutoProxifiedMethodHandler(Class<?> targetClazz, InterceptorRegistry registry)
+      public AutoProxifiedMethodHandler(Class<?> targetClazz, InterceptorRegistry<Class<?>> registry)
       {
-
          if (targetClazz == null)
             throw new IllegalArgumentException("Target class must not be null");
 
@@ -197,8 +196,11 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
       public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
       {
+         // do not intercept interceptor methods
          if (!thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
          {
+            if (thisMethod.getAnnotation(AroundInvoke.class) != null)
+               return proceed.invoke(self, args);
             return executeInterception(self, thisMethod, proceed, args, InterceptionType.AROUND_INVOKE);
          } else
          {
@@ -216,11 +218,22 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
       private Object executeInterception(Object self, Method thisMethod, Method proceed, Object[] args, InterceptionType interceptionType)
       {
+         addSelfAsInterceptorHandler(self);
          List<Class<?>> interceptorClasses = registry.getInterceptionModel(targetClazz).getInterceptors(interceptionType, thisMethod);
          List<Class<?>> interceptorClassesForMethod = interceptorClasses == null ? new ArrayList<Class<?>>() : interceptorClasses;
+         //assume the list is immutable and always consider target class as interception targets
+         interceptorClassesForMethod = new ArrayList(interceptorClassesForMethod);
+         interceptorClassesForMethod.add(targetClazz);
          InterceptionChain chain = new InterceptionChain(interceptorClassesForMethod, interceptionType, self, proceed, args, interceptorHandlerInstances);
          return chain.invokeNext(new InterceptorInvocationContext(chain, self, proceed, args));
       }
+
+      private void addSelfAsInterceptorHandler(Object self)
+      {
+         if (!interceptorHandlerInstances.containsKey(targetClazz))
+            interceptorHandlerInstances.put(targetClazz, new SimpleInterceptionHandler(self, targetClazz));
+      }
+
    }
 
    public interface LifecycleMixin
@@ -230,3 +243,5 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       public void lifecycle_mixin_$$_preDestroy();
    }
 }
+
+

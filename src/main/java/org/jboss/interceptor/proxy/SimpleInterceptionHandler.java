@@ -88,7 +88,10 @@ public class SimpleInterceptionHandler implements InterceptionHandler
    {
       try
       {
-         return interceptorMethods.get(interceptionType).invoke(interceptorInstance, new Object[]{invocationContext});
+         if (interceptorMethods.get(interceptionType) != null)
+            return interceptorMethods.get(interceptionType).invoke(interceptorInstance, new Object[]{invocationContext});
+         else
+            return null;
       } catch (IllegalAccessException e)
       {
          throw new RuntimeException((e));

@@ -19,22 +19,35 @@ package org.jboss.interceptor.util;
 
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 
+import javax.interceptor.AroundInvoke;
+import java.lang.reflect.Method;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
 public class InterceptionUtils
 {
-   public static void executePostConstruct(Object proxy) {
-      if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin) {
+   public static void executePostConstruct(Object proxy)
+   {
+      if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin)
+      {
          InterceptorProxyCreatorImpl.LifecycleMixin lifecycleMixin = (InterceptorProxyCreatorImpl.LifecycleMixin) proxy;
          lifecycleMixin.lifecycle_mixin_$$_postConstruct();
       }
    }
 
-   public static void executePredestroy(Object proxy) {
-      if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin) {
+   public static void executePredestroy(Object proxy)
+   {
+      if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin)
+      {
          InterceptorProxyCreatorImpl.LifecycleMixin lifecycleMixin = (InterceptorProxyCreatorImpl.LifecycleMixin) proxy;
          lifecycleMixin.lifecycle_mixin_$$_preDestroy();
       }
+   }
+
+   public static boolean isAroundInvokeInterceptionCandidate(Method thisMethod)
+   {
+      // just a provisory implementation
+      return thisMethod.getAnnotation(AroundInvoke.class) == null;
    }
 }
