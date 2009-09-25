@@ -27,19 +27,19 @@ import java.lang.reflect.Method;
 public class InterceptionModelBuilder<T>
 {
 
-   private InterceptionModelImpl interceptionModel;
+   private InterceptionModelImpl<T> interceptionModel;
 
    private T interceptedEntity;
 
    private InterceptionModelBuilder(T interceptedEntity)
    {
       this.interceptedEntity = interceptedEntity;
-      this.interceptionModel = new InterceptionModelImpl(interceptedEntity);
+      this.interceptionModel = new InterceptionModelImpl<T>(interceptedEntity);
    }
 
    public static <T> InterceptionModelBuilder<T> newBuilderFor(T entity)
    {
-      return new InterceptionModelBuilder(entity);
+      return new InterceptionModelBuilder<T>(entity);
    }
 
    public T getInterceptedEntity()
@@ -47,7 +47,7 @@ public class InterceptionModelBuilder<T>
       return interceptedEntity;
    }
 
-   public InterceptionModel build()
+   public InterceptionModel<T> build()
    {
       return interceptionModel;
    }

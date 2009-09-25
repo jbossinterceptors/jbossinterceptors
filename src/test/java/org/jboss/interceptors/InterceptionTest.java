@@ -17,23 +17,20 @@
 
 package org.jboss.interceptors;
 
-import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
+import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;
+import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.SimpleInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
-import org.jboss.interceptor.model.InterceptionModelImpl;
-import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.util.InterceptionUtils;
-import org.junit.Test;
-import org.junit.Before;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-import javax.interceptor.InvocationContext;
-import javax.interceptor.AroundInvoke;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Arrays;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -54,17 +51,15 @@ public class InterceptionTest
          "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_preDestroy"
 
    };
-   private InterceptorRegistry<Class<?>> interceptorRegistry;
-   private InterceptionModelBuilder builder;
    private InterceptorProxyCreator interceptorProxyCreator;
 
    @Before
    public void resetLogAndSetupClasses() throws Exception
    {
       InterceptorTestLogger.reset();
-      interceptorRegistry = new InterceptorRegistry<Class<?>>();
+      InterceptorRegistry<Class<?>> interceptorRegistry = new InterceptorRegistry<Class<?>>();
 
-      builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class);
+      InterceptionModelBuilder<Class<?>> builder = InterceptionModelBuilder.<Class<?>>newBuilderFor(FootballTeam.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MyFirstInterceptor.class, MySecondInterceptor.class);
       builder.interceptPostConstruct().with(MyFirstInterceptor.class);
@@ -108,7 +103,7 @@ public class InterceptionTest
       StringBuffer buffer = new StringBuffer();
       for (Object logValue: logValues)
       {
-         buffer.append(logValue.toString() + "\n");
+         buffer.append(logValue.toString()).append("\n");
       }
       return buffer.toString();
    }
