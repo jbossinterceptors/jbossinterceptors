@@ -18,6 +18,7 @@
 package org.jboss.interceptor.proxy;
 
 import org.jboss.interceptor.model.InterceptionType;
+import org.jboss.interceptor.model.InterceptionTypeRegistry;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
@@ -44,11 +45,11 @@ public class SimpleInterceptionHandler implements InterceptionHandler
 
       this.clazz = (clazz == null) ?interceptorInstance.getClass():clazz;
       this.interceptorInstance = interceptorInstance;
-      for (InterceptionType interceptionType : InterceptionType.values())
+      for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
       {
          for (Method method : clazz.getDeclaredMethods())
          {
-            if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(interceptionType.getAssociatedAnnotation()) != null)
+            if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
             {
                interceptorMethods.put(interceptionType, method);
             }
@@ -71,11 +72,11 @@ public class SimpleInterceptionHandler implements InterceptionHandler
       {
          throw new InterceptorException("Cannot create interceptor instance:", e);
       }
-      for (InterceptionType interceptionType : InterceptionType.values())
+      for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
       {
          for (Method method : simpleInterceptorClass.getDeclaredMethods())
          {
-            if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(interceptionType.getAssociatedAnnotation()) != null)
+            if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
             {
                interceptorMethods.put(interceptionType, method);
             }

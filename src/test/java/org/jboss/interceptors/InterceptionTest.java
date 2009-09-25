@@ -29,8 +29,8 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.Assert;
 
-import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
+import javax.interceptor.AroundInvoke;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Arrays;

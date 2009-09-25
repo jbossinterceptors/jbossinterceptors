@@ -17,32 +17,26 @@
 
 package org.jboss.interceptor.model;
 
-import javax.interceptor.AroundInvoke;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.PostActivate;
-import javax.ejb.PrePassivate;
-import java.lang.annotation.Annotation;
-
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
 public enum InterceptionType
 {
-   AROUND_INVOKE(false, AroundInvoke.class),
+
+   AROUND_INVOKE(false, "javax.interceptor.AroundInvoke"),
    //AROUND_TIMEOUT(false, AroundTimeout.class),
-   POST_CONSTRUCT(true, PostConstruct.class),
-   PRE_DESTROY(true, PreDestroy.class),
-   POST_ACTIVATE(true, PostActivate.class),
-   PRE_PASSIVATE(true, PrePassivate.class);
+   POST_CONSTRUCT(true, "javax.annotation.PostConstruct"),
+   PRE_DESTROY(true, "javax.annotation.PreDestroy"),
+   POST_ACTIVATE(true, "javax.ejb.PostActivate"),
+   PRE_PASSIVATE(true, "javax.ejb.PrePassivate");
 
    private boolean lifecycleCallback;
-   private Class<? extends Annotation> associatedAnnotation;
+   private String annotationClassName;
 
-   InterceptionType(boolean lifecycleCallback, Class<? extends Annotation> associatedAnnotation)
+   InterceptionType(boolean lifecycleCallback, String annotationClassName)
    {
       this.lifecycleCallback = lifecycleCallback;
-      this.associatedAnnotation = associatedAnnotation;
+      this.annotationClassName = annotationClassName;
    }
 
    public boolean isLifecycleCallback()
@@ -50,8 +44,8 @@ public enum InterceptionType
       return lifecycleCallback;
    }
 
-   public Class<? extends Annotation> getAssociatedAnnotation()
+   public String getAnnotationClassName()
    {
-      return associatedAnnotation;
+      return annotationClassName;
    }
 }
