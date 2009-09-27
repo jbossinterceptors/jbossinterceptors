@@ -24,7 +24,8 @@ import javax.interceptor.InvocationContext;
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
 public class FootballTeam {
-    private String teamName;
+
+   private String teamName;
 
     // an empty-argument constructor is required for proxifycation
     public FootballTeam() {

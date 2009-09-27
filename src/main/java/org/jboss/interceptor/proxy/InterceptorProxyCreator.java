@@ -21,9 +21,9 @@ package org.jboss.interceptor.proxy;
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
 public interface InterceptorProxyCreator {
-    <T> T createProxyFromInstance(Object target, Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) throws IllegalAccessException, InstantiationException;
+    <T> T createProxyFromInstance(Object target, Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) ;
 
-    <T> T createInstrumentedInstance(Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) throws IllegalAccessException, InstantiationException;
+    <T> T createInstrumentedInstance(Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) ;
 
     <T> T createProxyFromInstance(Object target, Class<T> proxyClass) throws IllegalAccessException, InstantiationException;
 }

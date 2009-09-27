@@ -51,7 +51,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    }
 
 
-   public <T> T createProxyFromInstance(final Object target, Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) throws IllegalAccessException, InstantiationException
+   public <T> T createProxyFromInstance(final Object target, Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments)
    {
       ProxyFactory proxyFactory = new ProxyFactory();
       if (proxyClass != null)
@@ -70,7 +70,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       }
    }
 
-   public <T> T createInstrumentedInstance(Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) throws IllegalAccessException, InstantiationException
+   public <T> T createInstrumentedInstance(Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments)
    {
       ProxyFactory proxyFactory = new ProxyFactory();
       if (proxyClass != null)
@@ -132,7 +132,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
          if (targetClass != null)
             this.targetClazz = targetClass;
          else
-            this.targetClazz = target.getClass();
+            this.targetClazz = this.target.getClass();
 
          this.registry = registry;
 

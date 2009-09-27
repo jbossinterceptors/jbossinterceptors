@@ -113,7 +113,7 @@ public class InterceptionTest
    {
 
       @AroundInvoke
-      private final Object doAround(InvocationContext invocationContext) throws Exception
+      private Object doAround(InvocationContext invocationContext) throws Exception
       {
          InterceptorTestLogger.add(MyFirstInterceptor.class, "aroundInvokeBefore");
          Object result = invocationContext.proceed();

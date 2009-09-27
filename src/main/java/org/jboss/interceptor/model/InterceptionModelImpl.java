@@ -96,8 +96,7 @@ public class InterceptionModelImpl<T> implements InterceptionModel<T>
          }
          appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
       }
-      for (Class<?> interceptorClass: interceptors )
-          allInterceptors.add(interceptorClass);
+      allInterceptors.addAll(Arrays.asList(interceptors));
    }
 
    private void appendInterceptorClassesToList(InterceptionType interceptionType, List<Class<?>> interceptorsList, Class<?>... interceptors)
