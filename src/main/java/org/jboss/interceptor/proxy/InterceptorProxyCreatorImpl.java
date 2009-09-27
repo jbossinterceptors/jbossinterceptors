@@ -17,17 +17,20 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.registry.InterceptorRegistry;
-import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.model.InterceptorMetadata;
-import org.jboss.interceptor.model.ClassInterceptorMetadata;
-import static org.jboss.interceptor.util.InterceptionUtils.isAroundInvokeInterceptionCandidate;
-import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
+import org.jboss.interceptor.model.InterceptionType;
+import org.jboss.interceptor.model.InterceptorClassMetadata;
+import org.jboss.interceptor.registry.InterceptorRegistry;
+import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
+import static org.jboss.interceptor.util.InterceptionUtils.isAroundInvokeInterceptionCandidate;
 
 import javax.interceptor.AroundInvoke;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -117,7 +120,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       private InterceptorRegistry registry;
       private Map<Class<?>, InterceptionHandler> interceptorHandlerInstances = new HashMap<Class<?>, InterceptionHandler>();
       private Class<?> targetClazz;
-      private InterceptorMetadata targetClassInterceptorMetadata;
+      private InterceptorClassMetadata targetClassInterceptorMetadata;
 
       public InstanceProxifyingMethodHandler(Object target, Class<?> targetClass, InterceptorRegistry<Class<?>> registry)
       {
@@ -137,8 +140,8 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
          {
             interceptorHandlerInstances.put(interceptorClazz, interceptionHandlerFactory.createForClass(interceptorClazz));
          }
-         targetClassInterceptorMetadata = new ClassInterceptorMetadata(targetClazz);
-         interceptorHandlerInstances.put(targetClazz, new SimpleInterceptionHandler(target, targetClazz));
+         targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(targetClazz);
+         interceptorHandlerInstances.put(targetClazz, new DirectClassInterceptionHandler(target, targetClazz));
       }
 
       public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
@@ -184,7 +187,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       private InterceptorRegistry registry;
       private Map<Class<?>, InterceptionHandler> interceptorHandlerInstances = new HashMap<Class<?>, InterceptionHandler>();
       private Class<?> targetClazz;
-      private InterceptorMetadata targetClassInterceptorMetadata;
+      private InterceptorClassMetadata targetClassInterceptorMetadata;
 
 
       public AutoProxifiedMethodHandler(Class<?> targetClazz, InterceptorRegistry<Class<?>> registry)
@@ -197,9 +200,9 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
          for (Class<?> interceptorClazz : registry.getInterceptionModel(this.targetClazz).getAllInterceptors())
          {
-            interceptorHandlerInstances.put(interceptorClazz, new SimpleInterceptionHandler(interceptorClazz));
+            interceptorHandlerInstances.put(interceptorClazz, new DirectClassInterceptionHandler(interceptorClazz));
          }
-         targetClassInterceptorMetadata = new ClassInterceptorMetadata(targetClazz);
+         targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(targetClazz);
       }
 
       public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
@@ -241,7 +244,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       private void addSelfAsInterceptorHandler(Object self)
       {
          if (!interceptorHandlerInstances.containsKey(targetClazz))
-            interceptorHandlerInstances.put(targetClazz, new SimpleInterceptionHandler(self, targetClazz));
+            interceptorHandlerInstances.put(targetClazz, new DirectClassInterceptionHandler(self, targetClazz));
       }
 
    }

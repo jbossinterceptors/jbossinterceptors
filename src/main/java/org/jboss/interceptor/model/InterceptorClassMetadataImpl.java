@@ -18,22 +18,27 @@
 package org.jboss.interceptor.model;
 
 import org.jboss.interceptor.proxy.InterceptorException;
+import org.jboss.interceptor.util.InterceptionUtils;
+import org.jboss.interceptor.util.ReflectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.*;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class ClassInterceptorMetadata implements InterceptorMetadata
+public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
 {
+
+   private Log log = LogFactory.getLog(InterceptorClassMetadataImpl.class);
 
    private Class<?> interceptorClass;
 
    private Map<InterceptionType, List<Method>> methodMap = new HashMap<InterceptionType, List<Method>>();
 
-   public ClassInterceptorMetadata(Class<?> interceptorClass)
+   public InterceptorClassMetadataImpl(Class<?> interceptorClass)
    {
       this.interceptorClass = interceptorClass;
 
@@ -48,7 +53,7 @@ public class ClassInterceptorMetadata implements InterceptorMetadata
          {
             for (Method method : currentClass.getDeclaredMethods())
             {
-               if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
+               if (InterceptionUtils.isInterceptorMethod(interceptionType, method))
                {
                   if (methodMap.get(interceptionType) == null)
                      methodMap.put(interceptionType, new LinkedList<Method>());
@@ -57,7 +62,7 @@ public class ClassInterceptorMetadata implements InterceptorMetadata
                   else
                      detectedInterceptorTypes.add(interceptionType);
                   // add method in the list - if it is there already, it means that it has been added by a subclass
-                  ensureAccessible(method);
+                  ReflectionUtils.ensureAccessible(method);
                   if (!foundMethodNames.contains(method.getName()))
                   {
                      methodMap.get(interceptionType).add(method);
@@ -70,14 +75,6 @@ public class ClassInterceptorMetadata implements InterceptorMetadata
       } while (currentClass != null);
    }
 
-   public static void ensureAccessible(Method method)
-   {
-      if (!method.isAccessible())
-      {
-         method.setAccessible(true);
-      }
-   }
-
    public Class<?> getInterceptorClass()
    {
       return interceptorClass;
@@ -85,7 +82,8 @@ public class ClassInterceptorMetadata implements InterceptorMetadata
 
    public List<Method> getInterceptorMethods(InterceptionType interceptionType)
    {
-      return methodMap.get(interceptionType);
+      List<Method> methods = methodMap.get(interceptionType);
+      return methods == null ? Collections.EMPTY_LIST : methods;
    }
 
 }

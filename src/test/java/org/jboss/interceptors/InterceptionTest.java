@@ -20,7 +20,7 @@ package org.jboss.interceptors;
 import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
-import org.jboss.interceptor.proxy.SimpleInterceptionHandlerFactory;
+import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.junit.Assert;
@@ -66,7 +66,7 @@ public class InterceptionTest
       builder.interceptPreDestroy().with(MySecondInterceptor.class);
       interceptorRegistry.registerInterceptionModel(FootballTeam.class, builder.build());
 
-      interceptorProxyCreator = new InterceptorProxyCreatorImpl(interceptorRegistry, new SimpleInterceptionHandlerFactory());
+      interceptorProxyCreator = new InterceptorProxyCreatorImpl(interceptorRegistry, new DirectClassInterceptionHandlerFactory());
 
    }
 

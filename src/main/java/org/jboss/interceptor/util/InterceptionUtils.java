@@ -20,8 +20,10 @@ package org.jboss.interceptor.util;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -30,6 +32,8 @@ import java.lang.reflect.Modifier;
  */
 public class InterceptionUtils
 {
+   private static final Log LOG = LogFactory.getLog(InterceptionUtils.class);
+
    public static void executePostConstruct(Object proxy)
    {
       if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin)
@@ -64,5 +68,78 @@ public class InterceptionUtils
       }
       return Modifier.isPublic(modifiers) 
             && !Modifier.isStatic(modifiers);
+   }
+
+   /**
+    *
+    * @param interceptionType
+    * @param method
+    * @return
+    */
+   public static boolean isInterceptorMethod(InterceptionType interceptionType, Method method)
+   {
+
+      if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) == null)
+         return false;
+
+      if (interceptionType.isLifecycleCallback())
+      {
+         if (!Void.TYPE.equals(method.getReturnType()))
+         {
+            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
+                  + " is annotated with " + interceptionType.getAnnotationClassName()
+                  + " but does not have a void return type");
+            return false;
+         }
+
+         Class<?>[] parameterTypes = method.getParameterTypes();
+
+         if (parameterTypes.length > 1)
+         {
+            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
+                  + " is annotated with " + interceptionType.getAnnotationClassName()
+                  + " but has more than 1 parameter");
+            return false;
+         }
+
+         if (parameterTypes.length == 1 && !InvocationContext.class.equals(parameterTypes[0]))
+         {
+            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
+                  + " is annotated with " + interceptionType.getAnnotationClassName()
+                  + " but does not have a " + InvocationContext.class.getName() + " parameter ");
+            return false;
+         }
+
+         return true;
+      } else
+      {
+         if (!Object.class.equals(method.getReturnType()))
+         {
+            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
+                  + " is annotated with " + interceptionType.getAnnotationClassName()
+                  + " but does not return a " + Object.class.getName());
+            return false;
+         }
+
+         Class<?>[] parameterTypes = method.getParameterTypes();
+
+         if (parameterTypes.length != 1)
+         {
+            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
+                  + " is annotated with " + interceptionType.getAnnotationClassName()
+                  + " but does not have exactly 1 parameter");
+            return false;
+         }
+
+         if (!InvocationContext.class.equals(parameterTypes[0]))
+         {
+            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
+                  + " is annotated with " + interceptionType.getAnnotationClassName()
+                  + " but does not have a " + InvocationContext.class.getName() + " parameter ");
+            return false;
+         }
+
+         return true;
+      }
    }
 }

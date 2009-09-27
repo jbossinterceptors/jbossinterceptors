@@ -15,18 +15,14 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model;
-
-import java.lang.reflect.Method;
-import java.util.List;
+package org.jboss.interceptor.proxy;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptorMetadata
-{
-     Class<?> getInterceptorClass();
+public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory {
 
-     List<Method> getInterceptorMethods(InterceptionType interceptionType);
-   
+    public InterceptionHandler createForClass(Class<?> clazz) {
+        return new DirectClassInterceptionHandler(clazz);
+    }
 }

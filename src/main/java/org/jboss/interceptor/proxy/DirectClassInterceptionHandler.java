@@ -18,39 +18,40 @@
 package org.jboss.interceptor.proxy;
 
 import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.model.InterceptorMetadata;
-import org.jboss.interceptor.model.ClassInterceptorMetadata;
+import org.jboss.interceptor.model.InterceptorClassMetadata;
+import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInterceptionHandler implements InterceptionHandler
+public class DirectClassInterceptionHandler implements InterceptionHandler
 {
 
    private final Object interceptorInstance;
 
-   private InterceptorMetadata interceptorMetadata;
+   private InterceptorClassMetadata interceptorMetadata;
 
    private Class<?> clazz;
 
-   public SimpleInterceptionHandler(Object interceptorInstance, Class<?> clazz)
+   public DirectClassInterceptionHandler(Object interceptorInstance, Class<?> clazz)
    {
       if (interceptorInstance == null)
          throw new IllegalArgumentException("Interceptor instance cannot be null");
 
       this.clazz = (clazz == null) ? interceptorInstance.getClass() : clazz;
       this.interceptorInstance = interceptorInstance;
-      this.interceptorMetadata = new ClassInterceptorMetadata(this.clazz);
+      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(this.clazz);
 
    }
 
-   public SimpleInterceptionHandler(Class<?> simpleInterceptorClass)
+   public DirectClassInterceptionHandler(Class<?> simpleInterceptorClass)
    {
 
       if (simpleInterceptorClass == null)
@@ -64,7 +65,7 @@ public class SimpleInterceptionHandler implements InterceptionHandler
       {
          throw new InterceptorException("Cannot create interceptor instance:", e);
       }
-      this.interceptorMetadata = new ClassInterceptorMetadata(this.clazz);
+      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(this.clazz);
 
    }
 

@@ -15,14 +15,37 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptors.metadata;
+
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.PostActivate;
+import javax.ejb.PrePassivate;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInterceptionHandlerFactory implements InterceptionHandlerFactory {
+public class InterceptorWithSomeMethods
+{
+   @AroundInvoke
+   public Object doAroundInvoke(InvocationContext invocationContext)
+   {
+      throw new UnsupportedOperationException();
+   }
 
-    public InterceptionHandler createForClass(Class<?> clazz) {
-        return new SimpleInterceptionHandler(clazz);
-    }
+   
+   @PreDestroy
+   public void doPreDestroy(InvocationContext invocationContext)
+   {
+
+   }
+
+   @PostActivate
+   public void doPostActivate(InvocationContext invocationContext)
+   {
+
+   }
+
 }
