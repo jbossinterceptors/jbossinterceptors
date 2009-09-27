@@ -23,10 +23,16 @@ import javax.interceptor.InvocationContext;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInheritanceChildInterceptor extends SimpleInheritanceParentInterceptor
+public class InterceptorWithDuplicateAnnotations
 {
    @AroundInvoke
    public Object doAroundInvoke(InvocationContext invocationContext)
+   {
+      throw new UnsupportedOperationException();
+   }
+
+   @AroundInvoke
+   public Object doAroundInvokeAgain(InvocationContext invocationContext)
    {
       throw new UnsupportedOperationException();
    }

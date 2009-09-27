@@ -15,19 +15,31 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptors.metadata;
+package org.jboss.interceptor.model;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+import org.jboss.interceptor.InterceptorException;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInheritanceChildInterceptor extends SimpleInheritanceParentInterceptor
+public class InterceptorMetadataException extends InterceptorException
 {
-   @AroundInvoke
-   public Object doAroundInvoke(InvocationContext invocationContext)
+   public InterceptorMetadataException()
    {
-      throw new UnsupportedOperationException();
+   }
+
+   public InterceptorMetadataException(String s)
+   {
+      super(s);
+   }
+
+   public InterceptorMetadataException(String s, Throwable throwable)
+   {
+      super(s, throwable);
+   }
+
+   public InterceptorMetadataException(Throwable throwable)
+   {
+      super(throwable);
    }
 }

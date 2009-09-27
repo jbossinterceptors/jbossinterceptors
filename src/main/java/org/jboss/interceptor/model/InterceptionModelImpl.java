@@ -17,7 +17,7 @@
 
 package org.jboss.interceptor.model;
 
-import org.jboss.interceptor.proxy.InterceptorException;
+import org.jboss.interceptor.InterceptorException;
 
 import java.lang.reflect.Method;
 import java.util.*;

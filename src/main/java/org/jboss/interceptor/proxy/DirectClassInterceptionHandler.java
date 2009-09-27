@@ -20,6 +20,7 @@ package org.jboss.interceptor.proxy;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
+import org.jboss.interceptor.InterceptorException;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;

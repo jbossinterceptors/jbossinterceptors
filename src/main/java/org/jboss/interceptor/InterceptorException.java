@@ -15,19 +15,29 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptors.metadata;
-
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+package org.jboss.interceptor;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInheritanceChildInterceptor extends SimpleInheritanceParentInterceptor
+public class InterceptorException extends RuntimeException
 {
-   @AroundInvoke
-   public Object doAroundInvoke(InvocationContext invocationContext)
+   public InterceptorException()
    {
-      throw new UnsupportedOperationException();
+   }
+
+   public InterceptorException(String s)
+   {
+      super(s);
+   }
+
+   public InterceptorException(String s, Throwable throwable)
+   {
+      super(s, throwable);
+   }
+
+   public InterceptorException(Throwable throwable)
+   {
+      super(throwable);
    }
 }

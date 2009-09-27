@@ -58,7 +58,8 @@ public class InterceptorClassMetadataRegistry
             {
                interceptorClassMetadataMap.put(interceptorClass, new InterceptorClassMetadataImpl(interceptorClass));
             }
-         } catch (Exception e)
+         }
+         finally 
          {
             lock.unlock();
          }

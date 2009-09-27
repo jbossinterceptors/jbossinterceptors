@@ -15,37 +15,28 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptors;
+package org.jboss.interceptors.proxy;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class FootballTeam {
+public class InterceptorTestLogger {
 
-   private String teamName;
+    private static final List<String> log = new ArrayList<String>();
 
-    // an empty-argument constructor is required for proxifycation
-    public FootballTeam() {
-
+    public static void add(Class<?> clazz, String logValue) {
+        log.add(clazz.getName() + "_" + logValue);  
     }
 
-    public FootballTeam(String s) {
-        this.teamName = s;
+    public static List<String> getLog() {
+        return Collections.unmodifiableList(log);
     }
 
-    public String getName() {
-        InterceptorTestLogger.add(FootballTeam.class, "getName");
-        return teamName;
-    }
-
-    @AroundInvoke
-    public Object itsMe(InvocationContext invocationContext) throws Exception {
-        InterceptorTestLogger.add(FootballTeam.class, "aroundInvokeBefore");
-        Object result = invocationContext.proceed();
-        InterceptorTestLogger.add(FootballTeam.class, "aroundInvokeAfter");
-        return result;
+    public static void reset() {
+        log.clear();
     }
 }

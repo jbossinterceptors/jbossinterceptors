@@ -24,6 +24,7 @@ import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import static org.jboss.interceptor.util.InterceptionUtils.isAroundInvokeInterceptionCandidate;
+import org.jboss.interceptor.InterceptorException;
 
 import javax.interceptor.AroundInvoke;
 import java.lang.reflect.Method;

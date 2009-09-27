@@ -17,17 +17,31 @@
 
 package org.jboss.interceptors.metadata;
 
-import javax.interceptor.AroundInvoke;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.interceptor.InvocationContext;
+import javax.interceptor.AroundInvoke;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInheritanceChildInterceptor extends SimpleInheritanceParentInterceptor
+public class OverrideParentInterceptor
 {
    @AroundInvoke
-   public Object doAroundInvoke(InvocationContext invocationContext)
+   Object methodDefinedOnParentAndUsedAsInterceptor(InvocationContext invocationContext)
    {
       throw new UnsupportedOperationException();
+   }
+
+   @PostConstruct
+   void methodOverriddenAndUsedAsInterceptor(InvocationContext invocationContext)
+   {
+
+   }
+
+   @PreDestroy
+   void methodOverriddenAndNotUsedAsInterceptor(InvocationContext invocationContext)
+   {
+
    }
 }

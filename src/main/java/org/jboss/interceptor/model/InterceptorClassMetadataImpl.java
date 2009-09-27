@@ -17,7 +17,7 @@
 
 package org.jboss.interceptor.model;
 
-import org.jboss.interceptor.proxy.InterceptorException;
+import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
@@ -44,35 +44,35 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
 
       Class<?> currentClass = interceptorClass;
 
-
-      Set<String> foundMethodNames = new HashSet<String>();
+      Set<MethodHolder> foundMethods = new HashSet<MethodHolder>();
       do
       {
          Set<InterceptionType> detectedInterceptorTypes = new HashSet<InterceptionType>();
-         for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
+
+         for (Method method : currentClass.getDeclaredMethods())
          {
-            for (Method method : currentClass.getDeclaredMethods())
+            for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
             {
                if (InterceptionUtils.isInterceptorMethod(interceptionType, method))
                {
                   if (methodMap.get(interceptionType) == null)
                      methodMap.put(interceptionType, new LinkedList<Method>());
                   if (detectedInterceptorTypes.contains(interceptionType))
-                     throw new InterceptorException("Same interception type cannot be specified twice on the same class");
+                     throw new InterceptorMetadataException("Same interception type cannot be specified twice on the same class");
                   else
                      detectedInterceptorTypes.add(interceptionType);
                   // add method in the list - if it is there already, it means that it has been added by a subclass
                   ReflectionUtils.ensureAccessible(method);
-                  if (!foundMethodNames.contains(method.getName()))
+                  if (!foundMethods.contains(new MethodHolder(method)))
                   {
-                     methodMap.get(interceptionType).add(method);
-                     foundMethodNames.add(method.getName());
+                     methodMap.get(interceptionType).add(0, method);
                   }
                }
             }
+            foundMethods.add(new MethodHolder(method));
          }
          currentClass = currentClass.getSuperclass();
-      } while (currentClass != null);
+      } while (!Object.class.equals(currentClass));
    }
 
    public Class<?> getInterceptorClass()
@@ -86,4 +86,41 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
       return methods == null ? Collections.EMPTY_LIST : methods;
    }
 
+   private class MethodHolder
+   {
+      private String methodName;
+
+      private Class<?>[] parameterTypes;
+
+
+      MethodHolder(Method method)
+      {
+         this.methodName = method.getName();
+         this.parameterTypes = method.getParameterTypes();
+      }
+
+      @Override
+      public boolean equals(Object o)
+      {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+
+         MethodHolder that = (MethodHolder) o;
+
+         if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null)
+            return false;
+         if (!Arrays.equals(parameterTypes, that.parameterTypes))
+            return false;
+
+         return true;
+      }
+
+      @Override
+      public int hashCode()
+      {
+         int result = methodName != null ? methodName.hashCode() : 0;
+         result = 31 * result + (parameterTypes != null ? Arrays.hashCode(parameterTypes) : 0);
+         return result;
+      }
+   }
 }

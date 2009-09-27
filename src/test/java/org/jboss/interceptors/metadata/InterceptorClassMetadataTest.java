@@ -18,11 +18,12 @@
 package org.jboss.interceptors.metadata;
 
 import org.junit.Test;
-import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.model.InterceptionType;
+import org.jboss.interceptor.model.InterceptorMetadataException;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
+import org.jboss.interceptor.InterceptorException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.List;
  */
 public class InterceptorClassMetadataTest
 {
-   
+
    @Test
    public void testInterceptorWithAllMethods()
    {
@@ -86,5 +87,64 @@ public class InterceptorClassMetadataTest
       assertEquals(true, prePassivateMethods.size() == 0);
 
    }
+
+   @Test
+   public void testSimpleInheritance()
+   {
+      InterceptorClassMetadata interceptorClassMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(SimpleInheritanceChildInterceptor.class);
+
+      List<Method> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
+      assertEquals(true, postConstructMethods.size() == 1);
+      assertEquals(postConstructMethods.get(0).getName(), "doPostConstruct");
+
+      List<Method> preDestroyMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_DESTROY);
+      assertEquals(true, preDestroyMethods.size() == 0);
+
+      List<Method> aroundInvokeMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.AROUND_INVOKE);
+      assertEquals(true, aroundInvokeMethods.size() == 1);
+      assertEquals(aroundInvokeMethods.get(0).getName(), "doAroundInvoke");
+
+      List<Method> postActivateMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_ACTIVATE);
+      assertEquals(true, postActivateMethods.size() == 0);
+
+      List<Method> prePassivateMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_PASSIVATE);
+      assertEquals(true, prePassivateMethods.size() == 0);
+
+   }
+
+   @Test
+   public void testInheritanceWithAndWithoutOverriding()
+   {
+      InterceptorClassMetadata interceptorClassMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(OverrideChildInterceptor.class);
+
+      List<Method> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
+      assertEquals(true, postConstructMethods.size() == 1);
+      assertEquals(postConstructMethods.get(0).getName(), "methodOverriddenAndUsedAsInterceptor");
+
+      List<Method> preDestroyMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_DESTROY);
+      assertEquals(true, preDestroyMethods.size() == 0);
+
+      List<Method> aroundInvokeMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.AROUND_INVOKE);
+      assertEquals(true, aroundInvokeMethods.size() == 2);
+      assertEquals(aroundInvokeMethods.get(0).getName(), "methodDefinedOnParentAndUsedAsInterceptor");
+      assertEquals(aroundInvokeMethods.get(1).getName(), "methodDefinedOnChildAndUsedAsInterceptor");
+
+      List<Method> postActivateMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_ACTIVATE);
+      assertEquals(true, postActivateMethods.size() == 0);
+
+
+      List<Method> prePassivateMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_PASSIVATE);
+      assertEquals(true, prePassivateMethods.size() == 0);
+
+   }
+
+   @Test(expected = InterceptorMetadataException.class)
+   public void testDuplicateAnnotations()
+   {
+      InterceptorClassMetadata interceptorClassMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(InterceptorWithDuplicateAnnotations.class);
+
+   }
+
+
 
 }

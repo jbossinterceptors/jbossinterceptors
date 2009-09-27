@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptors;
+package org.jboss.interceptors.proxy;
 
 import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;
@@ -23,6 +23,8 @@ import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.util.InterceptionUtils;
+import org.jboss.interceptors.proxy.FootballTeam;
+import org.jboss.interceptors.proxy.InterceptorTestLogger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,15 +42,15 @@ public class InterceptionTest
    private static final String TEAM_NAME = "Ajax Amsterdam";
 
    private String[] expectedLoggedValues = {
-         "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_postConstruct",
-         "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
-         "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
-         "org.jboss.interceptors.FootballTeam_aroundInvokeBefore",
-         "org.jboss.interceptors.FootballTeam_getName",
-         "org.jboss.interceptors.FootballTeam_aroundInvokeAfter",
-         "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
-         "org.jboss.interceptors.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
-         "org.jboss.interceptors.InterceptionTest$MySecondInterceptor_preDestroy"
+         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FootballTeam_getName",
+         "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_preDestroy"
 
    };
    private InterceptorProxyCreator interceptorProxyCreator;
@@ -122,10 +124,9 @@ public class InterceptionTest
       }
 
       @PostConstruct
-      public Object doAfterConstruction(InvocationContext invocationContext) throws Exception
+      public void doAfterConstruction(InvocationContext invocationContext) throws Exception
       {
          InterceptorTestLogger.add(MyFirstInterceptor.class, "postConstruct");
-         return invocationContext.proceed();
       }
    }
 
@@ -141,10 +142,9 @@ public class InterceptionTest
       }
 
       @PreDestroy
-      private Object doneHere(InvocationContext invocationContext) throws Exception
+      private void doneHere(InvocationContext invocationContext) throws Exception
       {
          InterceptorTestLogger.add(MySecondInterceptor.class, "preDestroy");
-         return invocationContext.proceed();
       }
    }
 }

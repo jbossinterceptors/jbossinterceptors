@@ -15,29 +15,32 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptors.metadata;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.interceptor.InvocationContext;
+import javax.interceptor.AroundInvoke;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorException extends RuntimeException
+public class OverrideChildInterceptor extends OverrideParentInterceptor
 {
-   public InterceptorException()
+   @AroundInvoke
+   Object methodDefinedOnChildAndUsedAsInterceptor(InvocationContext invocationContext)
    {
+      throw  new UnsupportedOperationException();
    }
 
-   public InterceptorException(String s)
+   @PostConstruct
+   void methodOverriddenAndUsedAsInterceptor(InvocationContext invocationContext)
    {
-      super(s);
+
    }
 
-   public InterceptorException(String s, Throwable throwable)
+   void methodOverriddenAndNotUsedAsInterceptor(InvocationContext invocationContext)
    {
-      super(s, throwable);
-   }
 
-   public InterceptorException(Throwable throwable)
-   {
-      super(throwable);
    }
 }
