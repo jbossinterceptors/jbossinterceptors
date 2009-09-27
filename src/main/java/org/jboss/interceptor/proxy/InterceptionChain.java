@@ -18,6 +18,8 @@
 package org.jboss.interceptor.proxy;
 
 import org.jboss.interceptor.model.InterceptionType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
@@ -30,6 +32,8 @@ import java.util.Map;
  */
 public class InterceptionChain
 {
+
+   private final Log log = LogFactory.getLog(InterceptionChain.class);
 
    private Object target;
 
@@ -54,11 +58,13 @@ public class InterceptionChain
       this.currentPosition = 0;
    }
 
-   public Object invokeNext(InvocationContext invocationContext) {
+   public Object invokeNext(InvocationContext invocationContext) throws Exception {
 
       if (hasNext())
       {
-         return interceptionHandlerMap.get(interceptorClasses.get(currentPosition++)).invoke(target, interceptionType, invocationContext);
+         InterceptionHandler nextInterceptorHandler = interceptionHandlerMap.get(interceptorClasses.get(currentPosition++));
+         log.debug("Invoking next interceptor in chain:" + nextInterceptorHandler.getClass().getName());
+         return nextInterceptorHandler.invoke(target, interceptionType, invocationContext);
       }
       else
       {

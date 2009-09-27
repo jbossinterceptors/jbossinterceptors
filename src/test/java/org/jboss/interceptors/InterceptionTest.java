@@ -113,7 +113,7 @@ public class InterceptionTest
    {
 
       @AroundInvoke
-      public Object doAround2(InvocationContext invocationContext) throws Exception
+      private final Object doAround(InvocationContext invocationContext) throws Exception
       {
          InterceptorTestLogger.add(MyFirstInterceptor.class, "aroundInvokeBefore");
          Object result = invocationContext.proceed();
@@ -132,7 +132,7 @@ public class InterceptionTest
    public static class MySecondInterceptor extends MyFirstInterceptor
    {
       @AroundInvoke
-      public Object doAround(InvocationContext invocationContext) throws Exception
+      private Object doAround(InvocationContext invocationContext) throws Exception
       {
          InterceptorTestLogger.add(MySecondInterceptor.class, "aroundInvokeBefore");
          Object result = invocationContext.proceed();
@@ -141,7 +141,7 @@ public class InterceptionTest
       }
 
       @PreDestroy
-      public Object doneHere(InvocationContext invocationContext) throws Exception
+      private Object doneHere(InvocationContext invocationContext) throws Exception
       {
          InterceptorTestLogger.add(MySecondInterceptor.class, "preDestroy");
          return invocationContext.proceed();

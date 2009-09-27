@@ -18,9 +18,12 @@
 package org.jboss.interceptor.util;
 
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
+import org.jboss.interceptor.model.InterceptionType;
+import org.jboss.interceptor.model.InterceptionTypeRegistry;
 
 import javax.interceptor.AroundInvoke;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -45,9 +48,21 @@ public class InterceptionUtils
       }
    }
 
-   public static boolean isAroundInvokeInterceptionCandidate(Method thisMethod)
+   /**
+    * @param method
+    * @return true if the method has none of the interception type annotations, and is public and not static
+    *         false otherwise
+    */
+   public static boolean isAroundInvokeInterceptionCandidate(Method method)
    {
       // just a provisory implementation
-      return thisMethod.getAnnotation(AroundInvoke.class) == null;
+      int modifiers = method.getModifiers();
+      for (InterceptionType interceptionType: InterceptionTypeRegistry.getSupportedInterceptionTypes())
+      {
+         if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
+            return true;
+      }
+      return Modifier.isPublic(modifiers) 
+            && !Modifier.isStatic(modifiers);
    }
 }

@@ -18,13 +18,14 @@
 package org.jboss.interceptor.proxy;
 
 import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.model.InterceptionTypeRegistry;
+import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.ClassInterceptorMetadata;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -34,7 +35,7 @@ public class SimpleInterceptionHandler implements InterceptionHandler
 
    private final Object interceptorInstance;
 
-   private final Map<InterceptionType, Method> interceptorMethods = new HashMap<InterceptionType, Method>();
+   private InterceptorMetadata interceptorMetadata;
 
    private Class<?> clazz;
 
@@ -43,18 +44,9 @@ public class SimpleInterceptionHandler implements InterceptionHandler
       if (interceptorInstance == null)
          throw new IllegalArgumentException("Interceptor instance cannot be null");
 
-      this.clazz = (clazz == null) ?interceptorInstance.getClass():clazz;
+      this.clazz = (clazz == null) ? interceptorInstance.getClass() : clazz;
       this.interceptorInstance = interceptorInstance;
-      for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
-      {
-         for (Method method : clazz.getDeclaredMethods())
-         {
-            if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
-            {
-               interceptorMethods.put(interceptionType, method);
-            }
-         }
-      }
+      this.interceptorMetadata = new ClassInterceptorMetadata(this.clazz);
 
    }
 
@@ -72,34 +64,19 @@ public class SimpleInterceptionHandler implements InterceptionHandler
       {
          throw new InterceptorException("Cannot create interceptor instance:", e);
       }
-      for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
-      {
-         for (Method method : simpleInterceptorClass.getDeclaredMethods())
-         {
-            if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(InvocationContext.class) && method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
-            {
-               interceptorMethods.put(interceptionType, method);
-            }
-         }
-      }
+      this.interceptorMetadata = new ClassInterceptorMetadata(this.clazz);
 
    }
 
-   public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext)
+   public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception
    {
-      try
+      List<Method> methods = interceptorMetadata.getInterceptorMethods(interceptionType);
+      if (methods != null)
       {
-         if (interceptorMethods.get(interceptionType) != null)
-            return interceptorMethods.get(interceptionType).invoke(interceptorInstance, new Object[]{invocationContext});
-         else
-            return null;
-      } catch (IllegalAccessException e)
-      {
-         throw new RuntimeException((e));
-      } catch (InvocationTargetException e)
-      {
-         throw new RuntimeException(e);
-      }
+         DelegatingInvocationContext delegatingInvocationContext = new DelegatingInvocationContext(invocationContext, interceptorInstance, methods);
+         return delegatingInvocationContext.proceed();
+      } else
+         throw new InterceptorException(target.toString() + " was requested to perform " + interceptionType.name() + " but no such method is defined on it");
    }
 
 
@@ -107,4 +84,59 @@ public class SimpleInterceptionHandler implements InterceptionHandler
    {
       return this.clazz.equals(clazz);
    }
+
+   public class DelegatingInvocationContext implements InvocationContext
+   {
+
+      private InvocationContext delegateInvocationContext;
+
+      private Object targetObject;
+
+      private Queue<Method> invocationQueue;
+
+      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<Method> methods)
+      {
+         this.delegateInvocationContext = delegateInvocationContext;
+         this.targetObject = targetObject;
+         this.invocationQueue = new ConcurrentLinkedQueue<Method>(methods);
+      }
+
+      public Map<String, Object> getContextData()
+      {
+         return delegateInvocationContext.getContextData();
+      }
+
+      public Method getMethod()
+      {
+         return delegateInvocationContext.getMethod();
+      }
+
+      public Object[] getParameters()
+      {
+         return delegateInvocationContext.getParameters();
+      }
+
+      public Object getTarget()
+      {
+         return delegateInvocationContext.getTarget();
+      }
+
+      public Object proceed() throws Exception
+      {
+         if (!invocationQueue.isEmpty())
+         {
+            return invocationQueue.remove().invoke(targetObject, this);
+         } else
+         {
+            return delegateInvocationContext.proceed();
+         }
+      }
+
+      public void setParameters(Object[] params)
+      {
+         delegateInvocationContext.setParameters(params);
+      }
+   }
+
 }
+

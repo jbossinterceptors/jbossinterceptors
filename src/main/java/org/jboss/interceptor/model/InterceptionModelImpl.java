@@ -104,7 +104,10 @@ public class InterceptionModelImpl<T> implements InterceptionModel<T>
    {
       for (Class<?> clazz: interceptors)
          if (interceptorsList.contains(clazz))
-            throw new InterceptorException("Duplicate interceptor class definition when binding" + clazz.getName() + " on " + interceptionType.name());
+            if (interceptionType != null)
+                throw new InterceptorException("Duplicate interceptor class definition when binding" + clazz.getName() + " on " + interceptionType.name());
+            else
+                throw new InterceptorException("Duplicate interceptor class definition when binding" + clazz.getName() + " as general interceptor");
       else
             interceptorsList.add(clazz);
    }

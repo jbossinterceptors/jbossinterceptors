@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptor.model;
 
-import org.jboss.interceptor.model.InterceptionType;
-
-import javax.interceptor.InvocationContext;
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionHandler
+public interface InterceptorMetadata
 {
-   public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception;
+     Class<?> getInterceptorClass();
 
-   boolean handles(Class<?> clazz);
+     List<Method> getInterceptorMethods(InterceptionType interceptionType);
+   
 }
-
