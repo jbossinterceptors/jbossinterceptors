@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandler implements InterceptionHandler
+public class DirectClassInterceptionHandler<I> implements InterceptionHandler
 {
 
    private final Object interceptorInstance;

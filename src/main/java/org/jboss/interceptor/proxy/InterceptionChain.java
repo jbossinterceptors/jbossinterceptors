@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionChain
+public class InterceptionChain<I>
 {
 
    private final Log log = LogFactory.getLog(InterceptionChain.class);
@@ -40,21 +40,19 @@ public class InterceptionChain
    private Object[] parameters;
 
    private Method targetMethod;
-   private Map<Class<?>, InterceptionHandler> interceptionHandlerMap;
 
    private int currentPosition;
-   private List<Class<?>> interceptorClasses;
 
+   private List<InterceptionHandler> interceptorHandlers;
    private final InterceptionType interceptionType;
 
-   public InterceptionChain(List<Class<?>> interceptorClasses, InterceptionType interceptionType, Object target, Method targetMethod, Object[] parameters, Map<Class<?>, InterceptionHandler> interceptionHandlerMap)
+   public InterceptionChain(List<InterceptionHandler> interceptorHandlers, InterceptionType interceptionType, Object target, Method targetMethod, Object[] parameters)
    {
-      this.interceptorClasses = interceptorClasses;
+      this.interceptorHandlers = interceptorHandlers;
       this.interceptionType = interceptionType;
       this.parameters = parameters;
       this.target = target;
       this.targetMethod = targetMethod;
-      this.interceptionHandlerMap = interceptionHandlerMap;
       this.currentPosition = 0;
    }
 
@@ -62,7 +60,7 @@ public class InterceptionChain
 
       if (hasNext())
       {
-         InterceptionHandler nextInterceptorHandler = interceptionHandlerMap.get(interceptorClasses.get(currentPosition++));
+         InterceptionHandler nextInterceptorHandler = interceptorHandlers.get(currentPosition++);
          log.debug("Invoking next interceptor in chain:" + nextInterceptorHandler.getClass().getName());
          return nextInterceptorHandler.invoke(target, interceptionType, invocationContext);
       }
@@ -86,7 +84,7 @@ public class InterceptionChain
 
    public boolean hasNext()
    {
-      return currentPosition < interceptorClasses.size();
+      return currentPosition < interceptorHandlers.size();
    }
 
 

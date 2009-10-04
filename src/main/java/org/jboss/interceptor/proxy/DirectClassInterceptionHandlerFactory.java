@@ -20,9 +20,9 @@ package org.jboss.interceptor.proxy;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory {
+public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>> {
 
-    public InterceptionHandler createForClass(Class<?> clazz) {
+    public InterceptionHandler createFor(Class<?> clazz) {
         return new DirectClassInterceptionHandler(clazz);
     }
 }

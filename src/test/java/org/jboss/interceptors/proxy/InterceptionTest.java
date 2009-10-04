@@ -59,9 +59,9 @@ public class InterceptionTest
    public void resetLogAndSetupClasses() throws Exception
    {
       InterceptorTestLogger.reset();
-      InterceptorRegistry<Class<?>> interceptorRegistry = new InterceptorRegistry<Class<?>>();
+      InterceptorRegistry<Class<?>, Class<?>> interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
 
-      InterceptionModelBuilder<Class<?>> builder = InterceptionModelBuilder.<Class<?>>newBuilderFor(FootballTeam.class);
+      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class)Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MyFirstInterceptor.class, MySecondInterceptor.class);
       builder.interceptPostConstruct().with(MyFirstInterceptor.class);
@@ -87,6 +87,7 @@ public class InterceptionTest
    public void testInterceptionWithProxifiedObject() throws Exception
    {
       FootballTeam proxy = interceptorProxyCreator.createProxyFromInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
+      proxy = interceptorProxyCreator.createProxyFromInstance(proxy, FootballTeam.class);
       executeAssertionsOnProxy(proxy);
 
    }

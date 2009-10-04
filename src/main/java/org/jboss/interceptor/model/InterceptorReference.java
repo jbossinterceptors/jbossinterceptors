@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptor.model;
 
-import org.jboss.interceptor.registry.InterceptorRegistry;
+import org.jboss.interceptor.proxy.InterceptionHandler;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionProxyFactory<C> {
+public interface InterceptorReference<T>
+{
+   T getReferredInterceptor();
 
-   <T> T createInterceptedProxy(T instance, Class<T> expectedProxyClass, InterceptorRegistry<C> interceptorRegistry);
-
+   InterceptionHandler getInterceptionHandler();
 }

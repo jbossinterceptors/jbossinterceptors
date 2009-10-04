@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionModel<T>
+public interface InterceptionModel<T, I>
 {
 
    /**
@@ -36,13 +36,13 @@ public interface InterceptionModel<T>
     * @throws IllegalArgumentException if interceptionType is business method or around timeout
     *                                  but method is null, as well as if interceptionType is callback and method is not null
     */
-   public List<Class<?>> getInterceptors(InterceptionType interceptionType, Method method);
+   public List<I> getInterceptors(InterceptionType interceptionType, Method method);
 
    /**
     * Returns all interceptor classes that are applicable to the given intercepted entity
     * @return
     */
-   public Set<Class<?>> getAllInterceptors();
+   public Set<I> getAllInterceptors();
 
    public T getInterceptedEntity();
 

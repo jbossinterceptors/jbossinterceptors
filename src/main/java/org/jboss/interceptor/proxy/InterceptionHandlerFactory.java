@@ -20,7 +20,7 @@ package org.jboss.interceptor.proxy;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionHandlerFactory {
+public interface InterceptionHandlerFactory<I> {
 
-    InterceptionHandler createForClass(Class<?> clazz);
+    InterceptionHandler createFor(I clazz);
 }

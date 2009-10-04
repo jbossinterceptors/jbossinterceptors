@@ -24,22 +24,22 @@ import java.lang.reflect.Method;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionModelBuilder<T>
+public class InterceptionModelBuilder<T, I>
 {
 
-   private InterceptionModelImpl<T> interceptionModel;
+   private InterceptionModelImpl<T, I> interceptionModel;
 
    private T interceptedEntity;
 
    private InterceptionModelBuilder(T interceptedEntity)
    {
       this.interceptedEntity = interceptedEntity;
-      this.interceptionModel = new InterceptionModelImpl<T>(interceptedEntity);
+      this.interceptionModel = new InterceptionModelImpl<T, I>(interceptedEntity);
    }
 
-   public static <T> InterceptionModelBuilder<T> newBuilderFor(T entity)
+   public static <T, I> InterceptionModelBuilder<T, I> newBuilderFor(T entity, Class<I> clazz)
    {
-      return new InterceptionModelBuilder<T>(entity);
+      return new InterceptionModelBuilder<T, I>(entity);
    }
 
    public T getInterceptedEntity()
@@ -47,7 +47,7 @@ public class InterceptionModelBuilder<T>
       return interceptedEntity;
    }
 
-   public InterceptionModel<T> build()
+   public InterceptionModel<T, I> build()
    {
       return interceptionModel;
    }
@@ -89,7 +89,7 @@ public class InterceptionModelBuilder<T>
          this.interceptionType = interceptionType;
       }
 
-      public void with(Class<?>... clazzes)
+      public void with(I... clazzes)
       {
          InterceptionModelBuilder.this.interceptionModel.appendInterceptors(interceptionType, method, clazzes);
       }

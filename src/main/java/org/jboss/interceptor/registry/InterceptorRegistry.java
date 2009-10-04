@@ -27,16 +27,16 @@ import java.util.HashMap;
  *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorRegistry<T>
+public class InterceptorRegistry<T, I>
 {
-   private Map<T, InterceptionModel<T>> interceptionModelMap = new HashMap<T, InterceptionModel<T>>();
+   private Map<T, InterceptionModel<T, I>> interceptionModelMap = new HashMap<T, InterceptionModel<T, I>>();
 
-   public void registerInterceptionModel(T interceptedEntity, InterceptionModel<T> interceptionModel)
+   public void registerInterceptionModel(T interceptedEntity, InterceptionModel<T, I> interceptionModel)
    {
       this.interceptionModelMap.put(interceptedEntity, interceptionModel);
    }
 
-   public InterceptionModel<T> getInterceptionModel(T interceptedEntity)
+   public InterceptionModel<T, I> getInterceptionModel(T interceptedEntity)
    {
       return this.interceptionModelMap.get(interceptedEntity);
    }
