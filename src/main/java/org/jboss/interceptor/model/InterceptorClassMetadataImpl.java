@@ -17,7 +17,6 @@
 
 package org.jboss.interceptor.model;
 
-import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.apache.commons.logging.Log;
@@ -63,13 +62,13 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
                      detectedInterceptorTypes.add(interceptionType);
                   // add method in the list - if it is there already, it means that it has been added by a subclass
                   ReflectionUtils.ensureAccessible(method);
-                  if (!foundMethods.contains(new MethodHolder(method)))
+                  if (!foundMethods.contains(new MethodHolder(method, false)))
                   {
                      methodMap.get(interceptionType).add(0, method);
                   }
                }
             }
-            foundMethods.add(new MethodHolder(method));
+            foundMethods.add(new MethodHolder(method, false));
          }
          currentClass = currentClass.getSuperclass();
       } while (!Object.class.equals(currentClass));
@@ -86,41 +85,4 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
       return methods == null ? Collections.EMPTY_LIST : methods;
    }
 
-   private class MethodHolder
-   {
-      private String methodName;
-
-      private Class<?>[] parameterTypes;
-
-
-      MethodHolder(Method method)
-      {
-         this.methodName = method.getName();
-         this.parameterTypes = method.getParameterTypes();
-      }
-
-      @Override
-      public boolean equals(Object o)
-      {
-         if (this == o) return true;
-         if (o == null || getClass() != o.getClass()) return false;
-
-         MethodHolder that = (MethodHolder) o;
-
-         if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null)
-            return false;
-         if (!Arrays.equals(parameterTypes, that.parameterTypes))
-            return false;
-
-         return true;
-      }
-
-      @Override
-      public int hashCode()
-      {
-         int result = methodName != null ? methodName.hashCode() : 0;
-         result = 31 * result + (parameterTypes != null ? Arrays.hashCode(parameterTypes) : 0);
-         return result;
-      }
-   }
 }

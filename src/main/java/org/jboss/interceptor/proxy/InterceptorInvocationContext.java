@@ -17,6 +17,8 @@
 
 package org.jboss.interceptor.proxy;
 
+import org.jboss.interceptor.InterceptorException;
+
 import javax.interceptor.InvocationContext;
 import java.util.Map;
 import java.util.HashMap;
@@ -68,7 +70,18 @@ public class InterceptorInvocationContext implements InvocationContext
 
    public Object proceed() throws Exception
    {
-      return interceptionChain.invokeNext(this);
+      try
+      {
+         return interceptionChain.invokeNext(this);
+      }
+      catch (Exception e)
+      {
+         throw e;
+      }
+      catch (Throwable t)
+      {
+         throw new InterceptorException(t);
+      }
    }
 
    public void setParameters(Object[] params)

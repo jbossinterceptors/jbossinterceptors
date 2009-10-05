@@ -28,6 +28,7 @@ import org.jboss.interceptors.proxy.InterceptorTestLogger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -73,6 +74,7 @@ public class InterceptionTest
    }
 
    @Test
+   @Ignore
    public void testInterceptionWithInstrumentedClass() throws Exception
    {
 

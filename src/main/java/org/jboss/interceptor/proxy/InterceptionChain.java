@@ -56,7 +56,8 @@ public class InterceptionChain<I>
       this.currentPosition = 0;
    }
 
-   public Object invokeNext(InvocationContext invocationContext) throws Exception {
+   public Object invokeNext(InvocationContext invocationContext) throws Throwable
+   {
 
       if (hasNext())
       {
@@ -67,18 +68,20 @@ public class InterceptionChain<I>
       else
       {
          if (targetMethod != null)
+         {
             try
             {
                return targetMethod.invoke(target, parameters);
-            } catch (IllegalAccessException e)
-            {
-               throw new RuntimeException(e);
-            } catch (InvocationTargetException e)
-            {
-               throw new RuntimeException(e);
             }
+            catch (InvocationTargetException e)
+            {
+               throw e.getCause();
+            }
+         }
          else
+         {
             return null;
+         }
       }
    }
 

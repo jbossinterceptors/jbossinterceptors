@@ -57,17 +57,16 @@ public class InterceptionUtils
     * @return true if the method has none of the interception type annotations, and is public and not static
     *         false otherwise
     */
-   public static boolean isAroundInvokeInterceptionCandidate(Method method)
+   public static boolean isInterceptionCandidate(Method method)
    {
       // just a provisory implementation
       int modifiers = method.getModifiers();
       for (InterceptionType interceptionType: InterceptionTypeRegistry.getSupportedInterceptionTypes())
       {
          if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
-            return true;
+            return false;
       }
-      return Modifier.isPublic(modifiers) 
-            && !Modifier.isStatic(modifiers);
+      return !Modifier.isStatic(modifiers);
    }
 
    /**

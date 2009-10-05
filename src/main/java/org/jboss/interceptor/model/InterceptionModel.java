@@ -20,11 +20,12 @@ package org.jboss.interceptor.model;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionModel<T, I>
+public interface InterceptionModel<T, I> extends Serializable
 {
 
    /**

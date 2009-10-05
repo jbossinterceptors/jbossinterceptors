@@ -21,13 +21,14 @@ import org.jboss.interceptor.model.InterceptionModel;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.Serializable;
 
 /**
  * Metadata store for information on how the an entity of a given type needs to be intercepted.
  *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorRegistry<T, I>
+public class InterceptorRegistry<T, I> implements Serializable
 {
    private Map<T, InterceptionModel<T, I>> interceptionModelMap = new HashMap<T, InterceptionModel<T, I>>();
 

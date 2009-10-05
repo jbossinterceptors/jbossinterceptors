@@ -21,9 +21,11 @@ import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.InterceptorException;
+import org.jboss.interceptor.util.ReflectionUtils;
 
 import javax.interceptor.InvocationContext;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -129,10 +131,21 @@ public class DirectClassInterceptionHandler<I> implements InterceptionHandler
          {
 
             Method interceptorMethod = invocationQueue.remove();
-            if (interceptorMethod.getParameterTypes().length == 0)
-               return interceptorMethod.invoke(targetObject);
-            else
-               return interceptorMethod.invoke(targetObject, this);
+            ReflectionUtils.ensureAccessible(interceptorMethod);
+            try
+            {
+               if (interceptorMethod.getParameterTypes().length == 0)
+                  return interceptorMethod.invoke(targetObject);
+               else
+                  return interceptorMethod.invoke(targetObject, this);
+            }
+            catch (InvocationTargetException e)
+            {
+               if (e.getCause() instanceof Exception)
+                  throw (Exception)e.getCause();
+               else
+                  throw new InterceptorException(e);
+            }
          } else
          {
             return delegateInvocationContext.proceed();
