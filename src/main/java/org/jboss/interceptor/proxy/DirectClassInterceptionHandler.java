@@ -127,7 +127,12 @@ public class DirectClassInterceptionHandler<I> implements InterceptionHandler
       {
          if (!invocationQueue.isEmpty())
          {
-            return invocationQueue.remove().invoke(targetObject, this);
+
+            Method interceptorMethod = invocationQueue.remove();
+            if (interceptorMethod.getParameterTypes().length == 0)
+               return interceptorMethod.invoke(targetObject);
+            else
+               return interceptorMethod.invoke(targetObject, this);
          } else
          {
             return delegateInvocationContext.proceed();
