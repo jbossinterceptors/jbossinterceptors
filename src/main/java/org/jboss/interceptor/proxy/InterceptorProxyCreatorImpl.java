@@ -19,6 +19,7 @@ package org.jboss.interceptor.proxy;
 
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.registry.InterceptorRegistry;
@@ -28,7 +29,10 @@ import org.jboss.interceptor.InterceptorException;
 
 import javax.interceptor.AroundInvoke;
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.util.*;
+
+import sun.reflect.ReflectionFactory;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -57,11 +61,19 @@ public class InterceptorProxyCreatorImpl<I> implements InterceptorProxyCreator
 
       proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class});
 
-      proxyFactory.setHandler(new InstanceProxifyingMethodHandler(target, proxyClass, interceptorRegistry));
+      InstanceProxifyingMethodHandler instanceProxifyingMethodHandler = new InstanceProxifyingMethodHandler(target, proxyClass, interceptorRegistry);
+      proxyFactory.setHandler(instanceProxifyingMethodHandler);
 
       try
       {
-         return (T) proxyFactory.create(constructorTypes, constructorArguments);
+         //return (T) proxyFactory.create(constructorTypes, constructorArguments);
+
+         Class<T> clazz = proxyFactory.createClass();
+         ReflectionFactory reflectionFactory = ReflectionFactory.getReflectionFactory();
+         Constructor<T> c = reflectionFactory.newConstructorForSerialization(clazz, Object.class.getDeclaredConstructor());
+         T proxyObject = c.newInstance();
+         ((ProxyObject)proxyObject).setHandler(instanceProxifyingMethodHandler);
+         return proxyObject;
       } catch (Exception e)
       {
          throw new InterceptorException(e);
