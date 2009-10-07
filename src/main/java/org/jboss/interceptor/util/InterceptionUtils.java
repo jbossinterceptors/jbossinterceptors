@@ -54,8 +54,8 @@ public class InterceptionUtils
    {
       try
       {
-         INTERCEPTORS_ANNOTATION_CLASS = (Class<? extends Annotation>) Class.forName("javax.intercept.Interceptors");
-         EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS = (Class<? extends Annotation>) Class.forName("javax.intercept.ExcludeClassInterceptors");
+         INTERCEPTORS_ANNOTATION_CLASS = (Class<? extends Annotation>) Class.forName("javax.interceptor.Interceptors");
+         EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS = (Class<? extends Annotation>) Class.forName("javax.interceptor.ExcludeClassInterceptors");
       }
       catch (ClassNotFoundException e)
       {
