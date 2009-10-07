@@ -17,15 +17,25 @@
 
 package org.jboss.interceptor.util;
 
-import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
+import org.jboss.interceptor.model.InterceptionModel;
+import org.jboss.interceptor.proxy.InterceptionHandlerFactory;
+import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
+import org.jboss.interceptor.proxy.LifecycleMixin;
+import org.jboss.interceptor.registry.InterceptorRegistry;
+import org.jboss.interceptor.InterceptorException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.interceptor.InvocationContext;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -33,21 +43,40 @@ import java.lang.reflect.Modifier;
 public class InterceptionUtils
 {
    private static final Log LOG = LogFactory.getLog(InterceptionUtils.class);
+   public static final String POST_CONSTRUCT = "lifecycle_mixin_$$_postConstruct";
+   public static final String PRE_DESTROY = "lifecycle_mixin_$$_preDestroy";
+
+
+   private static Class<? extends Annotation> INTERCEPTORS_ANNOTATION_CLASS = null;
+   private static Class<? extends Annotation> EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS = null;
+
+   static
+   {
+      try
+      {
+         INTERCEPTORS_ANNOTATION_CLASS = (Class<? extends Annotation>) Class.forName("javax.intercept.Interceptors");
+         EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS = (Class<? extends Annotation>) Class.forName("javax.intercept.ExcludeClassInterceptors");
+      }
+      catch (ClassNotFoundException e)
+      {
+         //do nothing
+      };
+   }
 
    public static void executePostConstruct(Object proxy)
    {
-      if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin)
+      if (proxy instanceof LifecycleMixin)
       {
-         InterceptorProxyCreatorImpl.LifecycleMixin lifecycleMixin = (InterceptorProxyCreatorImpl.LifecycleMixin) proxy;
+         LifecycleMixin lifecycleMixin = (LifecycleMixin) proxy;
          lifecycleMixin.lifecycle_mixin_$$_postConstruct();
       }
    }
 
    public static void executePredestroy(Object proxy)
    {
-      if (proxy instanceof InterceptorProxyCreatorImpl.LifecycleMixin)
+      if (proxy instanceof LifecycleMixin)
       {
-         InterceptorProxyCreatorImpl.LifecycleMixin lifecycleMixin = (InterceptorProxyCreatorImpl.LifecycleMixin) proxy;
+         LifecycleMixin lifecycleMixin = (LifecycleMixin) proxy;
          lifecycleMixin.lifecycle_mixin_$$_preDestroy();
       }
    }
@@ -61,16 +90,17 @@ public class InterceptionUtils
    {
       // just a provisory implementation
       int modifiers = method.getModifiers();
-      for (InterceptionType interceptionType: InterceptionTypeRegistry.getSupportedInterceptionTypes())
+      for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
       {
          if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)
+         {
             return false;
+         }
       }
       return !Modifier.isStatic(modifiers);
    }
 
    /**
-    *
     * @param interceptionType
     * @param method
     * @return
@@ -79,7 +109,9 @@ public class InterceptionUtils
    {
 
       if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) == null)
+      {
          return false;
+      }
 
       if (interceptionType.isLifecycleCallback())
       {
@@ -110,7 +142,8 @@ public class InterceptionUtils
          }
 
          return true;
-      } else
+      }
+      else
       {
          if (!Object.class.equals(method.getReturnType()))
          {
@@ -141,4 +174,47 @@ public class InterceptionUtils
          return true;
       }
    }
+
+   public static <T> T proxifyInstance(T instance, Class<?> superClass, List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries, List<InterceptionHandlerFactory<?>> interceptionHandlerFactory)
+   {
+      try
+      {
+        InterceptorProxyCreatorImpl proxyCreator = new InterceptorProxyCreatorImpl(interceptorRegistries, interceptionHandlerFactory);
+         return (T) proxyCreator.createProxyFromInstance(instance, superClass);
+      }
+      catch (Exception e)
+      {
+         throw new InterceptorException(e);
+      }
+   }
+
+    public static <T> T proxifyInstance(T instance, Class<?> superClass, InterceptorRegistry<Class<?>, ?> interceptorRegistry, InterceptionHandlerFactory<?> interceptionHandlerFactory)
+   {
+      try
+      {
+        InterceptorProxyCreatorImpl proxyCreator = new InterceptorProxyCreatorImpl(Collections.<InterceptorRegistry<Class<?>, ?>>singletonList(interceptorRegistry), Collections.<InterceptionHandlerFactory<?>>singletonList(interceptionHandlerFactory));
+         return (T) proxyCreator.createProxyFromInstance(instance, superClass);
+      }
+      catch (Exception e)
+      {
+         throw new InterceptorException(e);
+      }
+   }
+
+   public static boolean supportsEjb3InterceptorDeclaration()
+   {
+      return INTERCEPTORS_ANNOTATION_CLASS != null && EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS != null;
+   }
+
+
+   public static Class<? extends Annotation> getInterceptorsAnnotationClass()
+   {
+      return INTERCEPTORS_ANNOTATION_CLASS;
+   }
+
+   public static Class<? extends Annotation> getExcludeClassInterceptorsAnnotationClass()
+   {
+      return EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS;
+   }
+
 }

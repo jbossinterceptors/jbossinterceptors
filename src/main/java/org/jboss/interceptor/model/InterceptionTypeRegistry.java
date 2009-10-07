@@ -30,7 +30,7 @@ import java.lang.annotation.Annotation;
  */
 public final class InterceptionTypeRegistry
 {
-
+  
    private static final Log LOG = LogFactory.getLog(InterceptionTypeRegistry.class);
    private static Map<InterceptionType, Class<? extends Annotation>> interceptionAnnotationClasses;
 
