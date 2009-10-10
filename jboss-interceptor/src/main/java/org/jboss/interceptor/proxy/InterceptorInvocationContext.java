@@ -40,12 +40,24 @@ public class InterceptorInvocationContext implements InvocationContext
 
    private InterceptionChain interceptionChain;
 
+   private Object timer;
+
    public InterceptorInvocationContext(InterceptionChain interceptionChain, Object target, Method targetMethod, Object[] parameters)
    {
       this.interceptionChain = interceptionChain;
       this.method = targetMethod;
       this.parameters = parameters;
       this.target = target;
+      this.timer = null;
+   }
+
+   public InterceptorInvocationContext(InterceptionChain interceptionChain, Object target, Method targetMethod, Object timer)
+   {
+      this.interceptionChain = interceptionChain;
+      this.method = targetMethod;
+      this.timer = timer;
+      this.target = target;
+      this.parameters = null;
    }
 
    public Map<String, Object> getContextData()
@@ -89,4 +101,10 @@ public class InterceptorInvocationContext implements InvocationContext
       if (method != null)
          this.parameters = params;
    }
+
+   public Object getTimer()
+   {
+      return timer;
+   }
+
 }

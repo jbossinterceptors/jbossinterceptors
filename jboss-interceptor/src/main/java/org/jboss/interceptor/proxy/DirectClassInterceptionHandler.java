@@ -156,6 +156,12 @@ public class DirectClassInterceptionHandler<I> implements InterceptionHandler
       {
          delegateInvocationContext.setParameters(params);
       }
+
+      public Object getTimer()
+      {
+         return delegateInvocationContext.getTimer();
+      }
+      
    }
 
 }
