@@ -21,6 +21,7 @@ import org.jboss.interceptor.model.InterceptorClassMetadataImpl;
 import org.jboss.interceptor.model.InterceptorClassMetadata;
 
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

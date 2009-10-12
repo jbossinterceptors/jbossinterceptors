@@ -38,4 +38,5 @@ public interface InterceptorClassMetadata
     */
    List<Method> getInterceptorMethods(InterceptionType interceptionType);
 
+   boolean isInterceptor();
 }
