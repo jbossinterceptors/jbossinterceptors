@@ -89,7 +89,7 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
          {
             methodBoundInterceptors.put(interceptionType, new HashMap<MethodHolder, List<I>>());
          }
-         List<I> interceptorsList = methodBoundInterceptors.get(interceptionType).get(method);
+         List<I> interceptorsList = methodBoundInterceptors.get(interceptionType).get(new MethodHolder(method, true));
          if (interceptorsList == null)
          {
             interceptorsList = new ArrayList<I>();
