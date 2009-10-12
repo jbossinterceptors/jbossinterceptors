@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
 
@@ -12,16 +11,16 @@
 
   <groupId>org.jboss.interceptor</groupId>
   <artifactId>jboss-interceptor-parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0-M1</version>
   <packaging>pom</packaging>
 
   <name>JBoss Interceptors Parent</name>
   <description>JBoss Interceptors Parent</description>
 
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/interceptors/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/interceptors/trunk/</developerConnection>
-    <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/interceptors/trunk/</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/interceptors/tags/jboss-interceptor-parent-1.0.0-M1</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/interceptors/tags/jboss-interceptor-parent-1.0.0-M1</developerConnection>
+    <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/interceptors/tags/jboss-interceptor-parent-1.0.0-M1</url>
   </scm>
 
   <properties>
@@ -171,7 +170,7 @@
       <dependency>
         <groupId>org.jboss.interceptor</groupId>
         <artifactId>jboss-interceptor-api</artifactId>
-        <version>${version.interceptor.api}</version>
+        <version>3.1.0-M1</version>
       </dependency>
 
       <dependency>
