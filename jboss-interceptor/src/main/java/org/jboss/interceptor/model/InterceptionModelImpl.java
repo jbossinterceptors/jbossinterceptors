@@ -44,7 +44,7 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
    public List<I> getInterceptors(InterceptionType interceptionType, Method method)
    {
       if (interceptionType.isLifecycleCallback() && method != null)
-         throw new IllegalArgumentException("On a lifecycle callback, associated metod must be null");
+         throw new IllegalArgumentException("On a lifecycle callback, the associated method must be null");
 
       if (!interceptionType.isLifecycleCallback() && method == null)
          throw new IllegalArgumentException("Around-invoke and around-timeout interceptors are defined for a given method");
