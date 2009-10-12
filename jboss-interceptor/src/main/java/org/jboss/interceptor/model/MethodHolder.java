@@ -19,11 +19,15 @@ package org.jboss.interceptor.model;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.io.Serializable;
+
+import org.jboss.interceptor.util.ReflectionUtils;
+import org.jboss.interceptor.InterceptorException;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class MethodHolder
+public class MethodHolder implements Serializable
 {
    private String methodName;
 
@@ -38,6 +42,13 @@ public class MethodHolder
       this.parameterTypes = method.getParameterTypes();
       if (withDeclaringClass)
          this.declaringClass = method.getDeclaringClass();
+   }
+
+   private MethodHolder(String methodName, Class<?>[] parameterTypes, Class<?> declaringClass)
+   {
+      this.methodName = methodName;
+      this.parameterTypes = parameterTypes;
+      this.declaringClass = declaringClass;
    }
 
    @Override
@@ -63,5 +74,59 @@ public class MethodHolder
       result = 31 * result + (parameterTypes != null ? Arrays.hashCode(parameterTypes) : 0);
       result = 31 * result + (declaringClass != null ? declaringClass.hashCode() : 0);
       return result;
+   }
+
+   private Object writeReplace()
+   {
+      return new MethodHolderSerializationProxy(this);
+   }
+
+   static class MethodHolderSerializationProxy implements Serializable
+   {
+      private String className;
+      private String methodName;
+      private String parameterClassNames[];
+
+      MethodHolderSerializationProxy(MethodHolder methodHolder)
+      {
+         className = methodHolder.declaringClass != null? methodHolder.declaringClass.getName() : null;
+         methodName = methodHolder.methodName;
+         if (methodHolder.parameterTypes != null)
+         {
+            parameterClassNames = new String[methodHolder.parameterTypes.length];
+            int i = 0;
+            for (Class<?> parameterType: methodHolder.parameterTypes)
+            {
+               parameterClassNames[i++] = parameterType.getName();
+            }
+         }
+      }
+      
+      private Object readResolve()
+      {
+
+         try
+         {
+            Class<?>[] parameterTypes = null;
+            if (parameterClassNames != null)
+            {
+               parameterTypes = new Class<?>[parameterClassNames.length];
+               for (int i = 0; i<parameterClassNames.length; i++)
+               {
+                  parameterTypes[i] = ReflectionUtils.classForName(parameterClassNames[i]);
+               }
+            }
+            Class<?> declaringClass = null;
+            if (className != null)
+            {
+               declaringClass = ReflectionUtils.classForName(className);
+            }
+            return new MethodHolder(methodName, parameterTypes, declaringClass);
+         }
+         catch (ClassNotFoundException e)
+         {
+            throw new InterceptorException("Error while deserializing intercepted instance", e);
+         }
+      }
    }
 }

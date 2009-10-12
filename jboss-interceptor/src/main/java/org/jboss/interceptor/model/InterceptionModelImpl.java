@@ -30,7 +30,7 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
 
    private Map<InterceptionType, List<I>> lifecycleInterceptors = new HashMap<InterceptionType, List<I>>();
 
-   private Map<InterceptionType, Map<Method, List<I>>> methodBoundInterceptors = new HashMap<InterceptionType, Map<Method, List<I>>>();
+   private Map<InterceptionType, Map<MethodHolder, List<I>>> methodBoundInterceptors = new HashMap<InterceptionType, Map<MethodHolder, List<I>>>();
 
    private Set<I> allInterceptors = new LinkedHashSet<I>();
 
@@ -56,8 +56,8 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
       }
       else
       {
-         if (methodBoundInterceptors.containsKey(interceptionType) && methodBoundInterceptors.get(interceptionType).containsKey(method))
-            return methodBoundInterceptors.get(interceptionType).get(method);
+         if (methodBoundInterceptors.containsKey(interceptionType) && methodBoundInterceptors.get(interceptionType).containsKey(new MethodHolder(method, true)))
+            return methodBoundInterceptors.get(interceptionType).get(new MethodHolder(method, true));
       }
       return Collections.EMPTY_LIST;
    }
@@ -87,13 +87,13 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
       {
          if (null == methodBoundInterceptors.get(interceptionType))
          {
-            methodBoundInterceptors.put(interceptionType, new HashMap<Method, List<I>>());
+            methodBoundInterceptors.put(interceptionType, new HashMap<MethodHolder, List<I>>());
          }
          List<I> interceptorsList = methodBoundInterceptors.get(interceptionType).get(method);
          if (interceptorsList == null)
          {
             interceptorsList = new ArrayList<I>();
-            methodBoundInterceptors.get(interceptionType).put(method, interceptorsList);
+            methodBoundInterceptors.get(interceptionType).put(new MethodHolder(method, true), interceptorsList);
          }
          appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
       }

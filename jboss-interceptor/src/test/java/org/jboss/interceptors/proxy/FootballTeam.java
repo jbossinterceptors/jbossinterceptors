@@ -17,15 +17,20 @@
 
 package org.jboss.interceptors.proxy;
 
+import java.io.Serializable;
+
 import org.jboss.interceptors.proxy.InterceptorTestLogger;
 
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
+import javax.ejb.PrePassivate;
+import javax.ejb.PostActivate;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class FootballTeam {
+public class FootballTeam implements Serializable
+{
 
    private String teamName;
 
@@ -41,6 +46,18 @@ public class FootballTeam {
     public String getName() {
         InterceptorTestLogger.add(FootballTeam.class, "getName");
         return teamName;
+    }
+
+    @PrePassivate
+    public void beforePassivating()
+    {
+       InterceptorTestLogger.add(FootballTeam.class, "prePassivating");
+    }
+
+    @PostActivate
+    public void afterActivating()
+    {
+       InterceptorTestLogger.add(FootballTeam.class, "postActivating");
     }
 
     @AroundInvoke

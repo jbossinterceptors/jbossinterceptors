@@ -17,15 +17,20 @@
 
 package org.jboss.interceptors.proxy;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.Serializable;
+
 import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.model.InterceptionModel;
-import org.jboss.interceptor.proxy.InterceptorProxyCreator;
-import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptors.proxy.FootballTeam;
 import org.jboss.interceptors.proxy.InterceptorTestLogger;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,17 +58,28 @@ public class InterceptionTest
          "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
          "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
          "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_preDestroy"
-
    };
-   private InterceptionModel<Class<?>,Class<?>> interceptionModel;
-   private InterceptorRegistry<Class<?>,Class<?>> interceptorRegistry;
+
+   private String[] expectedLoggedValuesOnSerialization = {
+         "org.jboss.interceptors.proxy.FootballTeam_prePassivating",
+         "org.jboss.interceptors.proxy.FootballTeam_postActivating",
+         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FootballTeam_getName",
+         "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
+   };
+   private InterceptionModel<Class<?>, Class<?>> interceptionModel;
+   private InterceptorRegistry<Class<?>, Class<?>> interceptorRegistry;
 
    @Before
    public void resetLogAndSetupClasses() throws Exception
    {
       InterceptorTestLogger.reset();
 
-      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class)Class.class);
+      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MyFirstInterceptor.class, MySecondInterceptor.class);
       builder.interceptPostConstruct().with(MyFirstInterceptor.class);
@@ -90,22 +106,27 @@ public class InterceptionTest
    public void testInterceptionWithProxifiedObject() throws Exception
    {
       FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
-      executeAssertionsOnProxy(proxy);
-   }
-
-   private void executeAssertionsOnProxy(FootballTeam proxy)
-   {
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
+   }
+
+   @Test
+   public void testInterceptionWithSerializedProxy() throws Exception
+   {
+      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      new ObjectOutputStream(baos).writeObject(proxy);
+      proxy = (FootballTeam) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray())).readObject();
+      Assert.assertEquals(TEAM_NAME, proxy.getName());
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
-      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesOnSerialization, logValues);
    }
 
    private String iterateAndDisplay(Object[] logValues)
    {
       StringBuffer buffer = new StringBuffer();
-      for (Object logValue: logValues)
+      for (Object logValue : logValues)
       {
          buffer.append(logValue.toString()).append("\n");
       }
@@ -113,7 +134,7 @@ public class InterceptionTest
    }
 
 
-   public static class MyFirstInterceptor
+   public static class MyFirstInterceptor implements Serializable
    {
 
       @AroundInvoke

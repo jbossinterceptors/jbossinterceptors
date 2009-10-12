@@ -1,6 +1,9 @@
 package org.jboss.interceptor.proxy;
 
 import java.io.Serializable;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -132,4 +135,31 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
       InterceptionChain chain = new InterceptionChain(interceptionHandlers, interceptionType, target, thisMethod, args);
       return chain.invokeNext(new InterceptorInvocationContext(chain, target, thisMethod, args));
    }
+
+   private void writeObject(ObjectOutputStream objectOutputStream) throws IOException
+   {
+      try
+      {
+         executeInterception(null, null, InterceptionType.PRE_PASSIVATE);
+         objectOutputStream.defaultWriteObject();
+      }
+      catch (Throwable throwable)
+      {
+         throw new IOException("Error while serializing class", throwable);
+      }
+   }
+
+    private void readObject(ObjectInputStream objectInputStream) throws IOException
+   {
+      try
+      {
+         objectInputStream.defaultReadObject();
+         executeInterception(null, null, InterceptionType.POST_ACTIVATE);
+      }
+      catch (Throwable throwable)
+      {
+         throw new IOException("Error while deserializing class", throwable);
+      }
+   }
+
 }

@@ -32,4 +32,16 @@ public class ReflectionUtils
          method.setAccessible(true);
       }
    }
+
+   public static Class<?> classForName(String className) throws ClassNotFoundException
+   {
+      if (Thread.currentThread().getContextClassLoader() != null)
+      {
+         return Thread.currentThread().getContextClassLoader().loadClass(className);
+      }
+      else
+      {
+         return Class.forName(className);
+      }
+   }
 }

@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.lang.annotation.Annotation;
 
+import org.jboss.interceptor.util.ReflectionUtils;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
@@ -42,7 +44,7 @@ public final class InterceptionTypeRegistry
       {
          try
          {
-            interceptionAnnotationClasses.put(interceptionType, (Class<? extends Annotation>) Class.forName(interceptionType.getAnnotationClassName()));
+            interceptionAnnotationClasses.put(interceptionType, (Class<? extends Annotation>) ReflectionUtils.classForName(interceptionType.getAnnotationClassName()));
          } catch (Exception e)
          {
             LOG.warn("Class '" + interceptionType.getAnnotationClassName() + "' not found, interception based on it is not enabled" );

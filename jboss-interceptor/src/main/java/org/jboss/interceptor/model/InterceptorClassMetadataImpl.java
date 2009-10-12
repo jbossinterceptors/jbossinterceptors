@@ -19,16 +19,20 @@ package org.jboss.interceptor.model;
 
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
+import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
+import org.jboss.interceptor.InterceptorException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
+public class InterceptorClassMetadataImpl implements InterceptorClassMetadata, Serializable
 {
 
    private Log log = LogFactory.getLog(InterceptorClassMetadataImpl.class);
@@ -84,5 +88,34 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata
       List<Method> methods = methodMap.get(interceptionType);
       return methods == null ? Collections.EMPTY_LIST : methods;
    }
+
+   private Object writeReplace()
+   {
+      return new InterceptorClassMetadataSerializationProxy(getInterceptorClass().getName());
+   }
+
+   static class InterceptorClassMetadataSerializationProxy implements Serializable
+   {
+      private String className;
+
+      InterceptorClassMetadataSerializationProxy(String className)
+      {
+         this.className = className;
+      }
+
+      private Object readResolve()
+      {
+         try
+         {
+            return InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(ReflectionUtils.classForName(className));
+         }
+         catch (ClassNotFoundException e)
+         {
+            throw new InterceptorException("Failed to deserialize the interceptor class metadata", e);
+         }
+      }
+
+   }
+
 
 }
