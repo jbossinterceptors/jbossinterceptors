@@ -3,11 +3,11 @@
   <parent>
     <artifactId>jboss-interceptor-parent</artifactId>
     <groupId>org.jboss.interceptor</groupId>
-    <version>1.0.0-M1</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jboss.interceptor</groupId>
   <artifactId>jboss-interceptor-api</artifactId>
-  <version>3.1.0-M1</version>
+  <version>3.1.0-SNAPSHOT</version>
   <name>EJB 3.1 Interceptor API</name>
 </project>
