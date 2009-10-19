@@ -28,8 +28,6 @@ import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.util.InterceptionUtils;
-import org.jboss.interceptors.proxy.FootballTeam;
-import org.jboss.interceptors.proxy.InterceptorTestLogger;
 
 import org.junit.Assert;
 import org.junit.Test;

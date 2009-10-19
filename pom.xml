@@ -209,18 +209,10 @@
 
       <dependency>
         <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-ext</artifactId>
-        <version>${version.slf4j}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>${version.slf4j}</version>
-<!--
         <scope>test</scope>
         <optional>true</optional>
--->
       </dependency>
 
 
