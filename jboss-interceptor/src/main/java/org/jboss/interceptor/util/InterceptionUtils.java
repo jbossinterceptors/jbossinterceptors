@@ -88,7 +88,8 @@ public class InterceptionUtils
     */
    public static boolean isInterceptionCandidate(Method method)
    {
-      // just a provisory implementation
+      // just a provisory implementation - any method which is not an interceptor method
+      // is an interception candidate
       int modifiers = method.getModifiers();
       for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
       {

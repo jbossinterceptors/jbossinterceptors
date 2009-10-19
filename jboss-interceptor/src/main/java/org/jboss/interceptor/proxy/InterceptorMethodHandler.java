@@ -76,11 +76,11 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
    {
       ReflectionUtils.ensureAccessible(thisMethod);
-      if (getInterceptionStack().contains(new MethodHolder(thisMethod, true)))
+      if (getInterceptionStack().contains(MethodHolder.of(thisMethod, true)))
          return thisMethod.invoke(target, args);
       try
       {
-         getInterceptionStack().add(new MethodHolder(thisMethod, true));
+         getInterceptionStack().add(MethodHolder.of(thisMethod, true));
 
          if (!thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
          {
@@ -100,7 +100,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
           return null;
       } finally
       {
-         getInterceptionStack().remove(new MethodHolder(thisMethod, true));
+         getInterceptionStack().remove(MethodHolder.of(thisMethod, true));
       }
 
 

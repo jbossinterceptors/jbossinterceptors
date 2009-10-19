@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionChain<I>
+public class InterceptionChain
 {
 
    private final Logger log = LoggerFactory.getLogger(InterceptionChain.class);

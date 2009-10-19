@@ -36,7 +36,12 @@ public class MethodHolder implements Serializable
    private Class<?> declaringClass;
 
 
-   public MethodHolder(Method method, boolean withDeclaringClass)
+   public static MethodHolder of(Method method, boolean withDeclaringClass)
+   {
+      return new MethodHolder(method, withDeclaringClass);
+   }
+
+   private MethodHolder(Method method, boolean withDeclaringClass)
    {
       this.methodName = method.getName();
       this.parameterTypes = method.getParameterTypes();

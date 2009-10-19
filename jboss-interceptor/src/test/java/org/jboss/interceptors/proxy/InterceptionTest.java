@@ -74,8 +74,7 @@ public class InterceptionTest
    private InterceptionModel<Class<?>, Class<?>> interceptionModel;
    private InterceptorRegistry<Class<?>, Class<?>> interceptorRegistry;
 
-   @Before
-   public void resetLogAndSetupClasses() throws Exception
+   public void resetLogAndSetupClassesForMethod() throws Exception
    {
       InterceptorTestLogger.reset();
 
@@ -90,21 +89,39 @@ public class InterceptionTest
 
    }
 
-   @Test
-   @Ignore
-   public void testInterceptionWithInstrumentedClass() throws Exception
+   public void resetLogAndSetupClassesGlobally() throws Exception
    {
+      InterceptorTestLogger.reset();
 
-      //FootballTeam proxy = interceptorProxyCreator.createInstrumentedInstance(FootballTeam.class, new Class<?>[]{String.class}, new Object[]{TEAM_NAME});
-      //FootballTeam proxy = interceptorProxyCreator.createProxyFromInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
-      //executeAssertionsOnProxy(proxy);
+      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
+
+      builder.interceptAll().with(MyFirstInterceptor.class, MySecondInterceptor.class);
+      interceptionModel = builder.build();
+      this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
+      this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
+
+   }
+
+   public void resetLogAndSetupClassesMixed() throws Exception
+   {
+      InterceptorTestLogger.reset();
+
+      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
+
+      builder.interceptAll().with(MyFirstInterceptor.class);
+      builder.interceptPreDestroy().with(MySecondInterceptor.class);
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MySecondInterceptor.class);
+      interceptionModel = builder.build();
+      this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
+      this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
    }
 
 
    @Test
-   public void testInterceptionWithProxifiedObject() throws Exception
+   public void testInterceptionWithMethodRegisteredInterceptors() throws Exception
    {
+      resetLogAndSetupClassesForMethod();
       FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
@@ -112,8 +129,30 @@ public class InterceptionTest
    }
 
    @Test
+   public void testInterceptionWithGlobalInterceptors() throws Exception
+   {
+      resetLogAndSetupClassesGlobally();
+      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      InterceptionUtils.executePostConstruct(proxy);
+      Assert.assertEquals(TEAM_NAME, proxy.getName());
+      InterceptionUtils.executePredestroy(proxy);
+   }
+
+   @Test
+   public void testInterceptionWithMixedInterceptors() throws Exception
+   {
+      resetLogAndSetupClassesMixed();
+      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      InterceptionUtils.executePostConstruct(proxy);
+      Assert.assertEquals(TEAM_NAME, proxy.getName());
+      InterceptionUtils.executePredestroy(proxy);
+   }
+
+
+   @Test
    public void testInterceptionWithSerializedProxy() throws Exception
    {
+      resetLogAndSetupClassesForMethod();
       FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       new ObjectOutputStream(baos).writeObject(proxy);

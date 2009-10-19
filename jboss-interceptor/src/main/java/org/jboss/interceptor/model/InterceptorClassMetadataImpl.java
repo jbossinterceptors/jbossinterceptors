@@ -74,14 +74,14 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata, S
                      detectedInterceptorTypes.add(interceptionType);
                   // add method in the list - if it is there already, it means that it has been added by a subclass
                   ReflectionUtils.ensureAccessible(method);
-                  if (!foundMethods.contains(new MethodHolder(method, false)))
+                  if (!foundMethods.contains(MethodHolder.of(method, false)))
                   {
                      methodMap.get(interceptionType).add(0, method);
                      hasInterceptorMethods = true;
                   }
                }
             }
-            foundMethods.add(new MethodHolder(method, false));
+            foundMethods.add(MethodHolder.of(method, false));
          }
          currentClass = currentClass.getSuperclass();
       } while (!Object.class.equals(currentClass));

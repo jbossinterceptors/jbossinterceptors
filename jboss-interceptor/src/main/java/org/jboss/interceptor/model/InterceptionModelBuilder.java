@@ -52,6 +52,11 @@ public class InterceptionModelBuilder<T, I>
       return interceptionModel;
    }
 
+   public MethodInterceptorDescriptor interceptAll()
+   {
+      return new MethodInterceptorDescriptor(null, InterceptionType.values()); 
+   }
+
    public MethodInterceptorDescriptor interceptAroundInvoke(Method m)
    {
       return new MethodInterceptorDescriptor(m, InterceptionType.AROUND_INVOKE);
@@ -81,17 +86,20 @@ public class InterceptionModelBuilder<T, I>
    {
       private Method method;
 
-      private InterceptionType interceptionType;
+      private InterceptionType[] interceptionTypes;
 
-      public MethodInterceptorDescriptor(Method m, InterceptionType interceptionType)
+      public MethodInterceptorDescriptor(Method m, InterceptionType... interceptionType)
       {
          this.method = m;
-         this.interceptionType = interceptionType;
+         this.interceptionTypes = interceptionType;
       }
 
       public void with(I... clazzes)
       {
-         InterceptionModelBuilder.this.interceptionModel.appendInterceptors(interceptionType, method, clazzes);
+         for (InterceptionType interceptionType: interceptionTypes)
+         {
+            InterceptionModelBuilder.this.interceptionModel.appendInterceptors(interceptionType, method, clazzes);
+         }
       }
    }
 
