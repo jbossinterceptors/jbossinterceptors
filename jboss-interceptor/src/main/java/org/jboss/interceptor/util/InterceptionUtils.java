@@ -26,8 +26,8 @@ import org.jboss.interceptor.proxy.LifecycleMixin;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.InterceptorException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.interceptor.InvocationContext;
 
@@ -42,7 +42,7 @@ import java.util.Collections;
  */
 public class InterceptionUtils
 {
-   private static final Log LOG = LogFactory.getLog(InterceptionUtils.class);
+   private static final Logger LOG = LoggerFactory.getLogger(InterceptionUtils.class);
    public static final String POST_CONSTRUCT = "lifecycle_mixin_$$_postConstruct";
    public static final String PRE_DESTROY = "lifecycle_mixin_$$_preDestroy";
 

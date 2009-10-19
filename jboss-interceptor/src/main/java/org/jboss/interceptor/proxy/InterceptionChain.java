@@ -17,15 +17,15 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.model.InterceptionType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import javax.interceptor.InvocationContext;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
+
+import org.jboss.interceptor.model.InterceptionType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -33,7 +33,7 @@ import java.util.Map;
 public class InterceptionChain<I>
 {
 
-   private final Log log = LogFactory.getLog(InterceptionChain.class);
+   private final Logger log = LoggerFactory.getLogger(InterceptionChain.class);
 
    private Object target;
 

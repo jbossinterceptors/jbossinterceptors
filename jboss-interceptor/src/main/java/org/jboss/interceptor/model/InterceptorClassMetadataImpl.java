@@ -17,17 +17,23 @@
 
 package org.jboss.interceptor.model;
 
+import java.lang.reflect.Method;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.InterceptorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.io.Serializable;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -35,7 +41,7 @@ import java.io.Serializable;
 public class InterceptorClassMetadataImpl implements InterceptorClassMetadata, Serializable
 {
 
-   private Log log = LogFactory.getLog(InterceptorClassMetadataImpl.class);
+   private Logger log = LoggerFactory.getLogger(InterceptorClassMetadataImpl.class);
 
    private Class<?> interceptorClass;
 

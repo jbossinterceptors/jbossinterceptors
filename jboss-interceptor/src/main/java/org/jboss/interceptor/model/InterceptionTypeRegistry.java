@@ -17,8 +17,6 @@
 
 package org.jboss.interceptor.model;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
 import java.util.Map;
@@ -26,6 +24,8 @@ import java.util.HashMap;
 import java.lang.annotation.Annotation;
 
 import org.jboss.interceptor.util.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -33,7 +33,7 @@ import org.jboss.interceptor.util.ReflectionUtils;
 public final class InterceptionTypeRegistry
 {
   
-   private static final Log LOG = LogFactory.getLog(InterceptionTypeRegistry.class);
+   private static final Logger LOG = LoggerFactory.getLogger(InterceptionTypeRegistry.class);
    private static Map<InterceptionType, Class<? extends Annotation>> interceptionAnnotationClasses;
 
    static
