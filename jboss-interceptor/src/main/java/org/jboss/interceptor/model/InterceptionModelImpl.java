@@ -32,6 +32,8 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
 
    private Map<InterceptionType, Map<MethodHolder, List<I>>> methodBoundInterceptors = new HashMap<InterceptionType, Map<MethodHolder, List<I>>>();
 
+   private Set<MethodHolder> methodsIgnoringGlobals = new HashSet<MethodHolder>();
+
    private Set<I> allInterceptors = new LinkedHashSet<I>();
 
    private T interceptedEntity;
@@ -44,26 +46,32 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
    public List<I> getInterceptors(InterceptionType interceptionType, Method method)
    {
       if (interceptionType.isLifecycleCallback() && method != null)
+      {
          throw new IllegalArgumentException("On a lifecycle callback, the associated method must be null");
+      }
 
       if (!interceptionType.isLifecycleCallback() && method == null)
+      {
          throw new IllegalArgumentException("Around-invoke and around-timeout interceptors are defined for a given method");
+      }
 
       if (interceptionType.isLifecycleCallback())
       {
          if (globalInterceptors.containsKey(interceptionType))
+         {
             return globalInterceptors.get(interceptionType);
+         }
       }
       else
       {
          ArrayList<I> returnedInterceptors = new ArrayList<I>();
-         if (globalInterceptors.containsKey(interceptionType))
+         if (!methodsIgnoringGlobals.contains(methodHolder(method)) && globalInterceptors.containsKey(interceptionType))
          {
             returnedInterceptors.addAll(globalInterceptors.get(interceptionType));
          }
-         if (methodBoundInterceptors.containsKey(interceptionType) && methodBoundInterceptors.get(interceptionType).containsKey(MethodHolder.of(method, true)))
+         if (methodBoundInterceptors.containsKey(interceptionType) && methodBoundInterceptors.get(interceptionType).containsKey(methodHolder(method)))
          {
-            returnedInterceptors.addAll(methodBoundInterceptors.get(interceptionType).get(MethodHolder.of(method, true)));
+            returnedInterceptors.addAll(methodBoundInterceptors.get(interceptionType).get(methodHolder(method)));
          }
          return returnedInterceptors;
       }
@@ -80,6 +88,18 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
       return this.interceptedEntity;
    }
 
+   public void setIgnoresGlobals(Method method, boolean ignoresGlobals)
+   {
+      if (ignoresGlobals)
+      {
+         methodsIgnoringGlobals.add(methodHolder(method));
+      }
+      else
+      {
+         methodsIgnoringGlobals.remove(methodHolder(method));
+      }
+   }
+
    public void appendInterceptors(InterceptionType interceptionType, Method method, I... interceptors)
    {
       if (null == method)
@@ -91,17 +111,22 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
             globalInterceptors.put(interceptionType, interceptorsList);
          }
          appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
-      } else
+      }
+      else
       {
          if (null == methodBoundInterceptors.get(interceptionType))
          {
             methodBoundInterceptors.put(interceptionType, new HashMap<MethodHolder, List<I>>());
          }
-         List<I> interceptorsList = methodBoundInterceptors.get(interceptionType).get(MethodHolder.of(method, true));
+         List<I> interceptorsList = methodBoundInterceptors.get(interceptionType).get(methodHolder(method));
          if (interceptorsList == null)
          {
             interceptorsList = new ArrayList<I>();
-            methodBoundInterceptors.get(interceptionType).put(MethodHolder.of(method, true), interceptorsList);
+            methodBoundInterceptors.get(interceptionType).put(methodHolder(method), interceptorsList);
+         }
+         if (globalInterceptors.containsKey(interceptionType))
+         {
+            validateDuplicateInterceptors(interceptionType, globalInterceptors.get(interceptionType), interceptors);
          }
          appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
       }
@@ -110,14 +135,27 @@ public class InterceptionModelImpl<T, I> implements InterceptionModel<T, I>
 
    private void appendInterceptorClassesToList(InterceptionType interceptionType, List<I> interceptorsList, I... interceptors)
    {
-      for (I interceptor: interceptors)
+      validateDuplicateInterceptors(interceptionType, interceptorsList, interceptors);
+      interceptorsList.addAll(Arrays.asList(interceptors));
+   }
+
+   private void validateDuplicateInterceptors(InterceptionType interceptionType, List<I> interceptorsList, I[] interceptors)
+   {
+      for (I interceptor : interceptors)
+      {
          if (interceptorsList.contains(interceptor))
+         {
             if (interceptionType != null)
-                throw new InterceptorException("Duplicate interceptor class definition when binding" + interceptor + " on " + interceptionType.name());
-            else
-                throw new InterceptorException("Duplicate interceptor class definition when binding" + interceptor + " as general interceptor");
-      else
-            interceptorsList.add(interceptor);
+            {
+               throw new InterceptorException("Duplicate interceptor class definition when binding" + interceptor + " on " + interceptionType.name());
+            }
+         }
+      }
+   }
+
+   private static MethodHolder methodHolder(Method method)
+   {
+      return MethodHolder.of(method, true);
    }
 
 }

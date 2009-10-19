@@ -91,6 +91,8 @@ public class InterceptionUtils
       // just a provisory implementation - any method which is not an interceptor method
       // is an interception candidate
       int modifiers = method.getModifiers();
+      if (Modifier.isStatic(modifiers))
+         return false;
       for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
       {
          if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) != null)

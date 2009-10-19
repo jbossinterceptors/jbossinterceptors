@@ -32,9 +32,7 @@ import org.jboss.interceptors.proxy.FootballTeam;
 import org.jboss.interceptors.proxy.InterceptorTestLogger;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -57,6 +55,16 @@ public class InterceptionTest
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
          "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
          "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_preDestroy"
+   };
+
+   private String[] expectedLoggedValuesWithGlobalsIgnored = {
+         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FootballTeam_getName",
+         "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
          "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_preDestroy"
    };
 
@@ -107,10 +115,23 @@ public class InterceptionTest
       InterceptorTestLogger.reset();
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
-
       builder.interceptAll().with(MyFirstInterceptor.class);
       builder.interceptPreDestroy().with(MySecondInterceptor.class);
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MySecondInterceptor.class);
+      interceptionModel = builder.build();
+      this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
+      this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
+
+   }
+
+   public void resetLogAndSetupClassesWithGlobalsIgnored() throws Exception
+   {
+      InterceptorTestLogger.reset();
+      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
+      builder.interceptAll().with(MyFirstInterceptor.class);
+      builder.interceptPreDestroy().with(MySecondInterceptor.class);
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(MySecondInterceptor.class);
+      builder.ignoreGlobalInterceptors(FootballTeam.class.getMethod("getName"));
       interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
@@ -126,6 +147,8 @@ public class InterceptionTest
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
+      Object[] logValues = InterceptorTestLogger.getLog().toArray();
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);      
    }
 
    @Test
@@ -146,6 +169,21 @@ public class InterceptionTest
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
+      Object[] logValues = InterceptorTestLogger.getLog().toArray();
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
+
+   }
+
+   @Test
+   public void testInterceptionWithGlobalsIgnored() throws Exception
+   {
+      resetLogAndSetupClassesWithGlobalsIgnored();
+      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      InterceptionUtils.executePostConstruct(proxy);
+      Assert.assertEquals(TEAM_NAME, proxy.getName());
+      InterceptionUtils.executePredestroy(proxy);
+      Object[] logValues = InterceptorTestLogger.getLog().toArray();
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesWithGlobalsIgnored, logValues);
    }
 
 

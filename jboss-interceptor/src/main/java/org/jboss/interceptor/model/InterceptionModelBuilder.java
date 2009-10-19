@@ -82,6 +82,11 @@ public class InterceptionModelBuilder<T, I>
       return new MethodInterceptorDescriptor(null, POST_ACTIVATE);
    }
 
+   public void ignoreGlobalInterceptors(Method m)
+   {
+      this.interceptionModel.setIgnoresGlobals(m, true);
+   }
+
    public final class MethodInterceptorDescriptor
    {
       private Method method;
