@@ -25,6 +25,7 @@ import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.LifecycleMixin;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.InterceptorException;
+import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -218,6 +219,15 @@ public class InterceptionUtils
    public static Class<? extends Annotation> getExcludeClassInterceptorsAnnotationClass()
    {
       return EXCLUDE_CLASS_INTERCEPTORS_ANNOTATION_CLASS;
+   }
+
+   public static <T> T getRawInstance(T proxy)
+   {
+      while (proxy instanceof TargetInstanceProxy)
+      {
+         proxy = ((TargetInstanceProxy<T>)proxy).getTargetInstance();
+      }
+      return proxy;
    }
 
 }

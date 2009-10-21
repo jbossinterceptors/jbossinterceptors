@@ -20,13 +20,14 @@ import org.jboss.interceptor.model.InterceptionTypeRegistry;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.util.InterceptionUtils;
+import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
 
 import javassist.util.proxy.MethodHandler;
 
 /**
  * @author Marius Bogoevici
 */
-public class InterceptorMethodHandler implements MethodHandler, Serializable
+public class InterceptorMethodHandler implements Serializable, TargetInstanceProxy<Object>
 {
 
    private static ThreadLocal<Set<MethodHolder>> interceptionStack = new ThreadLocal<Set<MethodHolder>>();
@@ -72,6 +73,16 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
          }
       }
       targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(targetClazz);
+   }
+
+   public Object getTargetInstance()
+   {
+      return target;
+   }
+
+   public Class<?> getTargetClass()
+   {
+      return targetClazz;
    }
 
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
