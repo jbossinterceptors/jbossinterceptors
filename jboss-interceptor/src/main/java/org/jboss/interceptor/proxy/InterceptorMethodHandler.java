@@ -16,6 +16,7 @@ import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.MethodHolder;
 import org.jboss.interceptor.model.InterceptionType;
+import org.jboss.interceptor.model.InterceptionTypeRegistry;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.util.InterceptionUtils;
@@ -86,7 +87,10 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
          {
             if (!org.jboss.interceptor.util.InterceptionUtils.isInterceptionCandidate(thisMethod))
                return thisMethod.invoke(target, args);
-            return executeInterception(thisMethod, args, InterceptionType.AROUND_INVOKE);
+            if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.TIMEOUT_ANNOTATION_CLASS))
+               return executeInterception(thisMethod, args, InterceptionType.AROUND_TIMEOUT);
+            else
+               return executeInterception(thisMethod, args, InterceptionType.AROUND_INVOKE);
          } else
          {
             if (thisMethod.getName().equals(InterceptionUtils.POST_CONSTRUCT))

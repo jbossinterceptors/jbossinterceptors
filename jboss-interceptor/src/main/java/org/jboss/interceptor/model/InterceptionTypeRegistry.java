@@ -36,6 +36,8 @@ public final class InterceptionTypeRegistry
    private static final Logger LOG = LoggerFactory.getLogger(InterceptionTypeRegistry.class);
    private static Map<InterceptionType, Class<? extends Annotation>> interceptionAnnotationClasses;
 
+   public static Class<? extends Annotation> TIMEOUT_ANNOTATION_CLASS = null;
+
    static
    {
       interceptionAnnotationClasses = new HashMap<InterceptionType, Class<? extends Annotation>>();
@@ -50,11 +52,24 @@ public final class InterceptionTypeRegistry
             LOG.warn("Class '" + interceptionType.getAnnotationClassName() + "' not found, interception based on it is not enabled" );
          }
       }
+
+      try
+      {
+         TIMEOUT_ANNOTATION_CLASS = (Class<? extends Annotation>) ReflectionUtils.classForName("javax.ejb.Timeout");
+      } catch (ClassNotFoundException e)
+      {
+         // no-op
+      }
    }
 
    public static Collection<InterceptionType> getSupportedInterceptionTypes()
    {
       return interceptionAnnotationClasses.keySet();
+   }
+
+   public static boolean supportsTimeoutMethods()
+   {
+      return TIMEOUT_ANNOTATION_CLASS != null;
    }
 
    public static Class<? extends Annotation> getAnnotationClass(InterceptionType interceptionType)

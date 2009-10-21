@@ -100,7 +100,7 @@ public class InterceptionUtils
             return false;
          }
       }
-      return !Modifier.isStatic(modifiers);
+      return true;
    }
 
    /**
