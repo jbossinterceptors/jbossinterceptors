@@ -62,6 +62,11 @@ public class InterceptionModelBuilder<T, I>
       return new MethodInterceptorDescriptor(m, InterceptionType.AROUND_INVOKE);
    }
 
+   public MethodInterceptorDescriptor interceptAroundTimeout(Method m)
+   {
+      return new MethodInterceptorDescriptor(m, InterceptionType.AROUND_TIMEOUT);
+   }
+
    public MethodInterceptorDescriptor interceptPostConstruct()
    {
       return new MethodInterceptorDescriptor(null, POST_CONSTRUCT);
