@@ -24,7 +24,7 @@ public enum InterceptionType
 {
 
    AROUND_INVOKE(false, "javax.interceptor.AroundInvoke"),
-   AROUND_TIMEOUT(false, "javax.interceptorAroundTimeout"),
+   AROUND_TIMEOUT(false, "javax.interceptor.AroundTimeout"),
    POST_CONSTRUCT(true, "javax.annotation.PostConstruct"),
    PRE_DESTROY(true, "javax.annotation.PreDestroy"),
    POST_ACTIVATE(true, "javax.ejb.PostActivate"),
