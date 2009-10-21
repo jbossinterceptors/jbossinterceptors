@@ -10,7 +10,6 @@
   </parent>
 
   <artifactId>jboss-interceptor</artifactId>
-  <version>1.0.0-CR3</version>
   <name>JBoss EJB 3.1 Interceptor Library</name>
 
   <dependencies>
