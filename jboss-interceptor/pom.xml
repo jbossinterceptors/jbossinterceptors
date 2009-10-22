@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jboss.interceptor</groupId>
     <artifactId>jboss-interceptor-parent</artifactId>
-    <version>1.0.0-CR4</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>jboss-interceptor</artifactId>
