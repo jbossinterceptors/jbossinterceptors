@@ -27,6 +27,7 @@ import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.util.InterceptionUtils;
+import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
 
 import javax.interceptor.AroundInvoke;
 import java.lang.reflect.Method;
@@ -64,7 +65,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       if (proxyClass != null)
          proxyFactory.setSuperclass(proxyClass);
 
-      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class});
+      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
       InterceptorMethodHandler interceptorMethodHandler = new InterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories);
       proxyFactory.setHandler(interceptorMethodHandler);
 

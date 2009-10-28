@@ -38,6 +38,8 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Collections;
 
+import javassist.util.proxy.ProxyObject;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */

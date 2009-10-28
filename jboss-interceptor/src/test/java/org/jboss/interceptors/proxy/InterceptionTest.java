@@ -77,6 +77,13 @@ public class InterceptionTest
          "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
          "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
    };
+
+   private String[] expectedLoggedValuesWhenRaw = {
+         "org.jboss.interceptors.proxy.FootballTeam_getName",
+   };
+
+
+
    private InterceptionModel<Class<?>, Class<?>> interceptionModel;
    private InterceptorRegistry<Class<?>, Class<?>> interceptorRegistry;
 
@@ -146,7 +153,8 @@ public class InterceptionTest
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
-      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);      
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
+      assertRawObject(proxy);
    }
 
    @Test
@@ -157,6 +165,7 @@ public class InterceptionTest
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
+      assertRawObject(proxy);
    }
 
    @Test
@@ -169,7 +178,7 @@ public class InterceptionTest
       InterceptionUtils.executePredestroy(proxy);
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
-
+      assertRawObject(proxy);
    }
 
    @Test
@@ -182,6 +191,7 @@ public class InterceptionTest
       InterceptionUtils.executePredestroy(proxy);
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesWithGlobalsIgnored, logValues);
+      assertRawObject(proxy);
    }
 
 
@@ -196,6 +206,16 @@ public class InterceptionTest
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesOnSerialization, logValues);
+      assertRawObject(proxy);
+   }
+
+   public void assertRawObject(FootballTeam proxy)
+   {
+      InterceptorTestLogger.reset();
+      FootballTeam rawInstance = InterceptionUtils.getRawInstance(proxy);
+      Assert.assertEquals(TEAM_NAME, rawInstance.getName());
+      Object[] logValues = InterceptorTestLogger.getLog().toArray();
+      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesWhenRaw, logValues);
    }
 
    private String iterateAndDisplay(Object[] logValues)

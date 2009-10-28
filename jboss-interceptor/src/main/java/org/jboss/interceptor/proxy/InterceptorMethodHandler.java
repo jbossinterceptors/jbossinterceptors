@@ -21,27 +21,26 @@ import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
+import org.jboss.interceptor.util.proxy.TargetInstanceProxyMethodHandler;
 
 import javassist.util.proxy.MethodHandler;
 
 /**
  * @author Marius Bogoevici
 */
-public class InterceptorMethodHandler implements Serializable, TargetInstanceProxy<Object>
+public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler implements Serializable
 {
 
    private static ThreadLocal<Set<MethodHolder>> interceptionStack = new ThreadLocal<Set<MethodHolder>>();
 
-   private final Object target;
 
    private Map<Object, InterceptionHandler> interceptorHandlerInstances = new HashMap<Object, InterceptionHandler>();
-   private Class<?> targetClazz;
    private InterceptorClassMetadata targetClassInterceptorMetadata;
    private List<InterceptionModel<Class<?>, ?>> interceptionModels;
 
    public InterceptorMethodHandler(Object target, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories)
    {
-
+      super(target, targetClass != null? targetClass: target.getClass());
       if (interceptionModels == null)
          throw new IllegalArgumentException("Interception model must not be null");
 
@@ -55,16 +54,6 @@ public class InterceptorMethodHandler implements Serializable, TargetInstancePro
 
       this.interceptionModels = interceptionModels;
 
-      if (target == null)
-         this.target = this;
-      else
-         this.target = target;
-
-      if (targetClass != null)
-         this.targetClazz = targetClass;
-      else
-         this.targetClazz = this.target.getClass();
-
       for (int i = 0; i < interceptionModels.size(); i++)
       {
          for (Object interceptorReference : this.interceptionModels.get(i).getAllInterceptors())
@@ -72,24 +61,14 @@ public class InterceptorMethodHandler implements Serializable, TargetInstancePro
             interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories.get(i)).createFor((Object)interceptorReference));
          }
       }
-      targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(targetClazz);
+      targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass());
    }
 
-   public Object getTargetInstance()
-   {
-      return target;
-   }
-
-   public Class<?> getTargetClass()
-   {
-      return targetClazz;
-   }
-
-   public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
+   public Object doInvoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
    {
       ReflectionUtils.ensureAccessible(thisMethod);
       if (getInterceptionStack().contains(MethodHolder.of(thisMethod, true)))
-         return thisMethod.invoke(target, args);
+         return thisMethod.invoke(getTargetInstance(), args);
       try
       {
          getInterceptionStack().add(MethodHolder.of(thisMethod, true));
@@ -97,7 +76,7 @@ public class InterceptorMethodHandler implements Serializable, TargetInstancePro
          if (!thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
          {
             if (!org.jboss.interceptor.util.InterceptionUtils.isInterceptionCandidate(thisMethod))
-               return thisMethod.invoke(target, args);
+               return thisMethod.invoke(getTargetInstance(), args);
             if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.TIMEOUT_ANNOTATION_CLASS))
                return executeInterception(thisMethod, args, InterceptionType.AROUND_TIMEOUT);
             else
@@ -144,11 +123,11 @@ public class InterceptorMethodHandler implements Serializable, TargetInstancePro
 
       if (targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
       {
-         interceptionHandlers.add(new DirectClassInterceptionHandler<Class<?>>(target, targetClazz));
+         interceptionHandlers.add(new DirectClassInterceptionHandler<Class<?>>(getTargetInstance(), getTargetClass()));
       }
 
-      InterceptionChain chain = new InterceptionChain(interceptionHandlers, interceptionType, target, thisMethod, args);
-      return chain.invokeNext(new InterceptorInvocationContext(chain, target, thisMethod, args));
+      InterceptionChain chain = new InterceptionChain(interceptionHandlers, interceptionType, getTargetInstance(), thisMethod, args);
+      return chain.invokeNext(new InterceptorInvocationContext(chain, getTargetInstance(), thisMethod, args));
    }
 
    private void writeObject(ObjectOutputStream objectOutputStream) throws IOException
