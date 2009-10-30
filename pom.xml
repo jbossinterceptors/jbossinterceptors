@@ -11,16 +11,16 @@
 
   <groupId>org.jboss.interceptor</groupId>
   <artifactId>jboss-interceptor-parent</artifactId>
-  <version>1.0.0-CR5</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>JBoss Interceptors Parent</name>
   <description>JBoss Interceptors Parent</description>
 
   <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/interceptors/tags/jboss-interceptor-parent-1.0.0-CR5</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/interceptors/tags/jboss-interceptor-parent-1.0.0-CR5</developerConnection>
-    <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/interceptors/tags/jboss-interceptor-parent-1.0.0-CR5</url>
+    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/interceptors/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/interceptors/trunk/</developerConnection>
+    <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/interceptors/trunk/</url>
   </scm>
 
   <properties>
