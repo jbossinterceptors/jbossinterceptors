@@ -71,7 +71,7 @@ public class InterceptionChain
          {
             try
             {
-               return targetMethod.invoke(target, parameters);
+               return targetMethod.invoke(target, invocationContext.getParameters());
             }
             catch (InvocationTargetException e)
             {

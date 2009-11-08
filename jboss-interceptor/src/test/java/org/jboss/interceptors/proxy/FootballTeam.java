@@ -48,6 +48,11 @@ public class FootballTeam implements Serializable
         return teamName;
     }
 
+    public int echo(int i)
+    {
+       return i;
+    }
+
     @PrePassivate
     public void beforePassivating()
     {
