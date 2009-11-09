@@ -97,7 +97,7 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata, S
       List<Method> methods = methodMap.get(interceptionType);
       return methods == null ? Collections.EMPTY_LIST : methods;
    }
-
+   
    public boolean isInterceptor()
    {
       return hasInterceptorMethods;

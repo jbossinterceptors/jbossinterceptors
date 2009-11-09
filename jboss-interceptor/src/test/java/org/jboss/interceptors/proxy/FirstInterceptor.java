@@ -42,5 +42,6 @@ public class FirstInterceptor implements Serializable
    public void doAfterConstruction(InvocationContext invocationContext) throws Exception
    {
       InterceptorTestLogger.add(FirstInterceptor.class, "postConstruct");
+      invocationContext.proceed();
    }
 }

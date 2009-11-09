@@ -27,12 +27,9 @@ import javassist.util.proxy.MethodHandler;
 
 /**
  * @author Marius Bogoevici
-*/
+ */
 public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler implements Serializable
 {
-
-   private static ThreadLocal<Set<MethodHolder>> interceptionStack = new ThreadLocal<Set<MethodHolder>>();
-
 
    private Map<Object, InterceptionHandler> interceptorHandlerInstances = new HashMap<Object, InterceptionHandler>();
    private InterceptorClassMetadata targetClassInterceptorMetadata;
@@ -40,12 +37,16 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
 
    public InterceptorMethodHandler(Object target, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories)
    {
-      super(target, targetClass != null? targetClass: target.getClass());
+      super(target, targetClass != null ? targetClass : target.getClass());
       if (interceptionModels == null)
+      {
          throw new IllegalArgumentException("Interception model must not be null");
+      }
 
       if (interceptionHandlerFactories == null)
+      {
          throw new IllegalArgumentException("Interception handler factory must not be null");
+      }
 
       if (interceptionModels.size() != interceptionHandlerFactories.size())
       {
@@ -58,7 +59,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
       {
          for (Object interceptorReference : this.interceptionModels.get(i).getAllInterceptors())
          {
-            interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories.get(i)).createFor((Object)interceptorReference));
+            interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories.get(i)).createFor((Object) interceptorReference));
          }
       }
       targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass());
@@ -67,46 +68,35 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
    public Object doInvoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
    {
       ReflectionUtils.ensureAccessible(thisMethod);
-      if (getInterceptionStack().contains(MethodHolder.of(thisMethod, true)))
-         return thisMethod.invoke(getTargetInstance(), args);
-      try
+      if (!thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
       {
-         getInterceptionStack().add(MethodHolder.of(thisMethod, true));
-
-         if (!thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
+         if (!org.jboss.interceptor.util.InterceptionUtils.isInterceptionCandidate(thisMethod))
          {
-            if (!org.jboss.interceptor.util.InterceptionUtils.isInterceptionCandidate(thisMethod))
-               return thisMethod.invoke(getTargetInstance(), args);
-            if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.TIMEOUT_ANNOTATION_CLASS))
-               return executeInterception(thisMethod, args, InterceptionType.AROUND_TIMEOUT);
-            else
-               return executeInterception(thisMethod, args, InterceptionType.AROUND_INVOKE);
-         } else
-         {
-            if (thisMethod.getName().equals(InterceptionUtils.POST_CONSTRUCT))
-            {
-               return executeInterception(null, null, InterceptionType.POST_CONSTRUCT);
-            } else if (thisMethod.getName().equals(InterceptionUtils.PRE_DESTROY))
-            {
-               return executeInterception(null, null, InterceptionType.PRE_DESTROY);
-            }
+            return thisMethod.invoke(getTargetInstance(), args);
          }
-          return null;
-      } finally
-      {
-         getInterceptionStack().remove(MethodHolder.of(thisMethod, true));
+         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.TIMEOUT_ANNOTATION_CLASS))
+         {
+            return executeInterception(thisMethod, args, InterceptionType.AROUND_TIMEOUT);
+         }
+         else
+         {
+            return executeInterception(thisMethod, args, InterceptionType.AROUND_INVOKE);
+         }
       }
-
+      else
+      {
+         if (thisMethod.getName().equals(InterceptionUtils.POST_CONSTRUCT))
+         {
+            return executeInterception(null, null, InterceptionType.POST_CONSTRUCT);
+         }
+         else if (thisMethod.getName().equals(InterceptionUtils.PRE_DESTROY))
+         {
+            return executeInterception(null, null, InterceptionType.PRE_DESTROY);
+         }
+      }
+      return null;
 
    }
-
-   private Set<MethodHolder> getInterceptionStack()
-   {
-      if (interceptionStack.get() == null)
-         interceptionStack.set(new HashSet<MethodHolder>());
-      return interceptionStack.get();
-   }
-
 
    private Object executeInterception(Method thisMethod, Object[] args, InterceptionType interceptionType) throws Throwable
    {
@@ -143,7 +133,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
       }
    }
 
-    private void readObject(ObjectInputStream objectInputStream) throws IOException
+   private void readObject(ObjectInputStream objectInputStream) throws IOException
    {
       try
       {

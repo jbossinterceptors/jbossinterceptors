@@ -39,37 +39,37 @@ public class InterceptionTest
    private static final String TEAM_NAME = "Ajax Amsterdam";
 
    private String[] expectedLoggedValues = {
-         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_postConstruct",
-         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.FirstInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_getName",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_preDestroy"
+         "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.FirstInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.SecondInterceptor_preDestroy"
    };
 
    private String[] expectedLoggedValuesWithGlobalsIgnored = {
-         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_postConstruct",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_getName",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_preDestroy"
+         "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.SecondInterceptor_preDestroy"
    };
 
    private String[] expectedLoggedValuesOnSerialization = {
          "org.jboss.interceptors.proxy.FootballTeam_prePassivating",
          "org.jboss.interceptors.proxy.FootballTeam_postActivating",
-         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeBefore",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.FirstInterceptor_aroundInvokeBefore",
+         "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_getName",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MySecondInterceptor_aroundInvokeAfter",
-         "org.jboss.interceptors.proxy.InterceptionTest$MyFirstInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeAfter",
+         "org.jboss.interceptors.proxy.FirstInterceptor_aroundInvokeAfter",
    };
 
    private String[] expectedLoggedValuesWhenRaw = {
