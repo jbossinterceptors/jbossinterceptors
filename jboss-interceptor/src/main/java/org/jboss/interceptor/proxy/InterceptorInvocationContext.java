@@ -20,6 +20,10 @@ package org.jboss.interceptor.proxy;
 import org.jboss.interceptor.InterceptorException;
 
 import javax.interceptor.InvocationContext;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.lang.reflect.Method;
@@ -41,6 +45,33 @@ public class InterceptorInvocationContext implements InvocationContext
    private InterceptionChain interceptionChain;
 
    private Object timer;
+   private static List<Class<?>> WIDENING_SEQUENCE = Arrays.<Class<?>>asList(byte.class, short.class, int.class, long.class, float.class, double.class);
+
+   private static Map<Class<?>, Class<?>> WRAPPER_CLASSES;
+   private static Map<Class<?>, Class<?>> REVERSE_WRAPPER_CLASSES;
+
+   static
+   {
+      WRAPPER_CLASSES = new HashMap<Class<?>, Class<?>>();
+      WRAPPER_CLASSES.put(boolean.class, Boolean.class);
+      WRAPPER_CLASSES.put(byte.class, Byte.class);
+      WRAPPER_CLASSES.put(char.class, Character.class);
+      WRAPPER_CLASSES.put(short.class, Short.class);
+      WRAPPER_CLASSES.put(int.class, Integer.class);
+      WRAPPER_CLASSES.put(long.class, Long.class);
+      WRAPPER_CLASSES.put(float.class, Float.class);
+      WRAPPER_CLASSES.put(double.class, Double.class);
+
+      WRAPPER_CLASSES = Collections.unmodifiableMap(WRAPPER_CLASSES);
+
+      REVERSE_WRAPPER_CLASSES = new HashMap<Class<?>, Class<?>>();
+      for (Map.Entry<Class<?>, Class<?>> classEntry: WRAPPER_CLASSES.entrySet())
+      {
+         REVERSE_WRAPPER_CLASSES.put(classEntry.getValue(), classEntry.getKey());
+      }
+
+      REVERSE_WRAPPER_CLASSES = Collections.unmodifiableMap(REVERSE_WRAPPER_CLASSES);
+   }
 
    public InterceptorInvocationContext(InterceptionChain interceptionChain, Object target, Method targetMethod, Object[] parameters)
    {
@@ -96,6 +127,36 @@ public class InterceptorInvocationContext implements InvocationContext
       }
    }
 
+   private static boolean isWideningPrimitive(Class argumentClass, Class targetClass)
+   {
+      int argumentClassIndex = WIDENING_SEQUENCE.indexOf(argumentClass);
+      return argumentClassIndex >= 0 && WIDENING_SEQUENCE.indexOf(targetClass) >= argumentClassIndex;
+   }
+
+   private static Class<?> getWrapperClass(Class<?> primitiveClass)
+   {
+      if (!WRAPPER_CLASSES.containsKey(primitiveClass))
+      {
+         return primitiveClass;
+      }
+      else
+      {
+         return WRAPPER_CLASSES.get(primitiveClass);
+      }
+   }
+
+   private static Class<?> getPrimitiveClass(Class<?> wrapperClass)
+   {
+      if (!REVERSE_WRAPPER_CLASSES.containsKey(wrapperClass))
+      {
+         return wrapperClass;
+      }
+      else
+      {
+         return REVERSE_WRAPPER_CLASSES.get(wrapperClass);
+      }
+   }
+
    public void setParameters(Object[] params)
    {
       if (method != null)
@@ -110,16 +171,59 @@ public class InterceptorInvocationContext implements InvocationContext
          {
             for (int i=0; i<params.length; i++)
             {
-               Class<?> parameterClass = method.getParameterTypes()[i];
+               Class<?> methodParameterClass = method.getParameterTypes()[i];
                if (params[i] != null)
                {
-                  if (!method.getParameterTypes()[i].isAssignableFrom(params[i].getClass()))
+                  //identity ok
+                  Class<? extends Object> newArgumentClass = params[i].getClass();
+                  if (newArgumentClass.equals(methodParameterClass))
+                     break;
+                  if (newArgumentClass.isPrimitive())
                   {
-                     throw new IllegalArgumentException("Incompatible parameter: " + params[i] + " (expected type was " + method.getParameterTypes()[i].getName() + ")");
+                     // argument is primitive - never actually a case for interceptors
+                     if (methodParameterClass.isPrimitive())
+                     {
+                        //widening primitive
+                        if (!isWideningPrimitive(newArgumentClass, methodParameterClass))
+                        {
+                           throw new IllegalArgumentException("Incompatible parameter type on position: " + i + " :" + newArgumentClass + " (expected type was " + methodParameterClass.getName() + ")");
+                        }
+                     }
+                     else
+                     {
+                        //boxing+widening reference
+                        Class<?> boxedArgumentClass = getWrapperClass(newArgumentClass);
+                        if (!methodParameterClass.isAssignableFrom(boxedArgumentClass))
+                        {
+                           throw new IllegalArgumentException("Incompatible parameter type on position: " + i + " :" + newArgumentClass + " (expected type was " + methodParameterClass.getName() + ")");
+                        }
+                     }
                   }
+                  else
+                  {
+                     // argument is non-primitive
+                     if (methodParameterClass.isPrimitive())
+                     {
+                        // unboxing+widening primitive
+                        Class<?> unboxedClass = getPrimitiveClass(newArgumentClass);
+                        if (!isWideningPrimitive(unboxedClass, methodParameterClass))
+                        {
+                           throw new IllegalArgumentException("Incompatible parameter type on position: " + i + " :" + newArgumentClass + " (expected type was " + methodParameterClass.getName() + ")");
+                        }
+                     }
+                     else
+                     {
+                        //widening reference
+                        if (!methodParameterClass.isAssignableFrom(newArgumentClass))
+                        {
+                           throw new IllegalArgumentException("Incompatible parameter type on position: " + i + " :" + newArgumentClass + " (expected type was " + methodParameterClass.getName() + ")");
+                        }
+                     }
+                 }
                }
                else
                {
+                  // null is never acceptable on a primitive type
                   if (method.getParameterTypes()[i].isPrimitive())
                   {
                      throw new IllegalArgumentException("Trying to set a null value on a " + method.getParameterTypes()[i].getName());

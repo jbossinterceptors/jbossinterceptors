@@ -58,6 +58,31 @@ public class FootballTeam implements Serializable
        return vb.getValue();
     }
 
+    public int echoInt(int i)
+    {
+       return i;
+    }
+
+    public long echoLong(long i)
+    {
+       return i;
+    }
+
+    public Long echoLongAsObject(Long i)
+    {
+       return i;
+    }
+
+    public Object[] echoObjectArray(Object[] i)
+    {
+       return i;
+    }
+
+    public String[] echoStringArray(String[] i)
+    {
+       return i;
+    }
+
     @PrePassivate
     public void beforePassivating()
     {
