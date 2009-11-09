@@ -17,21 +17,10 @@
 
 package org.jboss.interceptors.proxy;
 
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-
 /**
  * @author Marius Bogoevici
  */
-public class ParameterOverridingInterceptor
+public interface ValueBearer
 {
-   @AroundInvoke
-   public Object overrideParameters(InvocationContext invocationContext) throws Exception
-   {
-      if (invocationContext.getMethod().getName().equals("echo"))
-      {
-         invocationContext.setParameters(new Object[]{"42"});
-      }
-      return invocationContext.proceed();
-   }
+   int getValue();
 }

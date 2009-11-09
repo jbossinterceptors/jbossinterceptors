@@ -99,7 +99,40 @@ public class InterceptorInvocationContext implements InvocationContext
    public void setParameters(Object[] params)
    {
       if (method != null)
-         this.parameters = params;
+      {
+         // there is no requirement to do anything if params is null
+         // but this is theoretically possible only if the target method has no arguments
+         int newParametersCount = params == null? 0 : params.length;
+         if (method.getParameterTypes().length != newParametersCount)
+            throw new IllegalArgumentException("Wrong number of parameters: method has " + method.getParameterTypes().length
+                  + ", attempting to set " + newParametersCount + (params != null?"": " (argument was null)"));
+         if (params != null)
+         {
+            for (int i=0; i<params.length; i++)
+            {
+               Class<?> parameterClass = method.getParameterTypes()[i];
+               if (params[i] != null)
+               {
+                  if (!method.getParameterTypes()[i].isAssignableFrom(params[i].getClass()))
+                  {
+                     throw new IllegalArgumentException("Incompatible parameter: " + params[i] + " (expected type was " + method.getParameterTypes()[i].getName() + ")");
+                  }
+               }
+               else
+               {
+                  if (method.getParameterTypes()[i].isPrimitive())
+                  {
+                     throw new IllegalArgumentException("Trying to set a null value on a " + method.getParameterTypes()[i].getName());
+                  }
+               }
+            }
+            this.parameters = params;
+         }
+      }
+      else
+      {
+         throw new IllegalStateException("Illegal invocation to setParameters() during lifecycle invocation");
+      }
    }
 
    public Object getTimer()

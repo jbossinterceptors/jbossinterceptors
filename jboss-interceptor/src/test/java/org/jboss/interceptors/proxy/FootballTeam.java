@@ -48,9 +48,14 @@ public class FootballTeam implements Serializable
         return teamName;
     }
 
-    public int echo(int i)
+    public int echo(String i)
     {
-       return i;
+       return Integer.parseInt(i);
+    }
+
+    public int echo2(ValueBearer vb)
+    {
+       return vb.getValue();
     }
 
     @PrePassivate

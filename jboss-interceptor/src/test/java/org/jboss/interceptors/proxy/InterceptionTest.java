@@ -211,13 +211,29 @@ public class InterceptionTest
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo", int.class)).with(ParameterOverridingInterceptor.class);
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo", String.class)).with(ParameterOverridingInterceptor.class);
       interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
       FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
-      Assert.assertEquals(42, proxy.echo(1));
+      Assert.assertEquals(42, proxy.echo("1"));
+   }
+
+   @Test
+   public void testMethodParameterOverridingWithSubclass() throws Exception
+   {
+      InterceptorTestLogger.reset();
+
+      InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
+
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo2", ValueBearer.class)).with(ParameterOverridingInterceptor2.class);
+      interceptionModel = builder.build();
+      this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
+      this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
+
+      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      Assert.assertEquals(42, proxy.echo2(new ValueBearerImpl(1)));
    }
 
 

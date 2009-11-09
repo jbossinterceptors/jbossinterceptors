@@ -23,14 +23,19 @@ import javax.interceptor.InvocationContext;
 /**
  * @author Marius Bogoevici
  */
-public class ParameterOverridingInterceptor
+public class ParameterOverridingInterceptor2
 {
    @AroundInvoke
    public Object overrideParameters(InvocationContext invocationContext) throws Exception
    {
-      if (invocationContext.getMethod().getName().equals("echo"))
+      if (invocationContext.getMethod().getName().equals("echo2"))
       {
-         invocationContext.setParameters(new Object[]{"42"});
+         invocationContext.setParameters(new Object[]{new ValueBearer(){
+            public int getValue()
+            {
+               return 42;
+            }
+         }});
       }
       return invocationContext.proceed();
    }
