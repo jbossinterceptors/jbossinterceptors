@@ -17,6 +17,8 @@
 
 package org.jboss.interceptor.proxy;
 
+import javassist.util.proxy.MethodHandler;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
@@ -26,4 +28,8 @@ public interface InterceptorProxyCreator {
     //<T> T createInstrumentedInstance(Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments) ;
 
     <T> T createProxyFromInstance(Object target, Class<T> proxyClass) throws IllegalAccessException, InstantiationException;
+
+   <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler);
+
+   <T> MethodHandler getMethodHandler(Object target, Class<T> proxyClass);
 }

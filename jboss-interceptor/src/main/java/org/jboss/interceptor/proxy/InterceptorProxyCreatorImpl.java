@@ -42,7 +42,7 @@ import sun.reflect.ReflectionFactory;
 public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 {
 
-   private List<InterceptorRegistry<Class<?>, ?>>  interceptorRegistries;
+   private List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries;
 
    private List<InterceptionHandlerFactory<?>> interceptionHandlerFactories;
 
@@ -54,39 +54,71 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
    public InterceptorProxyCreatorImpl(InterceptorRegistry<Class<?>, ?> interceptorRegistries, InterceptionHandlerFactory<?> interceptionHandlerFactories)
    {
-      this.interceptorRegistries =  Collections.<InterceptorRegistry<Class<?>, ?>>singletonList(interceptorRegistries);
+      this.interceptorRegistries = Collections.<InterceptorRegistry<Class<?>, ?>>singletonList(interceptorRegistries);
       this.interceptionHandlerFactories = Collections.<InterceptionHandlerFactory<?>>singletonList(interceptionHandlerFactories);
    }
 
 
-   public <T> T createProxyFromInstance(final Object target, Class<T> proxyClass, Class<?>[] constructorTypes, Object[] constructorArguments)
+   public <T> T createProxyFromInstance(final Object target, Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments)
    {
-      ProxyFactory proxyFactory = new ProxyFactory();
-      if (proxyClass != null)
-         proxyFactory.setSuperclass(proxyClass);
+      MethodHandler interceptorMethodHandler = getMethodHandler(target, proxifiedClass);
+      return createProxyInstance(createProxyClassWithHandler(proxifiedClass, interceptorMethodHandler), interceptorMethodHandler);
+   }
 
-      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
-      InterceptorMethodHandler interceptorMethodHandler = new InterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories);
-      proxyFactory.setHandler(interceptorMethodHandler);
-
+   public <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler)
+   {
       try
       {
-         Class<T> clazz = proxyFactory.createClass();
          ReflectionFactory reflectionFactory = ReflectionFactory.getReflectionFactory();
-         Constructor<T> c = reflectionFactory.newConstructorForSerialization(clazz, Object.class.getDeclaredConstructor());
+         Constructor<T> c = reflectionFactory.newConstructorForSerialization(proxyClass, Object.class.getDeclaredConstructor());
          T proxyObject = c.newInstance();
-         ((ProxyObject)proxyObject).setHandler(interceptorMethodHandler);
+         if (interceptorMethodHandler != null)
+         {
+            ((ProxyObject) proxyObject).setHandler(interceptorMethodHandler);
+         }
          return proxyObject;
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          throw new InterceptorException(e);
       }
    }
 
+   public static <T> Class<T> createProxyClass(Class<T> proxyClass)
+   {
+      ProxyFactory proxyFactory = new ProxyFactory();
+      if (proxyClass != null)
+      {
+         proxyFactory.setSuperclass(proxyClass);
+      }
+      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
+      Class<T> clazz = proxyFactory.createClass();
+      return clazz;
+   }
+
+   public static <T> Class<T> createProxyClassWithHandler(Class<T> proxyClass, MethodHandler methodHandler)
+   {
+      ProxyFactory proxyFactory = new ProxyFactory();
+      if (proxyClass != null)
+      {
+         proxyFactory.setSuperclass(proxyClass);
+      }
+      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
+      proxyFactory.setHandler(methodHandler);
+      Class<T> clazz = proxyFactory.createClass();
+      return clazz;
+   }
+
+
+   public <T> MethodHandler getMethodHandler(Object target, Class<T> proxyClass)
+   {
+      return new InterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories);
+   }
+
    private <T> List<InterceptionModel<Class<?>, ?>> getModelsFor(Class<T> proxyClass)
    {
-      List<InterceptionModel<Class<?>, ?>> interceptionModels = new ArrayList<InterceptionModel<Class<?>,?>>();
-      for (InterceptorRegistry interceptorRegistry: interceptorRegistries)
+      List<InterceptionModel<Class<?>, ?>> interceptionModels = new ArrayList<InterceptionModel<Class<?>, ?>>();
+      for (InterceptorRegistry interceptorRegistry : interceptorRegistries)
       {
          interceptionModels.add(interceptorRegistry.getInterceptionModel(proxyClass));
       }
@@ -119,14 +151,17 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    {
       ProxyFactory proxyFactory = new ProxyFactory();
       if (proxyClass != null)
+      {
          proxyFactory.setSuperclass(target.getClass());
+      }
 
       proxyFactory.setHandler(new InterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories));
 
       try
       {
          return (T) proxyFactory.create(constructorTypes, constructorArguments);
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          throw new InterceptorException(e);
       }
