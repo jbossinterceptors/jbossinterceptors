@@ -17,6 +17,7 @@
 
 package org.jboss.interceptor.proxy;
 
+import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.InterceptorException;
 
@@ -49,6 +50,13 @@ public class DirectClassInterceptionHandler<I> extends AbstractClassInterception
       }
 
    }
+
+   public DirectClassInterceptionHandler(Object targetInstance, InterceptorClassMetadata targetClassInterceptorMetadata)
+   {
+      super(targetClassInterceptorMetadata);
+      this.interceptorInstance = targetInstance;
+   }
+
 
    public Object getInterceptorInstance()
    {

@@ -33,7 +33,7 @@ public class InterceptorClassMetadataRegistry
 {
    private static InterceptorClassMetadataRegistry interceptorMetadataRegistry;
 
-   private final Map<Class<?>, InterceptorClassMetadata> interceptorClassMetadataMap = new ConcurrentHashMap<Class<?>, InterceptorClassMetadata>();
+   private final Map<Key, InterceptorClassMetadata> interceptorClassMetadataMap = new ConcurrentHashMap<Key, InterceptorClassMetadata>();
 
    private final Lock lock = new ReentrantLock();
 
@@ -49,15 +49,21 @@ public class InterceptorClassMetadataRegistry
 
    public InterceptorClassMetadata getInterceptorClassMetadata(Class<?> interceptorClass)
    {
-      if (!interceptorClassMetadataMap.containsKey(interceptorClass))
+      return this.getInterceptorClassMetadata(interceptorClass, false);
+   }
+
+   public InterceptorClassMetadata getInterceptorClassMetadata(Class<?> interceptorClass, boolean isInterceptorTargetClass)
+   {
+      Key key = new Key(interceptorClass, isInterceptorTargetClass);
+      if (!interceptorClassMetadataMap.containsKey(key))
       {
          try
          {
             lock.lock();
-            //verify that metadata hasn't been added while waiting for the lock
-            if (!interceptorClassMetadataMap.containsKey(interceptorClass))
+            //verify that metadata hasn't been added while waiting for the lock            
+            if (!interceptorClassMetadataMap.containsKey(key))
             {
-               interceptorClassMetadataMap.put(interceptorClass, new InterceptorClassMetadataImpl(interceptorClass));
+               interceptorClassMetadataMap.put(key, new InterceptorClassMetadataImpl(interceptorClass, isInterceptorTargetClass));
             }
          }
          finally 
@@ -66,8 +72,55 @@ public class InterceptorClassMetadataRegistry
          }
       }
 
-      return interceptorClassMetadataMap.get(interceptorClass);
+      return interceptorClassMetadataMap.get(key);
 
+   }
+
+   private static class Key
+   {
+      private Class<?> clazz;
+
+      private boolean isInterceptorTargetClass;
+
+      private Key(Class<?> clazz, boolean interceptorTargetClass)
+      {
+         this.clazz = clazz;
+         isInterceptorTargetClass = interceptorTargetClass;
+      }
+
+      @Override
+      public boolean equals(Object o)
+      {
+         if (this == o)
+         {
+            return true;
+         }
+         if (o == null || getClass() != o.getClass())
+         {
+            return false;
+         }
+
+         Key key = (Key) o;
+
+         if (isInterceptorTargetClass != key.isInterceptorTargetClass)
+         {
+            return false;
+         }
+         if (clazz != null ? !clazz.equals(key.clazz) : key.clazz != null)
+         {
+            return false;
+         }
+
+         return true;
+      }
+
+      @Override
+      public int hashCode()
+      {
+         int result = clazz != null ? clazz.hashCode() : 0;
+         result = 31 * result + (isInterceptorTargetClass ? 1 : 0);
+         return result;
+      }
    }
 
 }

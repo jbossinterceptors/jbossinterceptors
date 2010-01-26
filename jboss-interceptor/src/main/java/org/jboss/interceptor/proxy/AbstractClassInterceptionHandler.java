@@ -39,15 +39,19 @@ import org.jboss.interceptor.model.InterceptorClassMetadata;
 public abstract class AbstractClassInterceptionHandler implements InterceptionHandler, Serializable
 {
    private InterceptorClassMetadata interceptorMetadata;
-   private Class<?> clazz;
 
    public abstract Object getInterceptorInstance();
 
    protected AbstractClassInterceptionHandler(Class<?> clazz)
    {
-      this.clazz = clazz;
-      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(this.clazz);      
+      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(clazz);      
    }
+
+   public AbstractClassInterceptionHandler(InterceptorClassMetadata targetClassInterceptorMetadata)
+   {
+      this.interceptorMetadata = targetClassInterceptorMetadata;
+   }
+
 
    public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception
    {
@@ -63,16 +67,6 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
    public InterceptorClassMetadata getInterceptorMetadata()
    {
       return interceptorMetadata;
-   }
-
-   public Class<?> getClazz()
-   {
-      return clazz;
-   }
-
-   public boolean handles(Class<?> clazz)
-   {
-      return this.clazz.equals(clazz);
    }
 
    public class DelegatingInvocationContext implements InvocationContext

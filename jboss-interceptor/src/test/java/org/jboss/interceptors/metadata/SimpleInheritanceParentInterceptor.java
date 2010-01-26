@@ -18,6 +18,7 @@
 package org.jboss.interceptors.metadata;
 
 import javax.annotation.PostConstruct;
+import javax.interceptor.InvocationContext;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -25,7 +26,7 @@ import javax.annotation.PostConstruct;
 public class SimpleInheritanceParentInterceptor
 {
    @PostConstruct
-   public void doPostConstruct()
+   public void doPostConstruct(InvocationContext invocationContext)
    {
 
    }

@@ -109,9 +109,10 @@ public class InterceptionUtils
    /**
     * @param interceptionType
     * @param method
+    * @param forTargetClass
     * @return
     */
-   public static boolean isInterceptorMethod(InterceptionType interceptionType, Method method)
+   public static boolean isInterceptorMethod(InterceptionType interceptionType, Method method, boolean forTargetClass)
    {
 
       if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) == null)
@@ -123,27 +124,39 @@ public class InterceptionUtils
       {
          if (!Void.TYPE.equals(method.getReturnType()))
          {
-            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
-                  + " is annotated with " + interceptionType.getAnnotationClassName()
-                  + " but does not have a void return type");
+            if (LOG.isDebugEnabled())
+            {
+             LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have a void return type");
+            }
             return false;
          }
 
          Class<?>[] parameterTypes = method.getParameterTypes();
 
-         if (parameterTypes.length > 1)
+         if (forTargetClass && parameterTypes.length != 0)
          {
-            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
-                  + " is annotated with " + interceptionType.getAnnotationClassName()
-                  + " but has more than 1 parameter");
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "is defined on the target class and does not have 0 arguments");
+            }
+            return false;
+         }
+
+         if (!forTargetClass && parameterTypes.length != 1)
+         {
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have exactly one parameter");
+            }
             return false;
          }
 
          if (parameterTypes.length == 1 && !InvocationContext.class.equals(parameterTypes[0]))
          {
-            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
-                  + " is annotated with " + interceptionType.getAnnotationClassName()
-                  + " but does not have a " + InvocationContext.class.getName() + " parameter ");
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "its single argument is not a " + InvocationContext.class.getName());
+            }
             return false;
          }
 
@@ -153,9 +166,10 @@ public class InterceptionUtils
       {
          if (!Object.class.equals(method.getReturnType()))
          {
-            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
-                  + " is annotated with " + interceptionType.getAnnotationClassName()
-                  + " but does not return a " + Object.class.getName());
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not return a " + Object.class.getName());
+            }
             return false;
          }
 
@@ -163,22 +177,31 @@ public class InterceptionUtils
 
          if (parameterTypes.length != 1)
          {
-            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
-                  + " is annotated with " + interceptionType.getAnnotationClassName()
-                  + " but does not have exactly 1 parameter");
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have exactly 1 parameter");
+            }
             return false;
          }
 
          if (!InvocationContext.class.equals(parameterTypes[0]))
          {
-            LOG.warn("Method " + method.getName() + " on class " + method.getDeclaringClass().getName()
-                  + " is annotated with " + interceptionType.getAnnotationClassName()
-                  + " but does not have a " + InvocationContext.class.getName() + " parameter ");
+            if (LOG.isDebugEnabled())
+            {
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have a " + InvocationContext.class.getName() + " parameter ");
+            }
             return false;
          }
 
          return true;
       }
+   }
+
+   private static String getStandardIgnoredMessage(InterceptionType interceptionType, Method method)
+   {
+      return "Method " + method.getName() + " defined on class " + method.getDeclaringClass().getName()
+            + " will not be used for interception, since it is not defined according to the specification. It is annotated with @"
+            + interceptionType.getAnnotationClassName() + ", but ";
    }
 
    public static <T> T proxifyInstance(T instance, Class<?> superClass, List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries, List<InterceptionHandlerFactory<?>> interceptionHandlerFactory)

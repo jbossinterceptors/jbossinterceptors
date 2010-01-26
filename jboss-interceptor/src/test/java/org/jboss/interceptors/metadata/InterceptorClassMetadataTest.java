@@ -94,7 +94,7 @@ public class InterceptorClassMetadataTest
       InterceptorClassMetadata interceptorClassMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(SimpleInheritanceChildInterceptor.class);
 
       List<Method> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
-      assertEquals(true, postConstructMethods.size() == 1);
+      assertEquals(1, postConstructMethods.size());
       assertEquals(postConstructMethods.get(0).getName(), "doPostConstruct");
 
       List<Method> preDestroyMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_DESTROY);

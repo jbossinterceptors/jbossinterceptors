@@ -28,6 +28,5 @@ public interface InterceptionHandler
 {
    public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception;
 
-   boolean handles(Class<?> clazz);
 }
 

@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import org.jboss.interceptors.proxy.InterceptorTestLogger;
 
+import javax.annotation.PostConstruct;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.ejb.PrePassivate;
@@ -33,6 +34,8 @@ public class FootballTeam implements Serializable
 {
 
    private String teamName;
+
+   public static boolean postConstructed = false;
 
     // an empty-argument constructor is required for proxifycation
     public FootballTeam() {
@@ -102,4 +105,11 @@ public class FootballTeam implements Serializable
         InterceptorTestLogger.add(FootballTeam.class, "aroundInvokeAfter");
         return result;
     }
+
+   @PostConstruct
+   public void afterConstruction()
+   {
+      postConstructed = true;
+   }
 }
+

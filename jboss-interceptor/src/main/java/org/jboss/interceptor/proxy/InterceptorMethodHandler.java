@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 
 import org.jboss.interceptor.model.InterceptorClassMetadata;
 import org.jboss.interceptor.model.InterceptionModel;
+import org.jboss.interceptor.model.InterceptorClassMetadataImpl;
 import org.jboss.interceptor.model.MethodHolder;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
@@ -62,7 +63,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
             interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories.get(i)).createFor((Object) interceptorReference));
          }
       }
-      targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass());
+      targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass(), true);
    }
 
    public Object doInvoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
@@ -113,7 +114,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
 
       if (targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
       {
-         interceptionHandlers.add(new DirectClassInterceptionHandler<Class<?>>(getTargetInstance(), getTargetClass()));
+         interceptionHandlers.add(new DirectClassInterceptionHandler<Class<?>>(getTargetInstance(), targetClassInterceptorMetadata));
       }
 
       InterceptionChain chain = new InterceptionChain(interceptionHandlers, interceptionType, getTargetInstance(), thisMethod, args);
