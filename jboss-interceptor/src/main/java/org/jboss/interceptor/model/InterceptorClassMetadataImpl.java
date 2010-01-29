@@ -156,5 +156,9 @@ public class InterceptorClassMetadataImpl implements InterceptorClassMetadata, S
       }
 
    }
-   
+
+   public boolean isTargetClass()
+   {
+      return interceptionTargetClass;
+   }
 }

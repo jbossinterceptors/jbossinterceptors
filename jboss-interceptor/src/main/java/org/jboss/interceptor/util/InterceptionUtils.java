@@ -37,6 +37,7 @@ import java.lang.reflect.Modifier;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Collections;
+import java.util.concurrent.Callable;
 
 import javassist.util.proxy.ProxyObject;
 
@@ -66,22 +67,54 @@ public class InterceptionUtils
       };
    }
 
-   public static void executePostConstruct(Object proxy)
+   public static void executePostConstruct(Object proxy, Callable callback)
    {
       if (proxy instanceof LifecycleMixin)
       {
          LifecycleMixin lifecycleMixin = (LifecycleMixin) proxy;
          lifecycleMixin.lifecycle_mixin_$$_postConstruct();
       }
+      if (callback != null)
+      {
+         try
+         {
+            callback.call();
+         }
+         catch (Exception e)
+         {
+            throw new InterceptorException(e);
+         }
+      }
    }
 
-   public static void executePredestroy(Object proxy)
+   public static void executePostConstruct(Object proxy)
+   {
+      executePostConstruct(proxy, null);
+   }
+
+   public static void executePredestroy(Object proxy, Callable callback)
    {
       if (proxy instanceof LifecycleMixin)
       {
          LifecycleMixin lifecycleMixin = (LifecycleMixin) proxy;
          lifecycleMixin.lifecycle_mixin_$$_preDestroy();
       }
+      if (callback != null)
+      {
+         try
+         {
+            callback.call();
+         }
+         catch (Exception e)
+         {
+            throw new InterceptorException(e);
+         }
+      }
+   }
+
+   public static void executePredestroy(Object proxy)
+   {
+      executePredestroy(proxy, null);
    }
 
    /**

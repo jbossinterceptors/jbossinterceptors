@@ -62,7 +62,10 @@ public class InterceptionChain
       if (hasNext())
       {
          InterceptionHandler nextInterceptorHandler = interceptorHandlers.get(currentPosition++);
-         log.debug("Invoking next interceptor in chain:" + nextInterceptorHandler.getClass().getName());
+         if (log.isTraceEnabled())
+         {
+            log.trace("Invoking next interceptor in chain:" + nextInterceptorHandler.getClass().getName());
+         }
          return nextInterceptorHandler.invoke(target, interceptionType, invocationContext);
       }
       else

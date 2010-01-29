@@ -19,6 +19,7 @@ package org.jboss.interceptor.proxy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.Queue;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
 
    protected AbstractClassInterceptionHandler(Class<?> clazz)
    {
-      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(clazz);      
+      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(clazz);
    }
 
    public AbstractClassInterceptionHandler(InterceptorClassMetadata targetClassInterceptorMetadata)
@@ -58,10 +59,13 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       List<Method> methods = interceptorMetadata.getInterceptorMethods(interceptionType);
       if (methods != null)
       {
-         DelegatingInvocationContext delegatingInvocationContext = new DelegatingInvocationContext(invocationContext, getInterceptorInstance(), methods);
+         DelegatingInvocationContext delegatingInvocationContext = new DelegatingInvocationContext(invocationContext, getInterceptorInstance(), methods, interceptionType);
          return delegatingInvocationContext.proceed();
-      } else
+      }
+      else
+      {
          throw new InterceptorException(target.toString() + " was requested to perform " + interceptionType.name() + " but no such method is defined on it");
+      }
    }
 
    public InterceptorClassMetadata getInterceptorMetadata()
@@ -75,13 +79,15 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       private InvocationContext delegateInvocationContext;
 
       private Object targetObject;
+      private InterceptionType interceptionType;
 
       private Queue<Method> invocationQueue;
 
-      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<Method> methods)
+      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<Method> methods, InterceptionType interceptionType)
       {
          this.delegateInvocationContext = delegateInvocationContext;
          this.targetObject = targetObject;
+         this.interceptionType = interceptionType;
          this.invocationQueue = new ConcurrentLinkedQueue<Method>(methods);
       }
 
@@ -109,24 +115,47 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       {
          if (!invocationQueue.isEmpty())
          {
-
-            Method interceptorMethod = invocationQueue.remove();
-            ReflectionUtils.ensureAccessible(interceptorMethod);
             try
             {
-               if (interceptorMethod.getParameterTypes().length == 0)
-                  return interceptorMethod.invoke(targetObject);
+               if (AbstractClassInterceptionHandler.this.interceptorMetadata.isTargetClass() && interceptionType.isLifecycleCallback())
+               {
+                  Iterator<Method> methodIterator = invocationQueue.iterator();
+                  while (methodIterator.hasNext())
+                  {
+                     Method interceptorMethod = methodIterator.next();
+                     ReflectionUtils.ensureAccessible(interceptorMethod);
+                     // interceptor methods defined on
+                     interceptorMethod.invoke(targetObject);
+                  }
+                  return null;
+               }
                else
-                  return interceptorMethod.invoke(targetObject, this);
+               {
+                  Method interceptorMethod = invocationQueue.remove();
+                  ReflectionUtils.ensureAccessible(interceptorMethod);
+                  if (interceptorMethod.getParameterTypes().length == 0)
+                  {
+                     return interceptorMethod.invoke(targetObject);
+                  }
+                  else
+                  {
+                     return interceptorMethod.invoke(targetObject, this);
+                  }
+               }
             }
             catch (InvocationTargetException e)
             {
                if (e.getCause() instanceof Exception)
-                  throw (Exception)e.getCause();
+               {
+                  throw (Exception) e.getCause();
+               }
                else
+               {
                   throw new InterceptorException(e);
+               }
             }
-         } else
+         }
+         else
          {
             return delegateInvocationContext.proceed();
          }

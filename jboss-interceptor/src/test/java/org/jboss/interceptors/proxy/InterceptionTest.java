@@ -41,6 +41,8 @@ public class InterceptionTest
 
    private String[] expectedLoggedValues = {
          "org.jboss.interceptors.proxy.FirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.Team_postConstruct",
+         "org.jboss.interceptors.proxy.FootballTeam_postConstruct",
          "org.jboss.interceptors.proxy.FirstInterceptor_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
@@ -53,6 +55,8 @@ public class InterceptionTest
 
    private String[] expectedLoggedValuesWithGlobalsIgnored = {
          "org.jboss.interceptors.proxy.FirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.Team_postConstruct",
+         "org.jboss.interceptors.proxy.FootballTeam_postConstruct",
          "org.jboss.interceptors.proxy.SecondInterceptor_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_aroundInvokeBefore",
          "org.jboss.interceptors.proxy.FootballTeam_getName",
@@ -63,6 +67,8 @@ public class InterceptionTest
 
    private String[] expectedLoggedValuesOnSerialization = {
          "org.jboss.interceptors.proxy.FirstInterceptor_postConstruct",
+         "org.jboss.interceptors.proxy.Team_postConstruct",
+         "org.jboss.interceptors.proxy.FootballTeam_postConstruct",
          "org.jboss.interceptors.proxy.FootballTeam_prePassivating",
          "org.jboss.interceptors.proxy.FootballTeam_postActivating",
          "org.jboss.interceptors.proxy.FirstInterceptor_aroundInvokeBefore",
@@ -87,7 +93,6 @@ public class InterceptionTest
    {
       InterceptorTestLogger.reset();
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
-      FootballTeam.postConstructed = false;
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(FirstInterceptor.class, SecondInterceptor.class);
       builder.interceptPostConstruct().with(FirstInterceptor.class);
       builder.interceptPreDestroy().with(SecondInterceptor.class);
@@ -100,7 +105,6 @@ public class InterceptionTest
    public void resetLogAndSetupClassesGlobally() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -114,7 +118,6 @@ public class InterceptionTest
    public void resetLogAndSetupClassesMixed() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
       builder.interceptAll().with(FirstInterceptor.class);
@@ -129,7 +132,6 @@ public class InterceptionTest
    public void resetLogAndSetupClassesWithGlobalsIgnored() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
       builder.interceptAll().with(FirstInterceptor.class);
@@ -214,7 +216,6 @@ public class InterceptionTest
    public void testMethodParameterOverriding() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -231,7 +232,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithPrimitive() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -248,7 +248,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithObject() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -265,7 +264,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithObjectSucceed() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -282,7 +280,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithPrimitiveWidening() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -299,7 +296,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithPrimitiveNarrowing() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -316,7 +312,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithArray() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -333,7 +328,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithArrayOnString() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
@@ -350,7 +344,6 @@ public class InterceptionTest
    public void testMethodParameterOverridingWithSubclass() throws Exception
    {
       InterceptorTestLogger.reset();
-      FootballTeam.postConstructed = false;
 
 
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
@@ -372,7 +365,6 @@ public class InterceptionTest
       Assert.assertEquals(TEAM_NAME, rawInstance.getName());
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesWhenRaw, logValues);
-      Assert.assertTrue(FootballTeam.postConstructed);
    }
 
    private String iterateAndDisplay(Object[] logValues)

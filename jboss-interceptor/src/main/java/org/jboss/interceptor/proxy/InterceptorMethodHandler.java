@@ -36,7 +36,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
    private InterceptorClassMetadata targetClassInterceptorMetadata;
    private List<InterceptionModel<Class<?>, ?>> interceptionModels;
 
-   public InterceptorMethodHandler(Object target, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories)
+   public InterceptorMethodHandler(Object target, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories, boolean includeTargetClass)
    {
       super(target, targetClass != null ? targetClass : target.getClass());
       if (interceptionModels == null)
@@ -63,7 +63,10 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
             interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories.get(i)).createFor((Object) interceptorReference));
          }
       }
-      targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass(), true);
+      if (includeTargetClass)
+      {
+         targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass(), true);
+      }
    }
 
    public Object doInvoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
@@ -112,7 +115,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
          }
       }
 
-      if (targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
+      if (targetClassInterceptorMetadata != null && targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
       {
          interceptionHandlers.add(new DirectClassInterceptionHandler<Class<?>>(getTargetInstance(), targetClassInterceptorMetadata));
       }

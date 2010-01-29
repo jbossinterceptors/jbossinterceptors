@@ -30,12 +30,10 @@ import javax.ejb.PostActivate;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class FootballTeam implements Serializable
+public class FootballTeam extends Team 
 {
 
    private String teamName;
-
-   public static boolean postConstructed = false;
 
     // an empty-argument constructor is required for proxifycation
     public FootballTeam() {
@@ -109,7 +107,7 @@ public class FootballTeam implements Serializable
    @PostConstruct
    public void afterConstruction()
    {
-      postConstructed = true;
+      InterceptorTestLogger.add(FootballTeam.class, "postConstruct");
    }
 }
 

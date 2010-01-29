@@ -29,6 +29,7 @@ public class DirectClassInterceptionHandler<I> extends AbstractClassInterception
 
    private final Object interceptorInstance;
 
+   private boolean selfIntercepting;
 
    public DirectClassInterceptionHandler(Object interceptorInstance, Class<?> clazz)
    {

@@ -27,6 +27,5 @@ import javax.interceptor.InvocationContext;
 public interface InterceptionHandler
 {
    public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception;
-
 }
 
