@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -15,17 +15,14 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptor.model;
 
-import javassist.util.proxy.MethodHandler;
-import org.jboss.interceptor.model.InterceptorMetadata;
+import java.io.Serializable;
 
 /**
- * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
+ * @author Marius Bogoevici
  */
-public interface InterceptorProxyCreator {
-
-   <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler);
-
-   <T> MethodHandler createMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
+public interface SerializationProxyFactory
+{
+   public Serializable createSerializableProxy();
 }

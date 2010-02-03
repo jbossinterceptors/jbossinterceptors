@@ -17,9 +17,10 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.model.InterceptorClassMetadata;
-import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
+import org.jboss.interceptor.model.metadata.ClassReference;
+import org.jboss.interceptor.model.InterceptorMetadata;
 import org.jboss.interceptor.InterceptorException;
+import org.jboss.interceptor.util.ReflectionUtils;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -29,17 +30,15 @@ public class DirectClassInterceptionHandler<I> extends AbstractClassInterception
 
    private final Object interceptorInstance;
 
-   private boolean selfIntercepting;
-
-   public DirectClassInterceptionHandler(Object interceptorInstance, Class<?> clazz)
+   public DirectClassInterceptionHandler(Object interceptorInstance, InterceptorMetadata interceptorMetadata)
    {
-      super((clazz == null) ? interceptorInstance.getClass() : clazz);
+      super(interceptorMetadata);
       this.interceptorInstance = interceptorInstance;
    }
 
-   public DirectClassInterceptionHandler(Class<?> simpleInterceptorClass)
+   public DirectClassInterceptionHandler(Class<?> simpleInterceptorClass, InterceptorMetadata interceptorMetadata)
    {
-      super(simpleInterceptorClass);
+      super(interceptorMetadata);
       if (simpleInterceptorClass == null)
          throw new IllegalArgumentException("Class must not be null");
       try
@@ -51,13 +50,6 @@ public class DirectClassInterceptionHandler<I> extends AbstractClassInterception
       }
 
    }
-
-   public DirectClassInterceptionHandler(Object targetInstance, InterceptorClassMetadata targetClassInterceptorMetadata)
-   {
-      super(targetClassInterceptorMetadata);
-      this.interceptorInstance = targetInstance;
-   }
-
 
    public Object getInterceptorInstance()
    {

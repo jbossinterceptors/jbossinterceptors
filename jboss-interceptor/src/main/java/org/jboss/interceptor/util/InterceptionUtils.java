@@ -17,8 +17,11 @@
 
 package org.jboss.interceptor.util;
 
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
+import org.jboss.interceptor.model.metadata.MethodReference;
 import org.jboss.interceptor.proxy.InterceptionHandlerFactory;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.LifecycleMixin;
@@ -142,7 +145,7 @@ public class InterceptionUtils
     * @param forTargetClass
     * @return
     */
-   public static boolean isInterceptorMethod(InterceptionType interceptionType, Method method, boolean forTargetClass)
+   public static boolean isInterceptorMethod(InterceptionType interceptionType, MethodReference method, boolean forTargetClass)
    {
 
       if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) == null)
@@ -152,22 +155,22 @@ public class InterceptionUtils
 
       if (interceptionType.isLifecycleCallback())
       {
-         if (!Void.TYPE.equals(method.getReturnType()))
+         if (!Void.TYPE.equals(method.getReturnType().getJavaClass()))
          {
             if (LOG.isDebugEnabled())
             {
-             LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have a void return type");
+             LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have a void return type");
             }
             return false;
          }
 
-         Class<?>[] parameterTypes = method.getParameterTypes();
+         Class<?>[] parameterTypes = method.getJavaMethod().getParameterTypes();
 
          if (forTargetClass && parameterTypes.length != 0)
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "is defined on the target class and does not have 0 arguments");
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "is defined on the target class and does not have 0 arguments");
             }
             return false;
          }
@@ -176,7 +179,7 @@ public class InterceptionUtils
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have exactly one parameter");
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have exactly one parameter");
             }
             return false;
          }
@@ -185,7 +188,7 @@ public class InterceptionUtils
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "its single argument is not a " + InvocationContext.class.getName());
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "its single argument is not a " + InvocationContext.class.getName());
             }
             return false;
          }
@@ -194,22 +197,22 @@ public class InterceptionUtils
       }
       else
       {
-         if (!Object.class.equals(method.getReturnType()))
+         if (!Object.class.equals(method.getReturnType().getJavaClass()))
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not return a " + Object.class.getName());
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not return a " + Object.class.getName());
             }
             return false;
          }
 
-         Class<?>[] parameterTypes = method.getParameterTypes();
+         Class<?>[] parameterTypes = method.getJavaMethod().getParameterTypes();
 
          if (parameterTypes.length != 1)
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have exactly 1 parameter");
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have exactly 1 parameter");
             }
             return false;
          }
@@ -218,7 +221,7 @@ public class InterceptionUtils
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method) + "does not have a " + InvocationContext.class.getName() + " parameter ");
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have a " + InvocationContext.class.getName() + " parameter ");
             }
             return false;
          }
@@ -232,32 +235,6 @@ public class InterceptionUtils
       return "Method " + method.getName() + " defined on class " + method.getDeclaringClass().getName()
             + " will not be used for interception, since it is not defined according to the specification. It is annotated with @"
             + interceptionType.annotationClassName() + ", but ";
-   }
-
-   public static <T> T proxifyInstance(T instance, Class<?> superClass, List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries, List<InterceptionHandlerFactory<?>> interceptionHandlerFactory)
-   {
-      try
-      {
-        InterceptorProxyCreatorImpl proxyCreator = new InterceptorProxyCreatorImpl(interceptorRegistries, interceptionHandlerFactory);
-         return (T) proxyCreator.createProxyFromInstance(instance, superClass);
-      }
-      catch (Exception e)
-      {
-         throw new InterceptorException(e);
-      }
-   }
-
-    public static <T> T proxifyInstance(T instance, Class<?> superClass, InterceptorRegistry<Class<?>, ?> interceptorRegistry, InterceptionHandlerFactory<?> interceptionHandlerFactory)
-   {
-      try
-      {
-        InterceptorProxyCreatorImpl proxyCreator = new InterceptorProxyCreatorImpl(Collections.<InterceptorRegistry<Class<?>, ?>>singletonList(interceptorRegistry), Collections.<InterceptionHandlerFactory<?>>singletonList(interceptionHandlerFactory));
-         return (T) proxyCreator.createProxyFromInstance(instance, superClass);
-      }
-      catch (Exception e)
-      {
-         throw new InterceptorException(e);
-      }
    }
 
    public static boolean supportsEjb3InterceptorDeclaration()
@@ -285,4 +262,29 @@ public class InterceptionUtils
       return proxy;
    }
 
+
+   public static <T> Class<T> createProxyClass(Class<T> proxyClass)
+   {
+      ProxyFactory proxyFactory = new ProxyFactory();
+      if (proxyClass != null)
+      {
+         proxyFactory.setSuperclass(proxyClass);
+      }
+      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
+      Class<T> clazz = proxyFactory.createClass();
+      return clazz;
+   }
+
+   public static <T> Class<T> createProxyClassWithHandler(Class<T> proxyClass, MethodHandler methodHandler)
+   {
+      ProxyFactory proxyFactory = new ProxyFactory();
+      if (proxyClass != null)
+      {
+         proxyFactory.setSuperclass(proxyClass);
+      }
+      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
+      proxyFactory.setHandler(methodHandler);
+      Class<T> clazz = proxyFactory.createClass();
+      return clazz;
+   }
 }

@@ -17,12 +17,23 @@
 
 package org.jboss.interceptor.proxy;
 
+import org.jboss.interceptor.model.metadata.ClassReference;
+import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>> {
+public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>>
+{
+   private InterceptorMetadataRegistry interceptorMetadataRegistry;
 
-    public InterceptionHandler createFor(Class<?> clazz) {
-        return new DirectClassInterceptionHandler(clazz);
-    }
+   public DirectClassInterceptionHandlerFactory(InterceptorMetadataRegistry interceptorMetadataRegistry)
+   {
+      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
+   }
+
+   public InterceptionHandler createFor(Class<?> clazz)
+   {
+      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(clazz));
+   }
 }

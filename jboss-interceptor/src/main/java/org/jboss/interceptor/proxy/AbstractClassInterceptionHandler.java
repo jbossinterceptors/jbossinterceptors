@@ -28,35 +28,30 @@ import java.io.Serializable;
 
 import javax.interceptor.InvocationContext;
 
+import org.jboss.interceptor.model.metadata.MethodReference;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.InterceptorException;
-import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.model.InterceptorClassMetadata;
+import org.jboss.interceptor.model.InterceptorMetadata;
 
 /**
  * @author Marius Bogoevici
  */
 public abstract class AbstractClassInterceptionHandler implements InterceptionHandler, Serializable
 {
-   private InterceptorClassMetadata interceptorMetadata;
+   private InterceptorMetadata interceptorMetadata;
 
    public abstract Object getInterceptorInstance();
 
-   protected AbstractClassInterceptionHandler(Class<?> clazz)
+   public AbstractClassInterceptionHandler(InterceptorMetadata interceptorMetadata)
    {
-      this.interceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(clazz);
-   }
-
-   public AbstractClassInterceptionHandler(InterceptorClassMetadata targetClassInterceptorMetadata)
-   {
-      this.interceptorMetadata = targetClassInterceptorMetadata;
+      this.interceptorMetadata = interceptorMetadata;
    }
 
 
    public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception
    {
-      List<Method> methods = interceptorMetadata.getInterceptorMethods(interceptionType);
+      List<MethodReference> methods = interceptorMetadata.getInterceptorMethods(interceptionType);
       if (methods != null)
       {
          DelegatingInvocationContext delegatingInvocationContext = new DelegatingInvocationContext(invocationContext, getInterceptorInstance(), methods, interceptionType);
@@ -68,7 +63,7 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       }
    }
 
-   public InterceptorClassMetadata getInterceptorMetadata()
+   public InterceptorMetadata getInterceptorMetadata()
    {
       return interceptorMetadata;
    }
@@ -81,14 +76,14 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       private Object targetObject;
       private InterceptionType interceptionType;
 
-      private Queue<Method> invocationQueue;
+      private Queue<MethodReference> invocationQueue;
 
-      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<Method> methods, InterceptionType interceptionType)
+      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<MethodReference> methods, InterceptionType interceptionType)
       {
          this.delegateInvocationContext = delegateInvocationContext;
          this.targetObject = targetObject;
          this.interceptionType = interceptionType;
-         this.invocationQueue = new ConcurrentLinkedQueue<Method>(methods);
+         this.invocationQueue = new ConcurrentLinkedQueue<MethodReference>(methods);
       }
 
       public Map<String, Object> getContextData()
@@ -119,27 +114,27 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
             {
                if (AbstractClassInterceptionHandler.this.interceptorMetadata.isTargetClass() && interceptionType.isLifecycleCallback())
                {
-                  Iterator<Method> methodIterator = invocationQueue.iterator();
+                  Iterator<MethodReference> methodIterator = invocationQueue.iterator();
                   while (methodIterator.hasNext())
                   {
-                     Method interceptorMethod = methodIterator.next();
-                     ReflectionUtils.ensureAccessible(interceptorMethod);
+                     MethodReference interceptorMethod = methodIterator.next();
+                     ReflectionUtils.ensureAccessible(interceptorMethod.getJavaMethod());
                      // interceptor methods defined on
-                     interceptorMethod.invoke(targetObject);
+                     interceptorMethod.getJavaMethod().invoke(targetObject);
                   }
                   return null;
                }
                else
                {
-                  Method interceptorMethod = invocationQueue.remove();
-                  ReflectionUtils.ensureAccessible(interceptorMethod);
-                  if (interceptorMethod.getParameterTypes().length == 0)
+                  MethodReference interceptorMethod = invocationQueue.remove();
+                  ReflectionUtils.ensureAccessible(interceptorMethod.getJavaMethod());
+                  if (interceptorMethod.getJavaMethod().getParameterTypes().length == 0)
                   {
-                     return interceptorMethod.invoke(targetObject);
+                     return interceptorMethod.getJavaMethod().invoke(targetObject);
                   }
                   else
                   {
-                     return interceptorMethod.invoke(targetObject, this);
+                     return interceptorMethod.getJavaMethod().invoke(targetObject, this);
                   }
                }
             }

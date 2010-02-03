@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -17,26 +17,28 @@
 
 package org.jboss.interceptor.model;
 
-import java.lang.reflect.Method;
 import java.util.List;
+
+import org.jboss.interceptor.model.metadata.ClassReference;
+import org.jboss.interceptor.model.metadata.MethodReference;
 
 /**
  * A 
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptorClassMetadata
+public interface InterceptorMetadata
 {
-   Class<?> getInterceptorClass();
+   ClassReference getInterceptorClass();
 
    /**
-    * Returns the list of methods to be invoked on this class when doing
+    * Returns the list of method references to be invoked on this class when doing
     * interception (as an interceptor is supposed to invoke the superclass
     * methods too)
     *
     * @param interceptionType
     * @return a list of methods
     */
-   List<Method> getInterceptorMethods(InterceptionType interceptionType);
+   List<MethodReference> getInterceptorMethods(InterceptionType interceptionType);
 
    boolean isInterceptor();
 

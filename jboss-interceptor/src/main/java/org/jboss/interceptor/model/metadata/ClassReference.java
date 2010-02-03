@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -15,16 +15,26 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model;
+package org.jboss.interceptor.model.metadata;
 
-import org.jboss.interceptor.proxy.InterceptionHandler;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
- * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
+ * Abstraction of a class reference. Allows for the framework client to configure
+ * their own way of providing class metadata, rather than relying exclusively on
+ * Java reflection.
+ * 
+ * @author Marius Bogoevici
  */
-public interface InterceptorReference<T>
+public interface ClassReference extends Serializable
 {
-   T getReferredInterceptor();
+   Iterable<MethodReference> getDeclaredMethods();
+   
+   Class<?> getJavaClass();
+   
+   String getClassName();
 
-   InterceptionHandler getInterceptionHandler();
+   ClassReference getSuperclass();
 }

@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.io.Serializable;
 
+import org.jboss.interceptor.model.metadata.MethodReference;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.InterceptorException;
 
@@ -39,6 +40,11 @@ public class MethodHolder implements Serializable
    public static MethodHolder of(Method method, boolean withDeclaringClass)
    {
       return new MethodHolder(method, withDeclaringClass);
+   }
+
+   public static MethodHolder of(MethodReference method, boolean withDeclaringClass)
+   {
+      return new MethodHolder(method.getJavaMethod(), withDeclaringClass);
    }
 
    private MethodHolder(Method method, boolean withDeclaringClass)

@@ -17,19 +17,24 @@
 
 package org.jboss.interceptors.proxy;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.Array;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import org.jboss.interceptor.model.InterceptionModelBuilder;
+import javassist.util.proxy.MethodHandler;
 import org.jboss.interceptor.model.InterceptionModel;
+import org.jboss.interceptor.model.InterceptionModelBuilder;
+import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
+import org.jboss.interceptor.proxy.InterceptorProxyCreator;
+import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
+import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
 import org.jboss.interceptor.registry.InterceptorRegistry;
+import org.jboss.interceptor.registry.SimpleClassMetadataReader;
 import org.jboss.interceptor.util.InterceptionUtils;
-
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -84,10 +89,18 @@ public class InterceptionTestCase
          "org.jboss.interceptors.proxy.FootballTeam_getName",
    };
 
-
-
-   private InterceptionModel<Class<?>, Class<?>> interceptionModel;
    private InterceptorRegistry<Class<?>, Class<?>> interceptorRegistry;
+
+   private DirectClassInterceptionHandlerFactory interceptionHandlerFactory;
+
+   private InterceptorMetadataRegistry interceptorMetadataRegistry;
+
+   @Before
+   public void setUp()
+   {
+      interceptorMetadataRegistry = new InterceptorMetadataRegistry(SimpleClassMetadataReader.getInstance());
+      interceptionHandlerFactory = new DirectClassInterceptionHandlerFactory(interceptorMetadataRegistry);
+   }
 
    public void resetLogAndSetupClassesForMethod() throws Exception
    {
@@ -96,6 +109,7 @@ public class InterceptionTestCase
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(FirstInterceptor.class, SecondInterceptor.class);
       builder.interceptPostConstruct().with(FirstInterceptor.class);
       builder.interceptPreDestroy().with(SecondInterceptor.class);
+      InterceptionModel<Class<?>, Class<?>> interceptionModel;      
       interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
@@ -109,6 +123,7 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAll().with(FirstInterceptor.class, SecondInterceptor.class);
+      InterceptionModel<Class<?>, Class<?>> interceptionModel;      
       interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
@@ -123,6 +138,7 @@ public class InterceptionTestCase
       builder.interceptAll().with(FirstInterceptor.class);
       builder.interceptPreDestroy().with(SecondInterceptor.class);
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(SecondInterceptor.class);
+      InterceptionModel<Class<?>, Class<?>> interceptionModel;      
       interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
@@ -138,6 +154,7 @@ public class InterceptionTestCase
       builder.interceptPreDestroy().with(SecondInterceptor.class);
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(SecondInterceptor.class);
       builder.ignoreGlobalInterceptors(FootballTeam.class.getMethod("getName"));
+      InterceptionModel<Class<?>, Class<?>> interceptionModel;      
       interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
@@ -149,7 +166,7 @@ public class InterceptionTestCase
    public void testInterceptionWithMethodRegisteredInterceptors() throws Exception
    {
       resetLogAndSetupClassesForMethod();
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
@@ -162,7 +179,7 @@ public class InterceptionTestCase
    public void testInterceptionWithGlobalInterceptors() throws Exception
    {
       resetLogAndSetupClassesGlobally();
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
@@ -173,7 +190,7 @@ public class InterceptionTestCase
    public void testInterceptionWithMixedInterceptors() throws Exception
    {
       resetLogAndSetupClassesMixed();
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
@@ -186,7 +203,7 @@ public class InterceptionTestCase
    public void testInterceptionWithGlobalsIgnored() throws Exception
    {
       resetLogAndSetupClassesWithGlobalsIgnored();
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
@@ -200,7 +217,7 @@ public class InterceptionTestCase
    public void testInterceptionWithSerializedProxy() throws Exception
    {
       resetLogAndSetupClassesForMethod();
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       InterceptionUtils.executePostConstruct(proxy);
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       new ObjectOutputStream(baos).writeObject(proxy);
@@ -220,11 +237,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo", String.class)).with(ParameterOverridingInterceptor.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(42, proxy.echo("1"));
    }
 
@@ -236,11 +253,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoInt", int.class)).with(ParameterOverridingInterceptorWithInteger.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(42, proxy.echoInt(1));
    }
 
@@ -252,11 +269,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLongAsObject", Long.class)).with(ParameterOverridingInterceptorWithInteger.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(new Long(42), proxy.echoLongAsObject(1l));
    }
 
@@ -268,11 +285,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLongAsObject", Long.class)).with(ParameterOverridingInterceptorWithLong.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(new Long(42), proxy.echoLongAsObject(1l));
    }
 
@@ -284,11 +301,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLong", long.class)).with(ParameterOverridingInterceptorWithInteger.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(42, proxy.echoLong(1));
    }
 
@@ -300,11 +317,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoInt", int.class)).with(ParameterOverridingInterceptorWithLong.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy =proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(42, proxy.echoInt(1));
    }
 
@@ -316,11 +333,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoObjectArray", Object[].class)).with(ParameterOverridingInterceptorWithLongArray.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(new Long[]{42l}, proxy.echoObjectArray(new Object[]{}));
    }
 
@@ -332,11 +349,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoStringArray", String[].class)).with(ParameterOverridingInterceptorWithLongArray.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
       this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
 
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(new Long[]{42l}, proxy.echoStringArray(new String[]{}));
    }
 
@@ -349,11 +366,11 @@ public class InterceptionTestCase
       InterceptionModelBuilder<Class<?>, Class<?>> builder = InterceptionModelBuilder.newBuilderFor(FootballTeam.class, (Class) Class.class);
 
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo2", ValueBearer.class)).with(ParameterOverridingInterceptor2.class);
-      interceptionModel = builder.build();
+      InterceptionModel<Class<?>, Class<?>> interceptionModel = builder.build();
       this.interceptorRegistry = new InterceptorRegistry<Class<?>, Class<?>>();
-      this.interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
-
-      FootballTeam proxy = InterceptionUtils.proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class, interceptorRegistry, new DirectClassInterceptionHandlerFactory());
+      interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
+      
+      FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
       Assert.assertEquals(42, proxy.echo2(new ValueBearerImpl(1)));
    }
 
@@ -378,4 +395,10 @@ public class InterceptionTestCase
    }
 
 
+   private <T> T proxifyInstance(T instance, Class<? extends T> targetClass)
+   {
+      InterceptorProxyCreator ipc = new InterceptorProxyCreatorImpl(interceptorRegistry, interceptionHandlerFactory);
+      MethodHandler methodHandler = ipc.createMethodHandler(instance, targetClass, interceptorMetadataRegistry.getInterceptorClassMetadata(targetClass, true));
+      return ipc.createProxyInstance(InterceptionUtils.createProxyClassWithHandler(targetClass, methodHandler), methodHandler);
+   }
 }

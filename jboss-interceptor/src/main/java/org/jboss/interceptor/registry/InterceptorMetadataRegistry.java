@@ -17,11 +17,11 @@
 
 package org.jboss.interceptor.registry;
 
-import org.jboss.interceptor.model.InterceptorClassMetadataImpl;
-import org.jboss.interceptor.model.InterceptorClassMetadata;
+import org.jboss.interceptor.model.metadata.AbstractInterceptorMetadata;
+import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.ClassReference;
 
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,30 +29,25 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorClassMetadataRegistry
+public class InterceptorMetadataRegistry
 {
-   private static InterceptorClassMetadataRegistry interceptorMetadataRegistry;
+   private final Map<Key, InterceptorMetadata> interceptorClassMetadataMap = new ConcurrentHashMap<Key, InterceptorMetadata>();
 
-   private final Map<Key, InterceptorClassMetadata> interceptorClassMetadataMap = new ConcurrentHashMap<Key, InterceptorClassMetadata>();
+   private ClassMetadataReader classMetadataReader;
 
    private final Lock lock = new ReentrantLock();
 
-   static
+   public InterceptorMetadataRegistry(ClassMetadataReader classMetadataReader)
    {
-      interceptorMetadataRegistry = new InterceptorClassMetadataRegistry();
+      this.classMetadataReader = classMetadataReader;
    }
 
-   public static InterceptorClassMetadataRegistry getRegistry()
-   {
-      return interceptorMetadataRegistry;
-   }
-
-   public InterceptorClassMetadata getInterceptorClassMetadata(Class<?> interceptorClass)
+   public InterceptorMetadata getInterceptorClassMetadata(Class<?> interceptorClass)
    {
       return this.getInterceptorClassMetadata(interceptorClass, false);
    }
 
-   public InterceptorClassMetadata getInterceptorClassMetadata(Class<?> interceptorClass, boolean isInterceptorTargetClass)
+   public InterceptorMetadata getInterceptorClassMetadata(Class<?> interceptorClass, boolean isInterceptorTargetClass)
    {
       Key key = new Key(interceptorClass, isInterceptorTargetClass);
       if (!interceptorClassMetadataMap.containsKey(key))
@@ -60,13 +55,13 @@ public class InterceptorClassMetadataRegistry
          try
          {
             lock.lock();
-            //verify that metadata hasn't been added while waiting for the lock            
+            //verify that metadata hasn't been added while waiting for the lock
             if (!interceptorClassMetadataMap.containsKey(key))
             {
-               interceptorClassMetadataMap.put(key, new InterceptorClassMetadataImpl(interceptorClass, isInterceptorTargetClass));
+               interceptorClassMetadataMap.put(key, classMetadataReader.getInterceptorMetadata(interceptorClass, isInterceptorTargetClass));
             }
          }
-         finally 
+         finally
          {
             lock.unlock();
          }
@@ -76,15 +71,15 @@ public class InterceptorClassMetadataRegistry
 
    }
 
-   private static class Key
+   public static final class Key
    {
-      private Class<?> clazz;
+      private String className;
 
       private boolean isInterceptorTargetClass;
 
       private Key(Class<?> clazz, boolean interceptorTargetClass)
       {
-         this.clazz = clazz;
+         this.className = clazz.getName();
          isInterceptorTargetClass = interceptorTargetClass;
       }
 
@@ -106,7 +101,7 @@ public class InterceptorClassMetadataRegistry
          {
             return false;
          }
-         if (clazz != null ? !clazz.equals(key.clazz) : key.clazz != null)
+         if (className != null ? !className.equals(key.className) : key.className != null)
          {
             return false;
          }
@@ -117,7 +112,7 @@ public class InterceptorClassMetadataRegistry
       @Override
       public int hashCode()
       {
-         int result = clazz != null ? clazz.hashCode() : 0;
+         int result = className != null ? className.hashCode() : 0;
          result = 31 * result + (isInterceptorTargetClass ? 1 : 0);
          return result;
       }

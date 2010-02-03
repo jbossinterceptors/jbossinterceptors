@@ -6,25 +6,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 
-import org.jboss.interceptor.model.InterceptorClassMetadata;
+import org.jboss.interceptor.model.InterceptorMetadata;
 import org.jboss.interceptor.model.InterceptionModel;
-import org.jboss.interceptor.model.InterceptorClassMetadataImpl;
-import org.jboss.interceptor.model.MethodHolder;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
-import org.jboss.interceptor.registry.InterceptorClassMetadataRegistry;
 import org.jboss.interceptor.util.ReflectionUtils;
 import org.jboss.interceptor.util.InterceptionUtils;
-import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
 import org.jboss.interceptor.util.proxy.TargetInstanceProxyMethodHandler;
-
-import javassist.util.proxy.MethodHandler;
 
 /**
  * @author Marius Bogoevici
@@ -33,10 +25,10 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
 {
 
    private Map<Object, InterceptionHandler> interceptorHandlerInstances = new HashMap<Object, InterceptionHandler>();
-   private InterceptorClassMetadata targetClassInterceptorMetadata;
+   private InterceptorMetadata targetClassInterceptorMetadata;
    private List<InterceptionModel<Class<?>, ?>> interceptionModels;
 
-   public InterceptorMethodHandler(Object target, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories, boolean includeTargetClass)
+   public InterceptorMethodHandler(Object target, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories, InterceptorMetadata targetClassMetadata)
    {
       super(target, targetClass != null ? targetClass : target.getClass());
       if (interceptionModels == null)
@@ -63,10 +55,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
             interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories.get(i)).createFor((Object) interceptorReference));
          }
       }
-      if (includeTargetClass)
-      {
-         targetClassInterceptorMetadata = InterceptorClassMetadataRegistry.getRegistry().getInterceptorClassMetadata(getTargetClass(), true);
-      }
+      targetClassInterceptorMetadata = targetClassMetadata;
    }
 
    public Object doInvoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
