@@ -19,7 +19,6 @@ package org.jboss.interceptor.util;
 
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
-import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.proxy.InterceptionHandlerFactory;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.LifecycleMixin;
@@ -38,8 +37,6 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Collections;
 import java.util.concurrent.Callable;
-
-import javassist.util.proxy.ProxyObject;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -234,7 +231,7 @@ public class InterceptionUtils
    {
       return "Method " + method.getName() + " defined on class " + method.getDeclaringClass().getName()
             + " will not be used for interception, since it is not defined according to the specification. It is annotated with @"
-            + interceptionType.getAnnotationClassName() + ", but ";
+            + interceptionType.annotationClassName() + ", but ";
    }
 
    public static <T> T proxifyInstance(T instance, Class<?> superClass, List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries, List<InterceptionHandlerFactory<?>> interceptionHandlerFactory)

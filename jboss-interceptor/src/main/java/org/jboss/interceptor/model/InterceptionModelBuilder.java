@@ -104,11 +104,11 @@ public class InterceptionModelBuilder<T, I>
          this.interceptionTypes = interceptionType;
       }
 
-      public void with(I... clazzes)
+      public void with(I... interceptors)
       {
          for (InterceptionType interceptionType: interceptionTypes)
          {
-            InterceptionModelBuilder.this.interceptionModel.appendInterceptors(interceptionType, method, clazzes);
+            InterceptionModelBuilder.this.interceptionModel.appendInterceptors(interceptionType, method, interceptors);
          }
       }
    }

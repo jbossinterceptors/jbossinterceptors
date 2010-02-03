@@ -35,7 +35,7 @@ import org.junit.Test;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionTest
+public class InterceptionTestCase
 {
    private static final String TEAM_NAME = "Ajax Amsterdam";
 

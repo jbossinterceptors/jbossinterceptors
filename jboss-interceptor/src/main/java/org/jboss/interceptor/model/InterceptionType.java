@@ -44,7 +44,7 @@ public enum InterceptionType
       return lifecycleCallback;
    }
 
-   public String getAnnotationClassName()
+   public String annotationClassName()
    {
       return annotationClassName;
    }

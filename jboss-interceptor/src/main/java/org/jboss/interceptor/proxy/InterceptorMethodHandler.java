@@ -78,7 +78,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
          {
             return thisMethod.invoke(getTargetInstance(), args);
          }
-         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.TIMEOUT_ANNOTATION_CLASS))
+         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
          {
             return executeInterception(thisMethod, args, InterceptionType.AROUND_TIMEOUT);
          }

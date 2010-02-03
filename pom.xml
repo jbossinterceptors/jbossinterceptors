@@ -75,8 +75,8 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <!--testFailureIgnore>true</testFailureIgnore-->
             <includes>
-              <include>org/jboss/interceptor/**/*TestCase.java</include>
-              <include>org/jboss/interceptor/**/*Test.java</include>              
+              <include>org/jboss/interceptors/**/*TestCase.java</include>
+              <include>org/jboss/interceptors/**/*Test.java</include>              
             </includes>
           </configuration>
         </plugin>

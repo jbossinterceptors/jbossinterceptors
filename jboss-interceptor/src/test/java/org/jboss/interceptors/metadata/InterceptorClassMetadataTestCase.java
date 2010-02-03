@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorClassMetadataTest
+public class InterceptorClassMetadataTestCase
 {
 
    @Test
