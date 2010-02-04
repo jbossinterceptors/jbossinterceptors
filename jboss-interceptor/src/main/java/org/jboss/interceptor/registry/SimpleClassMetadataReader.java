@@ -21,6 +21,7 @@ import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.model.InterceptorMetadata;
 import org.jboss.interceptor.model.metadata.AbstractInterceptorMetadata;
 import org.jboss.interceptor.model.metadata.AbstractInterceptorMetadataSerializationProxy;
+import org.jboss.interceptor.model.metadata.ClassReference;
 import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
 import org.jboss.interceptor.util.ReflectionUtils;
 
@@ -31,9 +32,9 @@ public class SimpleClassMetadataReader implements ClassMetadataReader
 {
    private static SimpleClassMetadataReader instance = new SimpleClassMetadataReader();
 
-   public InterceptorMetadata getInterceptorMetadata(Class<?> clazz, final boolean isInterceptorTargetClass)
+   public InterceptorMetadata getInterceptorMetadata(ClassReference clazz, final boolean isInterceptorTargetClass)
    {
-      return new AbstractInterceptorMetadata(ReflectiveClassReference.of(clazz), isInterceptorTargetClass)
+      return new AbstractInterceptorMetadata(clazz, isInterceptorTargetClass)
       {
          @Override
          protected Object createSerializableProxy()
@@ -65,7 +66,7 @@ public class SimpleClassMetadataReader implements ClassMetadataReader
       protected InterceptorMetadata loadInterceptorMetadata() throws ClassNotFoundException
       {
          Class<?> clazz = ReflectionUtils.classForName(getClassName());
-         return SimpleClassMetadataReader.instance.getInterceptorMetadata(clazz, isInterceptionTargetClass());
+         return SimpleClassMetadataReader.instance.getInterceptorMetadata(ReflectiveClassReference.of(clazz), isInterceptionTargetClass());
       }
 
       private Object readResolve()

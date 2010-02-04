@@ -27,7 +27,7 @@ public abstract class ImmutableIteratorWrapper<T> implements Iterator<MethodRefe
 
    private Iterator<T> originalIterator;
 
-   ImmutableIteratorWrapper(Iterator<T> originalIterator)
+   protected ImmutableIteratorWrapper(Iterator<T> originalIterator)
    {
       this.originalIterator = originalIterator;
    }

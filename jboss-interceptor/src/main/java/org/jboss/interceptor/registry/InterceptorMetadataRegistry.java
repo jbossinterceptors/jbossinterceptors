@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorMetadataRegistry
+public class InterceptorMetadataRegistry<T>
 {
    private final Map<Key, InterceptorMetadata> interceptorClassMetadataMap = new ConcurrentHashMap<Key, InterceptorMetadata>();
 
@@ -42,12 +42,12 @@ public class InterceptorMetadataRegistry
       this.classMetadataReader = classMetadataReader;
    }
 
-   public InterceptorMetadata getInterceptorClassMetadata(Class<?> interceptorClass)
+   public InterceptorMetadata getInterceptorClassMetadata(ClassReference interceptorClass)
    {
       return this.getInterceptorClassMetadata(interceptorClass, false);
    }
 
-   public InterceptorMetadata getInterceptorClassMetadata(Class<?> interceptorClass, boolean isInterceptorTargetClass)
+   public InterceptorMetadata getInterceptorClassMetadata(ClassReference interceptorClass, boolean isInterceptorTargetClass)
    {
       Key key = new Key(interceptorClass, isInterceptorTargetClass);
       if (!interceptorClassMetadataMap.containsKey(key))
@@ -71,15 +71,20 @@ public class InterceptorMetadataRegistry
 
    }
 
+   public void cleanup()
+   {
+      this.interceptorClassMetadataMap.clear();
+   }
+
    public static final class Key
    {
       private String className;
 
       private boolean isInterceptorTargetClass;
 
-      private Key(Class<?> clazz, boolean interceptorTargetClass)
+      private Key(ClassReference clazz, boolean interceptorTargetClass)
       {
-         this.className = clazz.getName();
+         this.className = clazz.getClassName();
          isInterceptorTargetClass = interceptorTargetClass;
       }
 

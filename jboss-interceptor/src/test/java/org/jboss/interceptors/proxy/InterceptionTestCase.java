@@ -398,7 +398,7 @@ public class InterceptionTestCase
    private <T> T proxifyInstance(T instance, Class<? extends T> targetClass)
    {
       InterceptorProxyCreator ipc = new InterceptorProxyCreatorImpl(interceptorRegistry, interceptionHandlerFactory);
-      MethodHandler methodHandler = ipc.createMethodHandler(instance, targetClass, interceptorMetadataRegistry.getInterceptorClassMetadata(targetClass, true));
+      MethodHandler methodHandler = ipc.createMethodHandler(instance, targetClass, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(targetClass), true));
       return ipc.createProxyInstance(InterceptionUtils.createProxyClassWithHandler(targetClass, methodHandler), methodHandler);
    }
 }

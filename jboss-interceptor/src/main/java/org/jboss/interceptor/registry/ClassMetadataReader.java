@@ -18,11 +18,12 @@
 package org.jboss.interceptor.registry;
 
 import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.ClassReference;
 
 /**
  * @author Marius Bogoevici
  */
 public interface ClassMetadataReader
 {
-   InterceptorMetadata getInterceptorMetadata(Class<?> clazz, boolean isTargetClass);
+   InterceptorMetadata getInterceptorMetadata(ClassReference clazz, boolean isTargetClass);
 }

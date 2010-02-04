@@ -49,7 +49,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInterceptorWithAllMethods()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(InterceptorWithAllMethods.class);
+      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(InterceptorWithAllMethods.class));
 
       List<MethodReference> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 1);
@@ -76,7 +76,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInterceptorWithSomeMethods()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(InterceptorWithSomeMethods.class);
+      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(InterceptorWithSomeMethods.class));
 
       List<MethodReference> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 0);
@@ -101,7 +101,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testSimpleInheritance()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(SimpleInheritanceChildInterceptor.class);
+      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(SimpleInheritanceChildInterceptor.class));
 
       List<MethodReference> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(1, postConstructMethods.size());
@@ -125,7 +125,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInheritanceWithAndWithoutOverriding()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(OverrideChildInterceptor.class);
+      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(OverrideChildInterceptor.class));
 
       List<MethodReference> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 1);
@@ -151,7 +151,7 @@ public class InterceptorClassMetadataTestCase
    @Test(expected = InterceptorMetadataException.class)
    public void testDuplicateAnnotations()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(InterceptorWithDuplicateAnnotations.class);
+      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(InterceptorWithDuplicateAnnotations.class));
 
    }
 
