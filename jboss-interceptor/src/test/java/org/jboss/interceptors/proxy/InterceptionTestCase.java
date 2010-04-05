@@ -371,6 +371,7 @@ public class InterceptionTestCase
       interceptorRegistry.registerInterceptionModel(FootballTeam.class, interceptionModel);
       
       FootballTeam proxy = proxifyInstance(new FootballTeam(TEAM_NAME), FootballTeam.class);
+      proxy.doNothing();
       Assert.assertEquals(42, proxy.echo2(new ValueBearerImpl(1)));
    }
 

@@ -109,5 +109,11 @@ public class FootballTeam extends Team
    {
       InterceptorTestLogger.add(FootballTeam.class, "postConstruct");
    }
+
+   public final void doNothing()
+   {
+      int i = 0;
+      i++;
+   }
 }
 

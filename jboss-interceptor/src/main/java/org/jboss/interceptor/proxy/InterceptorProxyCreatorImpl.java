@@ -17,19 +17,18 @@
 
 package org.jboss.interceptor.proxy;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
 import javassist.util.proxy.ProxyObject;
+import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptorMetadata;
 import org.jboss.interceptor.registry.InterceptorRegistry;
-import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.util.InterceptionUtils;
-import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
-
-import java.lang.reflect.Constructor;
-import java.util.*;
-
 import sun.reflect.ReflectionFactory;
 
 /**
@@ -63,11 +62,25 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
    public <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler)
    {
+      Constructor<T> constructor = null;
       try
       {
-         ReflectionFactory reflectionFactory = ReflectionFactory.getReflectionFactory();
-         Constructor<T> c = reflectionFactory.newConstructorForSerialization(proxyClass, Object.class.getDeclaredConstructor());
-         T proxyObject = c.newInstance();
+         constructor = getNoArgConstructor(proxyClass);
+         if (constructor == null)
+         {
+            constructor = getReflectionFactoryConstructor(proxyClass);
+         }
+      }
+      catch (Exception e)
+      {
+         throw new InterceptorException(e);
+      }
+      if (constructor == null)
+         throw new InterceptorException("Cannot found a constructor for the proxy class: " + proxyClass + ". " +
+               "No no-arg constructor is available, and sun.reflect.ReflectionFactory is not accessible");
+      try
+      {
+         T proxyObject = constructor.newInstance();
          if (interceptorMethodHandler != null)
          {
             ((ProxyObject) proxyObject).setHandler(interceptorMethodHandler);
@@ -100,6 +113,39 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       return createProxyFromInstance(target, proxyClass, new Class[0], new Object[0], targetClassMetadata);
    }
 
+   private <T> Constructor<T> getNoArgConstructor(Class<T> clazz)
+   {
+      Constructor<T> constructor;
+      try
+      {
+        constructor = clazz.getConstructor(new Class[]{});
+      }
+      catch (NoSuchMethodException e)
+      {
+         return null;
+      }
+      return constructor;
+   }
+
+   private <T> Constructor<T> getReflectionFactoryConstructor(Class<T> proxyClass)
+         throws NoSuchMethodException
+   {
+      try
+      {
+         Constructor<T> constructor;
+         ReflectionFactory reflectionFactory = ReflectionFactory.getReflectionFactory();
+         constructor = reflectionFactory.newConstructorForSerialization(proxyClass, Object.class.getDeclaredConstructor());
+         return constructor;
+      }
+      catch (NoSuchMethodException e)
+      {
+         return null;
+      }
+      catch (SecurityException e)
+      {
+         return null;
+      }
+   }
 }
 
 

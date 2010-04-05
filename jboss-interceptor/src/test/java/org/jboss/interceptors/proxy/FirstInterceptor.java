@@ -44,4 +44,5 @@ public class FirstInterceptor implements Serializable
       InterceptorTestLogger.add(FirstInterceptor.class, "postConstruct");
       invocationContext.proceed();
    }
+   
 }
