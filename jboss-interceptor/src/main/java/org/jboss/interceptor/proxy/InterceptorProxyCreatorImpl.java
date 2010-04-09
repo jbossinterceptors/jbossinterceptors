@@ -18,6 +18,7 @@
 package org.jboss.interceptor.proxy;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,8 +57,30 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
    public <T> T createProxyFromInstance(final Object target, Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata)
    {
-      MethodHandler interceptorMethodHandler = createMethodHandler(target, proxifiedClass, interceptorClassMetadata);
+       MethodHandler interceptorMethodHandler = createMethodHandler(target, proxifiedClass, interceptorClassMetadata);
       return createProxyInstance(InterceptionUtils.createProxyClassWithHandler(proxifiedClass, interceptorMethodHandler), interceptorMethodHandler);
+   }
+
+   public <T> T createProxyFromClass(Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata)
+   {
+      T instance = createAdvisedSubclassInstance(proxifiedClass, constructorTypes, constructorArguments);
+      MethodHandler interceptorMethodHandler = createSubclassingMethodHandler(instance, proxifiedClass, interceptorClassMetadata);
+      ((ProxyObject)instance).setHandler(interceptorMethodHandler);
+      return instance;
+   }
+
+   public <T> T createAdvisedSubclassInstance(Class<T> proxifiedClass, Class<?>[] constructorParameterTypes, Object[] constructorArguments)
+   {
+       try
+       {
+           Class<T> clazz = InterceptionUtils.createProxyClass(proxifiedClass, true);
+           Constructor<T> constructor = clazz.getConstructor(constructorParameterTypes);
+           return constructor.newInstance(constructorArguments);
+       }
+       catch (Exception e)
+       {
+           throw new InterceptorException(e);
+       }
    }
 
    public <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler)
@@ -97,6 +120,12 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    {
       return new InterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
    }
+
+    public <T> MethodHandler createSubclassingMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata)
+    {
+       return new SubclassingInterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
+    }
+
 
    private <T> List<InterceptionModel<Class<?>, ?>> getModelsFor(Class<T> proxyClass)
    {

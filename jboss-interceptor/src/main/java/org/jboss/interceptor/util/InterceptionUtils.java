@@ -27,6 +27,7 @@ import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.LifecycleMixin;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.InterceptorException;
+import org.jboss.interceptor.util.proxy.SubclassedProxy;
 import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
 
 import org.slf4j.Logger;
@@ -126,6 +127,8 @@ public class InterceptionUtils
    {
       // just a provisory implementation - any method which is not an interceptor method
       // is an interception candidate
+      if (method.getDeclaringClass().equals(Object.class))
+         return false;
       int modifiers = method.getModifiers();
       if (Modifier.isStatic(modifiers))
          return false;
@@ -255,7 +258,7 @@ public class InterceptionUtils
 
    public static <T> T getRawInstance(T proxy)
    {
-      while (proxy instanceof TargetInstanceProxy)
+      while (proxy instanceof TargetInstanceProxy && !(proxy instanceof SubclassedProxy))
       {
          proxy = ((TargetInstanceProxy<T>)proxy).getTargetInstance();
       }
@@ -263,14 +266,17 @@ public class InterceptionUtils
    }
 
 
-   public static <T> Class<T> createProxyClass(Class<T> proxyClass)
+   public static <T> Class<T> createProxyClass(Class<T> proxyClass, boolean forSubclassing)
    {
       ProxyFactory proxyFactory = new ProxyFactory();
       if (proxyClass != null)
       {
          proxyFactory.setSuperclass(proxyClass);
       }
-      proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
+      if (forSubclassing)
+         proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class, SubclassedProxy.class});
+      else
+         proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
       Class<T> clazz = proxyFactory.createClass();
       return clazz;
    }

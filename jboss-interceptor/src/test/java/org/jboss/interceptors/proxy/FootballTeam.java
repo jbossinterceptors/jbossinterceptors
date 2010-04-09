@@ -17,15 +17,11 @@
 
 package org.jboss.interceptors.proxy;
 
-import java.io.Serializable;
-
-import org.jboss.interceptors.proxy.InterceptorTestLogger;
-
 import javax.annotation.PostConstruct;
+import javax.ejb.PostActivate;
+import javax.ejb.PrePassivate;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
-import javax.ejb.PrePassivate;
-import javax.ejb.PostActivate;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -35,12 +31,7 @@ public class FootballTeam extends Team
 
    private String teamName;
 
-    // an empty-argument constructor is required for proxifycation
-    public FootballTeam() {
-
-    }
-
-    public FootballTeam(String s) {
+   public FootballTeam(String s) {
         this.teamName = s;
     }
 
