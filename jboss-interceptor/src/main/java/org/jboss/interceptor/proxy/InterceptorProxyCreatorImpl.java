@@ -18,7 +18,6 @@
 package org.jboss.interceptor.proxy;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,9 +120,9 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       return new InterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
    }
 
-    public <T> MethodHandler createSubclassingMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata)
+    public <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata)
     {
-       return new SubclassingInterceptorMethodHandler(target, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
+       return new SubclassingInterceptorMethodHandler(targetInstance, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
     }
 
 

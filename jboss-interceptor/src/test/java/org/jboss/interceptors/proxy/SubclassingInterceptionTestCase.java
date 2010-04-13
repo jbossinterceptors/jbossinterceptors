@@ -18,12 +18,14 @@
 package org.jboss.interceptors.proxy;
 
 import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptionModelBuilder;
 import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
+import org.jboss.interceptor.proxy.SubclassingInterceptorMethodHandler;
 import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.registry.SimpleClassMetadataReader;
@@ -225,7 +227,19 @@ public class SubclassingInterceptionTestCase
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesOnSerialization, logValues);
+      Assert.assertTrue(((ProxyObject)proxy).getHandler() instanceof SubclassingInterceptorMethodHandler);
       assertRawObject(proxy);
+   }
+
+
+   @Test
+   public void testSerialization() throws Exception
+   {
+      FootballTeam proxy = new FootballTeam("Ajax Amsterdam");
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      new ObjectOutputStream(baos).writeObject(proxy);
+      proxy = (FootballTeam) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray())).readObject();
+      Assert.assertNotNull(proxy);
    }
 
 

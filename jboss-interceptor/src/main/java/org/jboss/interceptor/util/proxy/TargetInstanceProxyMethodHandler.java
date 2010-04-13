@@ -37,15 +37,15 @@ public abstract class TargetInstanceProxyMethodHandler<T> implements MethodHandl
       this.targetClass = targetClass;
    }
 
-   public final Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
+   public final Object invoke(Object proxyInstance, Method interceptedMethod, Method proceed, Object[] args) throws Throwable
    {
-      if (thisMethod.getDeclaringClass().equals(TargetInstanceProxy.class))
+      if (interceptedMethod.getDeclaringClass().equals(TargetInstanceProxy.class))
       {
-         if (thisMethod.getName().equals("getTargetInstance"))
+         if (interceptedMethod.getName().equals("getTargetInstance"))
          {
             return this.getTargetInstance();
          }
-         else if (thisMethod.getName().equals("getTargetClass"))
+         else if (interceptedMethod.getName().equals("getTargetClass"))
          {
             return this.getTargetClass();
          }
@@ -57,11 +57,12 @@ public abstract class TargetInstanceProxyMethodHandler<T> implements MethodHandl
       }
       else
       {
-         return doInvoke(self, thisMethod, proceed, args);
+         return doInvoke(proxyInstance, interceptedMethod, proceed, args);
       }
    }
 
-   protected abstract Object doInvoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable;
+   /**/
+   protected abstract Object doInvoke(Object proxyInstance, Method interceptedMethod, Method proceedingMethod, Object[] invocationArguments) throws Throwable;
 
    public T getTargetInstance()
    {

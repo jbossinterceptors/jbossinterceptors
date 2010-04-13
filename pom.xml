@@ -25,7 +25,7 @@
 
   <properties>
     <version.interceptor.api>1.1-CR1</version.interceptor.api>
-    <version.javassist>3.11.0.GA</version.javassist>
+    <version.javassist>3.12.0-SNAPSHOT</version.javassist>
      <version.junit>4.5</version.junit>
      <version.slf4j>1.5.6</version.slf4j>
   </properties>

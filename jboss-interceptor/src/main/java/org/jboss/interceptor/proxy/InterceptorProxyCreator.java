@@ -29,7 +29,7 @@ public interface InterceptorProxyCreator {
 
    <T> MethodHandler createMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
 
-    <T> MethodHandler createSubclassingMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
+    <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
 
     <T> T createProxyFromClass(Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata);
 }

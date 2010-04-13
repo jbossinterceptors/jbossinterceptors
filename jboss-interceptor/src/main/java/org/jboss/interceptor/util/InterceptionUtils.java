@@ -272,7 +272,9 @@ public class InterceptionUtils
       if (proxyClass != null)
       {
          proxyFactory.setSuperclass(proxyClass);
+         proxyFactory.setUseWriteReplace(false);
       }
+
       if (forSubclassing)
          proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class, SubclassedProxy.class});
       else
