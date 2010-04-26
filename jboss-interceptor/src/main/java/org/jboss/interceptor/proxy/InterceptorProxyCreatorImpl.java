@@ -19,12 +19,14 @@ package org.jboss.interceptor.proxy;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.InterceptorException;
+import org.jboss.interceptor.javassist.CompositeHandler;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptorMetadata;
 import org.jboss.interceptor.registry.InterceptorRegistry;
@@ -64,7 +66,8 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    {
       T instance = createAdvisedSubclassInstance(proxifiedClass, constructorTypes, constructorArguments);
       MethodHandler interceptorMethodHandler = createSubclassingMethodHandler(instance, proxifiedClass, interceptorClassMetadata);
-      ((ProxyObject)instance).setHandler(interceptorMethodHandler);
+      ((ProxyObject)instance).setHandler(new CompositeHandler(Arrays
+            .asList(new MethodHandler[]{interceptorMethodHandler})));
       return instance;
    }
 
@@ -122,7 +125,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
     public <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata)
     {
-       return new SubclassingInterceptorMethodHandler(targetInstance, proxyClass, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
+       return new SubclassingInterceptorMethodHandler(targetInstance, getModelsFor(proxyClass), interceptionHandlerFactories, interceptorMetadata);
     }
 
 
@@ -134,11 +137,6 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
          interceptionModels.add(interceptorRegistry.getInterceptionModel(proxyClass));
       }
       return interceptionModels;
-   }
-
-   public <T> T createProxyFromInstance(final Object target, Class<T> proxyClass, InterceptorMetadata targetClassMetadata) throws IllegalAccessException, InstantiationException
-   {
-      return createProxyFromInstance(target, proxyClass, new Class[0], new Object[0], targetClassMetadata);
    }
 
    private <T> Constructor<T> getNoArgConstructor(Class<T> clazz)

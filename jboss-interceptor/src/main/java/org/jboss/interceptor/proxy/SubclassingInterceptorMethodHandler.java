@@ -1,21 +1,22 @@
 package org.jboss.interceptor.proxy;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
 import org.jboss.interceptor.model.InterceptorMetadata;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
-import org.jboss.interceptor.util.proxy.TargetInstanceProxyMethodHandler;
-
-import java.io.*;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Marius Bogoevici
@@ -28,17 +29,7 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
    private List<InterceptionModel<Class<?>, ?>> interceptionModels;
    private Object targetInstance;
 
-   private static MethodHandler DEFAULT_METHOD_HANDLER = new MethodHandler() {
-
-        public Object invoke(Object self, Method m,
-                             Method proceed, Object[] args)
-            throws Exception
-        {
-            return proceed.invoke(self, args);
-        }
-   };
-
-   public SubclassingInterceptorMethodHandler(Object targetInstance, Class<?> targetClass, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories, InterceptorMetadata targetClassMetadata)
+   public SubclassingInterceptorMethodHandler(Object targetInstance, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories, InterceptorMetadata targetClassMetadata)
    {
       this.targetInstance = targetInstance;
       if (interceptionModels == null)
@@ -71,22 +62,7 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
    {
       ReflectionUtils.ensureAccessible(thisMethod);
-      if (null != proceed)
-      {
-         if (!InterceptionUtils.isInterceptionCandidate(thisMethod))
-         {
-            return proceed.invoke(self, args);
-         }
-         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
-         {
-            return executeInterception(self, proceed, thisMethod, args, InterceptionType.AROUND_TIMEOUT);
-         }
-         else
-         {
-            return executeInterception(self, proceed, thisMethod, args, InterceptionType.AROUND_INVOKE);
-         }
-      }
-      else
+      if (thisMethod.getDeclaringClass().equals(LifecycleMixin.class))
       {
          if (thisMethod.getName().equals(InterceptionUtils.POST_CONSTRUCT))
          {
@@ -95,6 +71,21 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
          else if (thisMethod.getName().equals(InterceptionUtils.PRE_DESTROY))
          {
             return executeInterception(self, null, null, null, InterceptionType.PRE_DESTROY);
+         }
+      }
+      else
+      {
+         if (!InterceptionUtils.isInterceptionCandidate(thisMethod))
+         {
+            return proceed.invoke(self, args);
+         }
+         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
+         {
+            return executeInterception(self, thisMethod, thisMethod, args, InterceptionType.AROUND_TIMEOUT);
+         }
+         else
+         {
+            return executeInterception(self, thisMethod, thisMethod, args, InterceptionType.AROUND_INVOKE);
          }
       }
       return null;
@@ -140,14 +131,6 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
       try
       {
          objectInputStream.defaultReadObject();
-         // it is reasonably safe to assume that all the fields from targetInstance
-         // have already been serialized because the MethodHandler is a field of the
-         // generated subclass, therefore it is deserialized after the fields of the
-         // superclass, which is the actual class of targetInstance, but we need a
-         // non-empty MethodHandler in order to be able to execute the methods
-         // set the DEFAULT_METHOD_HANDLER temporarily and let the deserialization
-         // process to overwrite it
-        ((ProxyObject)targetInstance).setHandler(DEFAULT_METHOD_HANDLER);
          executeInterception(targetInstance, null, null, null, InterceptionType.POST_ACTIVATE);
       }
       catch (Throwable throwable)

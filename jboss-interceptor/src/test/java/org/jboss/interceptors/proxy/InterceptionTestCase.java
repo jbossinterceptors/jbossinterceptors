@@ -172,7 +172,6 @@ public class InterceptionTestCase
       InterceptionUtils.executePredestroy(proxy);
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
-      assertRawObject(proxy);
    }
 
    @Test
@@ -183,7 +182,6 @@ public class InterceptionTestCase
       InterceptionUtils.executePostConstruct(proxy);
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       InterceptionUtils.executePredestroy(proxy);
-      assertRawObject(proxy);
    }
 
    @Test
@@ -196,7 +194,6 @@ public class InterceptionTestCase
       InterceptionUtils.executePredestroy(proxy);
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValues, logValues);
-      assertRawObject(proxy);
    }
 
    @Test
@@ -209,7 +206,6 @@ public class InterceptionTestCase
       InterceptionUtils.executePredestroy(proxy);
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesWithGlobalsIgnored, logValues);
-      assertRawObject(proxy);
    }
 
 
@@ -225,7 +221,6 @@ public class InterceptionTestCase
       Assert.assertEquals(TEAM_NAME, proxy.getName());
       Object[] logValues = InterceptorTestLogger.getLog().toArray();
       Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesOnSerialization, logValues);
-      assertRawObject(proxy);
    }
 
 
@@ -375,15 +370,6 @@ public class InterceptionTestCase
       Assert.assertEquals(42, proxy.echo2(new ValueBearerImpl(1)));
    }
 
-
-   public void assertRawObject(FootballTeam proxy)
-   {
-      InterceptorTestLogger.reset();
-      FootballTeam rawInstance = InterceptionUtils.getRawInstance(proxy);
-      Assert.assertEquals(TEAM_NAME, rawInstance.getName());
-      Object[] logValues = InterceptorTestLogger.getLog().toArray();
-      Assert.assertArrayEquals(iterateAndDisplay(logValues), expectedLoggedValuesWhenRaw, logValues);
-   }
 
    private String iterateAndDisplay(Object[] logValues)
    {
