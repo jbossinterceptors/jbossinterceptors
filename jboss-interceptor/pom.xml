@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>jboss-interceptor</artifactId>
-  <name>JBoss EJB 3.1 Interceptor Library</name>
+  <name>JBoss EJB 3.1 Common Interceptor Library</name>
 
   <dependencies>
     <dependency>
@@ -19,8 +19,8 @@
     </dependency>
      
     <dependency>
-      <groupId>org.jboss.interceptor</groupId>
-      <artifactId>jboss-interceptor-api</artifactId>
+      <groupId>org.jboss.spec.javax.interceptor</groupId>
+      <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
       <optional>true</optional>
     </dependency>
 
