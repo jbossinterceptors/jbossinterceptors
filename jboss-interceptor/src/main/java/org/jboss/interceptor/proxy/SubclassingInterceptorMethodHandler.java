@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
@@ -28,6 +29,16 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
    private InterceptorMetadata targetClassInterceptorMetadata;
    private List<InterceptionModel<Class<?>, ?>> interceptionModels;
    private Object targetInstance;
+
+   private static MethodHandler DEFAULT_METHOD_HANDLER = new MethodHandler() {
+
+        public Object invoke(Object self, Method m,
+                             Method proceed, Object[] args)
+            throws Exception
+        {
+            return proceed.invoke(self, args);
+        }
+   };
 
    public SubclassingInterceptorMethodHandler(Object targetInstance, List<InterceptionModel<Class<?>, ?>> interceptionModels, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories, InterceptorMetadata targetClassMetadata)
    {
@@ -131,6 +142,10 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
       try
       {
          objectInputStream.defaultReadObject();
+         if (((ProxyObject)targetInstance).getHandler() == null)
+         {
+            ((ProxyObject)targetInstance).setHandler(DEFAULT_METHOD_HANDLER); 
+         }
          executeInterception(targetInstance, null, null, null, InterceptionType.POST_ACTIVATE);
       }
       catch (Throwable throwable)

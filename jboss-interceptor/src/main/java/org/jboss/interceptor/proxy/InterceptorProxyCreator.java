@@ -23,13 +23,14 @@ import org.jboss.interceptor.model.InterceptorMetadata;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptorProxyCreator {
+public interface InterceptorProxyCreator
+{
 
    <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler);
 
    <T> MethodHandler createMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
 
-    <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
+   <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
 
-    <T> T createProxyFromClass(Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata);
+   <T> T createProxyFromClass(Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata);
 }

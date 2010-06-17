@@ -17,7 +17,11 @@
 
 package org.jboss.interceptors.proxy;
 
-import javassist.util.proxy.MethodHandler;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.javassist.CompositeHandler;
 import org.jboss.interceptor.model.InterceptionModel;
@@ -26,7 +30,6 @@ import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
-import org.jboss.interceptor.proxy.SubclassingInterceptorMethodHandler;
 import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
 import org.jboss.interceptor.registry.InterceptorRegistry;
 import org.jboss.interceptor.registry.SimpleClassMetadataReader;
@@ -35,11 +38,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
