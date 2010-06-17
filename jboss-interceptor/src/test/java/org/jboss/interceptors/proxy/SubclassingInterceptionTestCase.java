@@ -25,7 +25,7 @@ import java.io.ObjectOutputStream;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.javassist.CompositeHandler;
 import org.jboss.interceptor.model.InterceptionModel;
-import org.jboss.interceptor.model.InterceptionModelBuilder;
+import org.jboss.interceptor.model.builder.InterceptionModelBuilder;
 import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;

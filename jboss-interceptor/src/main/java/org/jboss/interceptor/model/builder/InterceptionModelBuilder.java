@@ -15,11 +15,15 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model;
+package org.jboss.interceptor.model.builder;
 
 import static org.jboss.interceptor.model.InterceptionType.*;
 
 import java.lang.reflect.Method;
+
+import org.jboss.interceptor.model.InterceptionModel;
+import org.jboss.interceptor.model.InterceptionModelImpl;
+import org.jboss.interceptor.model.InterceptionType;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -54,7 +58,7 @@ public class InterceptionModelBuilder<T, I>
 
    public MethodInterceptorDescriptor interceptAll()
    {
-      return new MethodInterceptorDescriptor(null, InterceptionType.values()); 
+      return new MethodInterceptorDescriptor(null, InterceptionType.values());
    }
 
    public MethodInterceptorDescriptor interceptAroundInvoke(Method m)
