@@ -15,32 +15,24 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model;
+package org.jboss.interceptor.model.metadata.reader;
 
-import java.util.List;
-
-import org.jboss.interceptor.model.metadata.ClassReference;
-import org.jboss.interceptor.model.metadata.MethodReference;
+import java.io.Serializable;
 
 /**
- * A 
- * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
+ * Abstraction of a class reference. Allows for the framework client to configure
+ * their own way of providing class metadata, rather than relying exclusively on
+ * Java reflection.
+ * 
+ * @author Marius Bogoevici
  */
-public interface InterceptorMetadata
+public interface ClassMetadataProvider extends Serializable
 {
-   ClassReference getInterceptorClass();
+   Iterable<MethodMetadataProvider> getDeclaredMethods();
+   
+   Class<?> getJavaClass();
+   
+   String getClassName();
 
-   /**
-    * Returns the list of method references to be invoked on this class when doing
-    * interception (as an interceptor is supposed to invoke the superclass
-    * methods too)
-    *
-    * @param interceptionType
-    * @return a list of methods
-    */
-   List<MethodReference> getInterceptorMethods(InterceptionType interceptionType);
-
-   boolean isInterceptor();
-
-   boolean isTargetClass();
+   ClassMetadataProvider getSuperclass();
 }

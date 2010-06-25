@@ -15,29 +15,31 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model.metadata;
+package org.jboss.interceptor.model.metadata.reader;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Iterator;
+
+import org.jboss.interceptor.util.ImmutableIteratorWrapper;
+import org.jboss.interceptor.util.ArrayIterator;
 
 /**
  * @author Marius Bogoevici
  */
-public class ReflectiveClassReference implements ClassReference, Serializable
+public class ReflectiveClassMetadataProvider implements ClassMetadataProvider, Serializable
 {
 
    private Class<?> clazz;
 
-   private ReflectiveClassReference(Class<?> clazz)
+   private ReflectiveClassMetadataProvider(Class<?> clazz)
    {
       this.clazz = clazz;
    }
 
-   public static ClassReference of(Class<?> clazz)
+   public static ClassMetadataProvider of(Class<?> clazz)
    {
-      return new ReflectiveClassReference(clazz);
+      return new ReflectiveClassMetadataProvider(clazz);
    }
 
    public String getClassName()
@@ -45,18 +47,18 @@ public class ReflectiveClassReference implements ClassReference, Serializable
       return clazz.getName();
    }
 
-   public Iterable<MethodReference> getDeclaredMethods()
+   public Iterable<MethodMetadataProvider> getDeclaredMethods()
    {
-      return new Iterable<MethodReference>()
+      return new Iterable<MethodMetadataProvider>()
       {
-         public Iterator<MethodReference> iterator()
+         public Iterator<MethodMetadataProvider> iterator()
          {
-             return new ImmutableIteratorWrapper<Method>(new ArrayIterator(ReflectiveClassReference.this.clazz.getDeclaredMethods()))
+             return new ImmutableIteratorWrapper<Method>(new ArrayIterator(ReflectiveClassMetadataProvider.this.clazz.getDeclaredMethods()))
              {
                 @Override
-                protected MethodReference wrapObject(Method method)
+                protected MethodMetadataProvider wrapObject(Method method)
                 {
-                   return ReflectiveMethodReference.of(method);
+                   return ReflectiveMethodMetadataProvider.of(method);
                 }
              };
          }
@@ -68,10 +70,10 @@ public class ReflectiveClassReference implements ClassReference, Serializable
       return clazz;
    }   
 
-   public ClassReference getSuperclass()
+   public ClassMetadataProvider getSuperclass()
    {
       Class<?> superClass = clazz.getSuperclass();
-      return superClass == null? null : new ReflectiveClassReference(superClass);
+      return superClass == null? null : new ReflectiveClassMetadataProvider(superClass);
    }
 
 }

@@ -19,22 +19,13 @@ package org.jboss.interceptor.model.metadata;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jboss.interceptor.model.InterceptionType;
-import org.jboss.interceptor.model.InterceptionTypeRegistry;
-import org.jboss.interceptor.model.InterceptorMetadata;
-import org.jboss.interceptor.model.InterceptorMetadataException;
-import org.jboss.interceptor.model.MethodHolder;
-import org.jboss.interceptor.model.metadata.ClassReference;
-import org.jboss.interceptor.model.metadata.MethodReference;
+import org.jboss.interceptor.model.metadata.reader.ClassMetadataProvider;
+import org.jboss.interceptor.model.metadata.reader.MethodMetadataProvider;
 import org.jboss.interceptor.util.InterceptionUtils;
-import org.jboss.interceptor.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,75 +37,32 @@ public abstract class AbstractInterceptorMetadata implements InterceptorMetadata
 {
 
    private Logger log = LoggerFactory.getLogger(AbstractInterceptorMetadata.class);
-   private ClassReference interceptorClass;
-   private Map<InterceptionType, List<MethodReference>> methodMap;
+   private ClassMetadataProvider interceptorClass;
+   private Map<InterceptionType, List<MethodMetadataProvider>> methodMap;
    private boolean targetClass;
 
-   protected AbstractInterceptorMetadata(ClassReference interceptorClass, boolean targetClass)
+   protected AbstractInterceptorMetadata(ClassMetadataProvider interceptorClass, boolean targetClass)
    {
       this.interceptorClass = interceptorClass;
-      this.methodMap = buildMethodMap(interceptorClass, targetClass);
+      this.methodMap = InterceptionUtils.buildMethodMap(interceptorClass, targetClass);
       this.targetClass = targetClass;
    }
 
-   private Map<InterceptionType, List<MethodReference>> buildMethodMap(ClassReference interceptorClass, boolean isTargetClass)
-   {
-      Map<InterceptionType, List<MethodReference>> methodMap = new HashMap<InterceptionType, List<MethodReference>>();
-      ClassReference currentClass = interceptorClass;
-      Set<MethodHolder> foundMethods = new HashSet<MethodHolder>();
-      do
-      {
-         Set<InterceptionType> detectedInterceptorTypes = new HashSet<InterceptionType>();
-
-         for (MethodReference method : currentClass.getDeclaredMethods())
-         {
-            for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
-            {
-               if (InterceptionUtils.isInterceptorMethod(interceptionType, method, isTargetClass))
-               {
-                  if (methodMap.get(interceptionType) == null)
-                  {
-                     methodMap.put(interceptionType, new LinkedList<MethodReference>());
-                  }
-                  if (detectedInterceptorTypes.contains(interceptionType))
-                  {
-                     throw new InterceptorMetadataException("Same interception type cannot be specified twice on the same class");
-                  }
-                  else
-                  {
-                     detectedInterceptorTypes.add(interceptionType);
-                  }
-                  // add method in the list - if it is there already, it means that it has been added by a subclass
-                  ReflectionUtils.ensureAccessible(method.getJavaMethod());
-                  if (!foundMethods.contains(MethodHolder.of(method, false)))
-                  {
-                     methodMap.get(interceptionType).add(0, method);
-                  }
-               }
-            }
-            foundMethods.add(MethodHolder.of(method, false));
-         }
-         currentClass = currentClass.getSuperclass();
-      }
-      while (!Object.class.equals(currentClass.getJavaClass()));
-      return methodMap;
-   }
-
-   public ClassReference getInterceptorClass()
+   public ClassMetadataProvider getInterceptorClass()
    {
       return interceptorClass;
    }
 
-   public List<MethodReference> getInterceptorMethods(InterceptionType interceptionType)
+   public List<MethodMetadataProvider> getInterceptorMethods(InterceptionType interceptionType)
    {
       if (methodMap != null)
       {
-         List<MethodReference> methods = methodMap.get(interceptionType);
-         return methods == null ? Collections.<MethodReference>emptyList() : methods;
+         List<MethodMetadataProvider> methods = methodMap.get(interceptionType);
+         return methods == null ? Collections.<MethodMetadataProvider>emptyList() : methods;
       }
       else
       {
-         return Collections.<MethodReference>emptyList();
+         return Collections.<MethodMetadataProvider>emptyList();
       }
    }
 

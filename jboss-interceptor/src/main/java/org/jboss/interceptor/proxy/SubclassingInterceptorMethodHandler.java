@@ -15,7 +15,7 @@ import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
-import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
 
@@ -90,7 +90,7 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
          {
             return proceed.invoke(self, args);
          }
-         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
+         if (InterceptionTypeRegistry.isSupported(InterceptionType.AROUND_TIMEOUT) && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
          {
             return executeInterception(self, thisMethod, thisMethod, args, InterceptionType.AROUND_TIMEOUT);
          }

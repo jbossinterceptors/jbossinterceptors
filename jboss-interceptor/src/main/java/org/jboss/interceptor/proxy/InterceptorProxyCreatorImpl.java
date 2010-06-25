@@ -26,10 +26,10 @@ import java.util.List;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.InterceptorException;
-import org.jboss.interceptor.javassist.CompositeHandler;
+import org.jboss.interceptor.proxy.javassist.CompositeHandler;
 import org.jboss.interceptor.model.InterceptionModel;
-import org.jboss.interceptor.model.InterceptorMetadata;
-import org.jboss.interceptor.registry.InterceptorRegistry;
+import org.jboss.interceptor.model.registry.InterceptionModelRegistry;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 import org.jboss.interceptor.util.InterceptionUtils;
 import sun.reflect.ReflectionFactory;
 
@@ -39,19 +39,19 @@ import sun.reflect.ReflectionFactory;
 public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 {
 
-   private List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries;
+   private List<InterceptionModelRegistry<Class<?>, ?>> interceptionModelRegistries;
 
    private List<InterceptionHandlerFactory<?>> interceptionHandlerFactories;
 
-   public InterceptorProxyCreatorImpl(List<InterceptorRegistry<Class<?>, ?>> interceptorRegistries, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories)
+   public InterceptorProxyCreatorImpl(List<InterceptionModelRegistry<Class<?>, ?>> interceptionModelRegistries, List<InterceptionHandlerFactory<?>> interceptionHandlerFactories)
    {
-      this.interceptorRegistries = interceptorRegistries;
+      this.interceptionModelRegistries = interceptionModelRegistries;
       this.interceptionHandlerFactories = interceptionHandlerFactories;
    }
 
-   public InterceptorProxyCreatorImpl(InterceptorRegistry<Class<?>, ?> interceptorRegistries, InterceptionHandlerFactory<?> interceptionHandlerFactories)
+   public InterceptorProxyCreatorImpl(InterceptionModelRegistry<Class<?>, ?> interceptionModelRegistries, InterceptionHandlerFactory<?> interceptionHandlerFactories)
    {
-      this.interceptorRegistries = Collections.<InterceptorRegistry<Class<?>, ?>>singletonList(interceptorRegistries);
+      this.interceptionModelRegistries = Collections.<InterceptionModelRegistry<Class<?>, ?>>singletonList(interceptionModelRegistries);
       this.interceptionHandlerFactories = Collections.<InterceptionHandlerFactory<?>>singletonList(interceptionHandlerFactories);
    }
 
@@ -132,9 +132,9 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    private <T> List<InterceptionModel<Class<?>, ?>> getModelsFor(Class<T> proxyClass)
    {
       List<InterceptionModel<Class<?>, ?>> interceptionModels = new ArrayList<InterceptionModel<Class<?>, ?>>();
-      for (InterceptorRegistry interceptorRegistry : interceptorRegistries)
+      for (InterceptionModelRegistry interceptionModelRegistry : interceptionModelRegistries)
       {
-         interceptionModels.add(interceptorRegistry.getInterceptionModel(proxyClass));
+         interceptionModels.add(interceptionModelRegistry.getInterceptionModel(proxyClass));
       }
       return interceptionModels;
    }

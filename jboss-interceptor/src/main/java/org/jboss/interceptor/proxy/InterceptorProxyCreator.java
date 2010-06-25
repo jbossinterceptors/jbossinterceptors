@@ -18,7 +18,7 @@
 package org.jboss.interceptor.proxy;
 
 import javassist.util.proxy.MethodHandler;
-import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>

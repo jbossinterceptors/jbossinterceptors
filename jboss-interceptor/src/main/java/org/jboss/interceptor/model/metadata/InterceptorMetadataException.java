@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -15,15 +15,31 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.registry;
+package org.jboss.interceptor.model.metadata;
 
-import org.jboss.interceptor.model.InterceptorMetadata;
-import org.jboss.interceptor.model.metadata.ClassReference;
+import org.jboss.interceptor.InterceptorException;
 
 /**
- * @author Marius Bogoevici
+ * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface ClassMetadataReader
+public class InterceptorMetadataException extends InterceptorException
 {
-   InterceptorMetadata getInterceptorMetadata(ClassReference clazz, boolean isTargetClass);
+   public InterceptorMetadataException()
+   {
+   }
+
+   public InterceptorMetadataException(String s)
+   {
+      super(s);
+   }
+
+   public InterceptorMetadataException(String s, Throwable throwable)
+   {
+      super(s, throwable);
+   }
+
+   public InterceptorMetadataException(Throwable throwable)
+   {
+      super(throwable);
+   }
 }

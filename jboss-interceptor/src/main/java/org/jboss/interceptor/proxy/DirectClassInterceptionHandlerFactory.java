@@ -17,9 +17,8 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.model.metadata.ClassReference;
-import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
-import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
+import org.jboss.interceptor.model.metadata.reader.ReflectiveClassMetadataProvider;
+import org.jboss.interceptor.model.metadata.registry.InterceptorMetadataRegistry;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -35,6 +34,6 @@ public class DirectClassInterceptionHandlerFactory implements InterceptionHandle
 
    public InterceptionHandler createFor(Class<?> clazz)
    {
-      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassReference.of(clazz)));
+      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadataProvider.of(clazz)));
    }
 }

@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model;
+package org.jboss.interceptor.model.metadata.reader;
 
-import java.io.Serializable;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 
 /**
+ * Reads interceptor metada
  * @author Marius Bogoevici
  */
-public interface SerializationProxyFactory
+public interface InterceptorMetadataReader
 {
-   public Serializable createSerializableProxy();
+   InterceptorMetadata getInterceptorMetadata(ClassMetadataProvider clazz, boolean isTargetClass);
 }

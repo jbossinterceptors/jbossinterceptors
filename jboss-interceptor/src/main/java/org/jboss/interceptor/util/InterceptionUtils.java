@@ -17,22 +17,32 @@
 
 package org.jboss.interceptor.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import javax.interceptor.InvocationContext;
+
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import org.jboss.interceptor.InterceptorException;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
-import org.jboss.interceptor.model.metadata.MethodReference;
+import org.jboss.interceptor.model.MethodHolder;
+import org.jboss.interceptor.model.metadata.InterceptorMetadataException;
+import org.jboss.interceptor.model.metadata.reader.ClassMetadataProvider;
+import org.jboss.interceptor.model.metadata.reader.MethodMetadataProvider;
 import org.jboss.interceptor.proxy.LifecycleMixin;
 import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.interceptor.InvocationContext;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.concurrent.Callable;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -140,7 +150,7 @@ public class InterceptionUtils
     * @param forTargetClass
     * @return
     */
-   public static boolean isInterceptorMethod(InterceptionType interceptionType, MethodReference method, boolean forTargetClass)
+   public static boolean isInterceptorMethod(InterceptionType interceptionType, MethodMetadataProvider method, boolean forTargetClass)
    {
 
       if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) == null)
@@ -278,5 +288,48 @@ public class InterceptionUtils
       proxyFactory.setHandler(methodHandler);
       Class<T> clazz = proxyFactory.createClass();
       return clazz;
+   }
+
+   public static Map<InterceptionType, List<MethodMetadataProvider>> buildMethodMap(ClassMetadataProvider interceptorClass, boolean isTargetClass)
+   {
+      Map<InterceptionType, List<MethodMetadataProvider>> methodMap = new HashMap<InterceptionType, List<MethodMetadataProvider>>();
+      ClassMetadataProvider currentClass = interceptorClass;
+      Set<MethodHolder> foundMethods = new HashSet<MethodHolder>();
+      do
+      {
+         Set<InterceptionType> detectedInterceptorTypes = new HashSet<InterceptionType>();
+
+         for (MethodMetadataProvider method : currentClass.getDeclaredMethods())
+         {
+            for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
+            {
+               if (isInterceptorMethod(interceptionType, method, isTargetClass))
+               {
+                  if (methodMap.get(interceptionType) == null)
+                  {
+                     methodMap.put(interceptionType, new LinkedList<MethodMetadataProvider>());
+                  }
+                  if (detectedInterceptorTypes.contains(interceptionType))
+                  {
+                     throw new InterceptorMetadataException("Same interception type cannot be specified twice on the same class");
+                  }
+                  else
+                  {
+                     detectedInterceptorTypes.add(interceptionType);
+                  }
+                  // add method in the list - if it is there already, it means that it has been added by a subclass
+                  ReflectionUtils.ensureAccessible(method.getJavaMethod());
+                  if (!foundMethods.contains(MethodHolder.of(method, false)))
+                  {
+                     methodMap.get(interceptionType).add(0, method);
+                  }
+               }
+            }
+            foundMethods.add(MethodHolder.of(method, false));
+         }
+         currentClass = currentClass.getSuperclass();
+      }
+      while (!Object.class.equals(currentClass.getJavaClass()));
+      return methodMap;
    }
 }

@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model.metadata;
+package org.jboss.interceptor.util;
 
 import java.util.Iterator;
-
-import org.jboss.interceptor.InterceptorException;
 
 /**
  * @author Marius Bogoevici

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model.metadata;
+package org.jboss.interceptor.model.metadata.reader;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -24,18 +24,18 @@ import java.lang.reflect.Method;
 /**
  * @author Marius Bogoevici
  */
-public class ReflectiveMethodReference implements MethodReference, Serializable
+public class ReflectiveMethodMetadataProvider implements MethodMetadataProvider, Serializable
 {
    private Method javaMethod;
 
-   private ReflectiveMethodReference(Method method)
+   private ReflectiveMethodMetadataProvider(Method method)
    {
       this.javaMethod = method;
    }
 
-   public static MethodReference of(Method method)
+   public static MethodMetadataProvider of(Method method)
    {
-      return new ReflectiveMethodReference(method);
+      return new ReflectiveMethodMetadataProvider(method);
    }
 
    public Annotation getAnnotation(Class<? extends Annotation> annotationClass)
@@ -48,9 +48,9 @@ public class ReflectiveMethodReference implements MethodReference, Serializable
       return javaMethod;
    }
 
-   public ClassReference getReturnType()
+   public ClassMetadataProvider getReturnType()
    {
-      return ReflectiveClassReference.of(javaMethod.getReturnType());
+      return ReflectiveClassMetadataProvider.of(javaMethod.getReturnType());
    }
 
 }

@@ -23,6 +23,10 @@ import java.util.Set;
 import java.io.Serializable;
 
 /**
+ * Describes the interceptors that apply to a particular entity.
+ *
+ * Interceptors and intercepted entities are parametrized.
+ *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
 public interface InterceptionModel<T, I> extends Serializable
@@ -32,10 +36,10 @@ public interface InterceptionModel<T, I> extends Serializable
     * Returns the interceptors applicable for the given interception type and method
     *
     * @param interceptionType
-    * @param method
+    * @param method - null if the interception type is lifecycle
     * @return list of interceptors
     * @throws IllegalArgumentException if interceptionType is business method or around timeout
-    *                                  but method is null, as well as if interceptionType is callback and method is not null
+    * but method is null, as well as if interceptionType is callback and method is not null
     */
    public List<I> getInterceptors(InterceptionType interceptionType, Method method);
 

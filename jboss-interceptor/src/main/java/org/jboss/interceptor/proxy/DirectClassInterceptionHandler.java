@@ -17,10 +17,8 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.model.metadata.ClassReference;
-import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 import org.jboss.interceptor.InterceptorException;
-import org.jboss.interceptor.util.ReflectionUtils;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>

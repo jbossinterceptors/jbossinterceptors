@@ -58,9 +58,9 @@ public final class InterceptionTypeRegistry
       return interceptionAnnotationClasses.keySet();
    }
 
-   public static boolean supportsTimeoutMethods()
+   public static boolean isSupported(InterceptionType interceptionType)
    {
-      return interceptionAnnotationClasses.containsKey(InterceptionType.AROUND_TIMEOUT);
+      return interceptionAnnotationClasses.containsKey(interceptionType);
    }
 
    public static Class<? extends Annotation> getAnnotationClass(InterceptionType interceptionType)

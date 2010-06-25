@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 
-import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 import org.jboss.interceptor.model.InterceptionModel;
 import org.jboss.interceptor.model.InterceptionType;
 import org.jboss.interceptor.model.InterceptionTypeRegistry;
@@ -67,7 +67,7 @@ public class InterceptorMethodHandler extends TargetInstanceProxyMethodHandler i
          {
             return thisMethod.invoke(getTargetInstance(), args);
          }
-         if (InterceptionTypeRegistry.supportsTimeoutMethods() && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
+         if (InterceptionTypeRegistry.isSupported(InterceptionType.AROUND_TIMEOUT) && thisMethod.isAnnotationPresent(InterceptionTypeRegistry.getAnnotationClass(InterceptionType.AROUND_TIMEOUT)))
          {
             return executeInterception(thisMethod, args, InterceptionType.AROUND_TIMEOUT);
          }

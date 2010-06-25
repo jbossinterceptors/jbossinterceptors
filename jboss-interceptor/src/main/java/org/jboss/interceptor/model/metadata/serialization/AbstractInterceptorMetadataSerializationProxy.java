@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model.metadata;
+package org.jboss.interceptor.model.metadata.serialization;
 
 import java.io.Serializable;
 
 import org.jboss.interceptor.InterceptorException;
-import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 
 public abstract class AbstractInterceptorMetadataSerializationProxy implements Serializable
 {

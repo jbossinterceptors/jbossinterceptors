@@ -15,39 +15,39 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.registry;
-
-import org.jboss.interceptor.model.metadata.AbstractInterceptorMetadata;
-import org.jboss.interceptor.model.InterceptorMetadata;
-import org.jboss.interceptor.model.metadata.ClassReference;
+package org.jboss.interceptor.model.metadata.registry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jboss.interceptor.model.metadata.reader.ClassMetadataProvider;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.reader.InterceptorMetadataReader;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorMetadataRegistry<T>
+public class SimpleInterceptorMetadataRegistry implements InterceptorMetadataRegistry
 {
    private final Map<Key, InterceptorMetadata> interceptorClassMetadataMap = new ConcurrentHashMap<Key, InterceptorMetadata>();
 
-   private ClassMetadataReader classMetadataReader;
+   private InterceptorMetadataReader interceptorMetadataReader;
 
    private final Lock lock = new ReentrantLock();
 
-   public InterceptorMetadataRegistry(ClassMetadataReader classMetadataReader)
+   public SimpleInterceptorMetadataRegistry(InterceptorMetadataReader interceptorMetadataReader)
    {
-      this.classMetadataReader = classMetadataReader;
+      this.interceptorMetadataReader = interceptorMetadataReader;
    }
 
-   public InterceptorMetadata getInterceptorClassMetadata(ClassReference interceptorClass)
+   public InterceptorMetadata getInterceptorClassMetadata(ClassMetadataProvider interceptorClass)
    {
       return this.getInterceptorClassMetadata(interceptorClass, false);
    }
 
-   public InterceptorMetadata getInterceptorClassMetadata(ClassReference interceptorClass, boolean isInterceptorTargetClass)
+   public InterceptorMetadata getInterceptorClassMetadata(ClassMetadataProvider interceptorClass, boolean isInterceptorTargetClass)
    {
       Key key = new Key(interceptorClass, isInterceptorTargetClass);
       if (!interceptorClassMetadataMap.containsKey(key))
@@ -58,7 +58,7 @@ public class InterceptorMetadataRegistry<T>
             //verify that metadata hasn't been added while waiting for the lock
             if (!interceptorClassMetadataMap.containsKey(key))
             {
-               interceptorClassMetadataMap.put(key, classMetadataReader.getInterceptorMetadata(interceptorClass, isInterceptorTargetClass));
+               interceptorClassMetadataMap.put(key, interceptorMetadataReader.getInterceptorMetadata(interceptorClass, isInterceptorTargetClass));
             }
          }
          finally
@@ -82,7 +82,7 @@ public class InterceptorMetadataRegistry<T>
 
       private boolean isInterceptorTargetClass;
 
-      private Key(ClassReference clazz, boolean interceptorTargetClass)
+      private Key(ClassMetadataProvider clazz, boolean interceptorTargetClass)
       {
          this.className = clazz.getClassName();
          isInterceptorTargetClass = interceptorTargetClass;

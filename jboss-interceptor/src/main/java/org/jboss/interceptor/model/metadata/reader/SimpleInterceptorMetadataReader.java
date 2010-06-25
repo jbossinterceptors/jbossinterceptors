@@ -15,24 +15,22 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.registry;
+package org.jboss.interceptor.model.metadata.reader;
 
 import org.jboss.interceptor.InterceptorException;
-import org.jboss.interceptor.model.InterceptorMetadata;
+import org.jboss.interceptor.model.metadata.InterceptorMetadata;
 import org.jboss.interceptor.model.metadata.AbstractInterceptorMetadata;
-import org.jboss.interceptor.model.metadata.AbstractInterceptorMetadataSerializationProxy;
-import org.jboss.interceptor.model.metadata.ClassReference;
-import org.jboss.interceptor.model.metadata.ReflectiveClassReference;
+import org.jboss.interceptor.model.metadata.serialization.AbstractInterceptorMetadataSerializationProxy;
 import org.jboss.interceptor.util.ReflectionUtils;
 
 /**
  * @author Marius Bogoevici
  */
-public class SimpleClassMetadataReader implements ClassMetadataReader
+public class SimpleInterceptorMetadataReader implements InterceptorMetadataReader
 {
-   private static SimpleClassMetadataReader instance = new SimpleClassMetadataReader();
+   private static SimpleInterceptorMetadataReader instance = new SimpleInterceptorMetadataReader();
 
-   public InterceptorMetadata getInterceptorMetadata(ClassReference clazz, final boolean isInterceptorTargetClass)
+   public InterceptorMetadata getInterceptorMetadata(ClassMetadataProvider clazz, final boolean isInterceptorTargetClass)
    {
       return new AbstractInterceptorMetadata(clazz, isInterceptorTargetClass)
       {
@@ -50,7 +48,7 @@ public class SimpleClassMetadataReader implements ClassMetadataReader
       };
    }
 
-   public static ClassMetadataReader getInstance()
+   public static InterceptorMetadataReader getInstance()
    {
       return instance;
    }
@@ -66,7 +64,7 @@ public class SimpleClassMetadataReader implements ClassMetadataReader
       protected InterceptorMetadata loadInterceptorMetadata() throws ClassNotFoundException
       {
          Class<?> clazz = ReflectionUtils.classForName(getClassName());
-         return SimpleClassMetadataReader.instance.getInterceptorMetadata(ReflectiveClassReference.of(clazz), isInterceptionTargetClass());
+         return SimpleInterceptorMetadataReader.instance.getInterceptorMetadata(ReflectiveClassMetadataProvider.of(clazz), isInterceptionTargetClass());
       }
 
       private Object readResolve()

@@ -1,4 +1,4 @@
-package org.jboss.interceptor.javassist;
+package org.jboss.interceptor.proxy.javassist;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;

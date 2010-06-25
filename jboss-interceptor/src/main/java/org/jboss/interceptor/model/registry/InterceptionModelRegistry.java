@@ -15,31 +15,30 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.model;
+package org.jboss.interceptor.model.registry;
 
-import org.jboss.interceptor.InterceptorException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jboss.interceptor.model.InterceptionModel;
 
 /**
+ * Metadata store for information on how the an entity of a given type needs to be intercepted.
+ *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptorMetadataException extends InterceptorException
+public class InterceptionModelRegistry<T, I> implements Serializable
 {
-   public InterceptorMetadataException()
+   private Map<T, InterceptionModel<T, I>> interceptionModelMap = new HashMap<T, InterceptionModel<T, I>>();
+
+   public void registerInterceptionModel(T interceptedEntity, InterceptionModel<T, I> interceptionModel)
    {
+      this.interceptionModelMap.put(interceptedEntity, interceptionModel);
    }
 
-   public InterceptorMetadataException(String s)
+   public InterceptionModel<T, I> getInterceptionModel(T interceptedEntity)
    {
-      super(s);
-   }
-
-   public InterceptorMetadataException(String s, Throwable throwable)
-   {
-      super(s, throwable);
-   }
-
-   public InterceptorMetadataException(Throwable throwable)
-   {
-      super(throwable);
+      return this.interceptionModelMap.get(interceptedEntity);
    }
 }
