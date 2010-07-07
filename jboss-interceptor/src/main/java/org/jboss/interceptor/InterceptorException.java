@@ -20,6 +20,7 @@ package org.jboss.interceptor;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
+@SuppressWarnings("serial")
 public class InterceptorException extends RuntimeException
 {
    public InterceptorException()
