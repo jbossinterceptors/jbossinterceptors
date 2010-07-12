@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -15,22 +15,27 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptor.spi.metadata;
 
-import javassist.util.proxy.MethodHandler;
-import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
+import java.util.List;
+
+import org.jboss.interceptor.spi.model.InterceptionType;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptorProxyCreator
+public interface InterceptorMetadata
 {
+   ClassMetadata getInterceptorClass();
 
-   <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler);
+   /**
+    * Returns the list of interceptor methods of this class for a given 
+    * interception type.
+    *
+    * @param interceptionType
+    * @return a list of methods
+    */
+   List<MethodMetadata> getInterceptorMethods(InterceptionType interceptionType);
 
-   <T> MethodHandler createMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
-
-   <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
-
-   <T> T createProxyFromClass(Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata);
+   boolean isTargetClass();
 }

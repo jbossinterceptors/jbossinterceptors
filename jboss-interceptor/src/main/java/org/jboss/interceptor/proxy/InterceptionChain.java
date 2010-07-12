@@ -17,13 +17,14 @@
 
 package org.jboss.interceptor.proxy;
 
-import javax.interceptor.InvocationContext;
-
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
-import org.jboss.interceptor.model.InterceptionType;
+import javax.interceptor.InvocationContext;
+
+import org.jboss.interceptor.spi.handler.InterceptionHandler;
+import org.jboss.interceptor.spi.model.InterceptionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,20 +38,18 @@ public class InterceptionChain
 
    private Object target;
 
-   private Object[] parameters;
-
    private Method targetMethod;
 
    private int currentPosition;
 
    private List<InterceptionHandler> interceptorHandlers;
+
    private final InterceptionType interceptionType;
 
-   public InterceptionChain(List<InterceptionHandler> interceptorHandlers, InterceptionType interceptionType, Object target, Method targetMethod, Object[] parameters)
+   public InterceptionChain(List<InterceptionHandler> interceptorHandlers, InterceptionType interceptionType, Object target, Method targetMethod)
    {
       this.interceptorHandlers = interceptorHandlers;
       this.interceptionType = interceptionType;
-      this.parameters = parameters;
       this.target = target;
       this.targetMethod = targetMethod;
       this.currentPosition = 0;
@@ -66,7 +65,7 @@ public class InterceptionChain
          {
             log.trace("Invoking next interceptor in chain:" + nextInterceptorHandler.getClass().getName());
          }
-         return nextInterceptorHandler.invoke(target, interceptionType, invocationContext);
+         return nextInterceptorHandler.intercept(target, interceptionType, invocationContext);
       }
       else
       {

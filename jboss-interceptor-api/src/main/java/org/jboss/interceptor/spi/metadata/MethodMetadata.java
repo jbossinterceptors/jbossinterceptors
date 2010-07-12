@@ -15,40 +15,24 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.util;
+package org.jboss.interceptor.spi.metadata;
 
-import java.util.Iterator;
-
-import org.jboss.interceptor.spi.metadata.MethodMetadata;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
-* @author Marius Bogoevici
-*/
-public abstract class ImmutableIteratorWrapper<T> implements Iterator<MethodMetadata>
+ * Abstraction of a source of metadata information about a method. Allows the framework client
+ * to configure their own way of providing method metadata, rather than relying exclusively on
+ * Java reflection.
+ * 
+ * @author Marius Bogoevici
+ */
+public interface MethodMetadata
 {
+   Method getJavaMethod();
 
-   private Iterator<T> originalIterator;
+   Annotation getAnnotation(Class<? extends Annotation> annotationClass);
 
-   protected ImmutableIteratorWrapper(Iterator<T> originalIterator)
-   {
-      this.originalIterator = originalIterator;
-   }
-
-
-   public boolean hasNext()
-   {
-      return originalIterator.hasNext();
-   }
-
-   public MethodMetadata next()
-   {
-      return wrapObject(originalIterator.next());
-   }
-
-   protected abstract MethodMetadata wrapObject(T t);
-
-   public void remove()
-   {
-      throw new UnsupportedOperationException("Removal not supported");
-   }
+   ClassMetadata getReturnType();
+   
 }

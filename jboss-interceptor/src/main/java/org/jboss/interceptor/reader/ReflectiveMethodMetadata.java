@@ -15,40 +15,45 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.util;
+package org.jboss.interceptor.reader;
 
-import java.util.Iterator;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;
 
 /**
-* @author Marius Bogoevici
-*/
-public abstract class ImmutableIteratorWrapper<T> implements Iterator<MethodMetadata>
+ * @author Marius Bogoevici
+ */
+public class ReflectiveMethodMetadata implements MethodMetadata, Serializable
 {
+   private Method javaMethod;
 
-   private Iterator<T> originalIterator;
-
-   protected ImmutableIteratorWrapper(Iterator<T> originalIterator)
+   private ReflectiveMethodMetadata(Method method)
    {
-      this.originalIterator = originalIterator;
+      this.javaMethod = method;
    }
 
-
-   public boolean hasNext()
+   public static MethodMetadata of(Method method)
    {
-      return originalIterator.hasNext();
+      return new ReflectiveMethodMetadata(method);
    }
 
-   public MethodMetadata next()
+   public Annotation getAnnotation(Class<? extends Annotation> annotationClass)
    {
-      return wrapObject(originalIterator.next());
+      return javaMethod.getAnnotation(annotationClass);
    }
 
-   protected abstract MethodMetadata wrapObject(T t);
-
-   public void remove()
+   public Method getJavaMethod()
    {
-      throw new UnsupportedOperationException("Removal not supported");
+      return javaMethod;
    }
+
+   public ClassMetadata getReturnType()
+   {
+      return ReflectiveClassMetadata.of(javaMethod.getReturnType());
+   }
+
 }

@@ -15,27 +15,31 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptor.util;
 
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.reader.ReflectiveClassMetadata;
-import org.jboss.interceptor.spi.handler.InterceptionHandler;
-import org.jboss.interceptor.spi.handler.InterceptionHandlerFactory;
+import org.jboss.interceptor.proxy.InterceptorException;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>>
+public class InterceptorMetadataException extends InterceptorException
 {
-   private InterceptorMetadataRegistry interceptorMetadataRegistry;
-
-   public DirectClassInterceptionHandlerFactory(InterceptorMetadataRegistry interceptorMetadataRegistry)
+   public InterceptorMetadataException()
    {
-      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
    }
 
-   public InterceptionHandler createFor(Class<?> clazz)
+   public InterceptorMetadataException(String s)
    {
-      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(clazz)));
+      super(s);
+   }
+
+   public InterceptorMetadataException(String s, Throwable throwable)
+   {
+      super(s, throwable);
+   }
+
+   public InterceptorMetadataException(Throwable throwable)
+   {
+      super(throwable);
    }
 }

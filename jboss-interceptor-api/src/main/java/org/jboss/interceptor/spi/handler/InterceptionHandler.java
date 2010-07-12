@@ -14,28 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.interceptor.spi.handler;
 
-package org.jboss.interceptor.proxy;
+import javax.interceptor.InvocationContext;
 
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.reader.ReflectiveClassMetadata;
-import org.jboss.interceptor.spi.handler.InterceptionHandler;
-import org.jboss.interceptor.spi.handler.InterceptionHandlerFactory;
+import org.jboss.interceptor.spi.model.InterceptionType;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>>
+public interface InterceptionHandler
 {
-   private InterceptorMetadataRegistry interceptorMetadataRegistry;
-
-   public DirectClassInterceptionHandlerFactory(InterceptorMetadataRegistry interceptorMetadataRegistry)
-   {
-      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
-   }
-
-   public InterceptionHandler createFor(Class<?> clazz)
-   {
-      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(clazz)));
-   }
+   public Object intercept(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception;
 }
+

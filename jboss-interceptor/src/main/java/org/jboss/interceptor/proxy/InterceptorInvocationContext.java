@@ -17,16 +17,15 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.InterceptorException;
 
-import javax.interceptor.InvocationContext;
-
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.lang.reflect.Method;
+
+import javax.interceptor.InvocationContext;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>

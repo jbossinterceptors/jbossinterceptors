@@ -11,11 +11,11 @@
 
   <groupId>org.jboss.interceptor</groupId>
   <artifactId>jboss-interceptor-parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>JBoss Interceptors Parent</name>
-  <description>JBoss Interceptors Parent</description>
+  <name>JBoss EJB 3.1 Common Interceptor Library Parent</name>
+  <description>JBoss EJB 3.1 Common Interceptor Library Parent</description>
 
   <scm>
     <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/interceptors/trunk/</connection>
@@ -31,6 +31,7 @@
   </properties>
 
   <modules>
+    <module>jboss-interceptor-api</module>
     <module>jboss-interceptor</module>
   </modules>
 
@@ -176,7 +177,13 @@
 
       <dependency>
         <groupId>org.jboss.interceptor</groupId>
-        <artifactId>jboss-interceptor</artifactId>
+        <artifactId>jboss-interceptor-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.interceptor</groupId>
+        <artifactId>jboss-interceptor-impl</artifactId>
         <version>${project.version}</version>
       </dependency>
 

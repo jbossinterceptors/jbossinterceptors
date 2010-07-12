@@ -17,22 +17,22 @@
 
 package org.jboss.interceptor.proxy;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.Queue;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.io.Serializable;
 
 import javax.interceptor.InvocationContext;
 
-import org.jboss.interceptor.model.metadata.InterceptorMetadata;
-import org.jboss.interceptor.model.metadata.reader.MethodMetadataProvider;
+import org.jboss.interceptor.spi.handler.InterceptionHandler;
+import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
+import org.jboss.interceptor.spi.metadata.MethodMetadata;
+import org.jboss.interceptor.spi.model.InterceptionType;
 import org.jboss.interceptor.util.ReflectionUtils;
-import org.jboss.interceptor.InterceptorException;
-import org.jboss.interceptor.model.InterceptionType;
 
 /**
  * @author Marius Bogoevici
@@ -49,9 +49,9 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
    }
 
 
-   public Object invoke(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception
+   public Object intercept(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception
    {
-      List<MethodMetadataProvider> methods = interceptorMetadata.getInterceptorMethods(interceptionType);
+      List<MethodMetadata> methods = interceptorMetadata.getInterceptorMethods(interceptionType);
       if (methods != null)
       {
          DelegatingInvocationContext delegatingInvocationContext = new DelegatingInvocationContext(invocationContext, getInterceptorInstance(), methods, interceptionType);
@@ -63,11 +63,6 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       }
    }
 
-   public InterceptorMetadata getInterceptorMetadata()
-   {
-      return interceptorMetadata;
-   }
-
    public class DelegatingInvocationContext implements InvocationContext
    {
 
@@ -76,14 +71,14 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
       private Object targetObject;
       private InterceptionType interceptionType;
 
-      private Queue<MethodMetadataProvider> invocationQueue;
+      private Queue<MethodMetadata> invocationQueue;
 
-      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<MethodMetadataProvider> methods, InterceptionType interceptionType)
+      public DelegatingInvocationContext(InvocationContext delegateInvocationContext, Object targetObject, List<MethodMetadata> methods, InterceptionType interceptionType)
       {
          this.delegateInvocationContext = delegateInvocationContext;
          this.targetObject = targetObject;
          this.interceptionType = interceptionType;
-         this.invocationQueue = new ConcurrentLinkedQueue<MethodMetadataProvider>(methods);
+         this.invocationQueue = new ConcurrentLinkedQueue<MethodMetadata>(methods);
       }
 
       public Map<String, Object> getContextData()
@@ -114,10 +109,10 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
             {
                if (AbstractClassInterceptionHandler.this.interceptorMetadata.isTargetClass() && interceptionType.isLifecycleCallback())
                {
-                  Iterator<MethodMetadataProvider> methodIterator = invocationQueue.iterator();
+                  Iterator<MethodMetadata> methodIterator = invocationQueue.iterator();
                   while (methodIterator.hasNext())
                   {
-                     MethodMetadataProvider interceptorMethod = methodIterator.next();
+                     MethodMetadata interceptorMethod = methodIterator.next();
                      ReflectionUtils.ensureAccessible(interceptorMethod.getJavaMethod());
                      // interceptor methods defined on
                      interceptorMethod.getJavaMethod().invoke(targetObject);
@@ -126,7 +121,7 @@ public abstract class AbstractClassInterceptionHandler implements InterceptionHa
                }
                else
                {
-                  MethodMetadataProvider interceptorMethod = invocationQueue.remove();
+                  MethodMetadata interceptorMethod = invocationQueue.remove();
                   ReflectionUtils.ensureAccessible(interceptorMethod.getJavaMethod());
                   if (interceptorMethod.getJavaMethod().getParameterTypes().length == 0)
                   {

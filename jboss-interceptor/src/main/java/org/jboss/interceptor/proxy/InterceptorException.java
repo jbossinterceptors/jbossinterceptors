@@ -17,25 +17,28 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.reader.ReflectiveClassMetadata;
-import org.jboss.interceptor.spi.handler.InterceptionHandler;
-import org.jboss.interceptor.spi.handler.InterceptionHandlerFactory;
-
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>>
+@SuppressWarnings("serial")
+public class InterceptorException extends RuntimeException
 {
-   private InterceptorMetadataRegistry interceptorMetadataRegistry;
-
-   public DirectClassInterceptionHandlerFactory(InterceptorMetadataRegistry interceptorMetadataRegistry)
+   public InterceptorException()
    {
-      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
    }
 
-   public InterceptionHandler createFor(Class<?> clazz)
+   public InterceptorException(String s)
    {
-      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(clazz)));
+      super(s);
+   }
+
+   public InterceptorException(String s, Throwable throwable)
+   {
+      super(s, throwable);
+   }
+
+   public InterceptorException(Throwable throwable)
+   {
+      super(throwable);
    }
 }

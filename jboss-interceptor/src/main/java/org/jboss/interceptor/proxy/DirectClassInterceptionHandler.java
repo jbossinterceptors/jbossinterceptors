@@ -17,8 +17,8 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.model.metadata.InterceptorMetadata;
-import org.jboss.interceptor.InterceptorException;
+import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
+
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -42,7 +42,8 @@ public class DirectClassInterceptionHandler<I> extends AbstractClassInterception
       try
       {
          this.interceptorInstance = simpleInterceptorClass.newInstance();
-      } catch (Exception e)
+      }
+      catch (Exception e)
       {
          throw new InterceptorException("Cannot create interceptor instance:", e);
       }

@@ -15,27 +15,38 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
-
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.reader.ReflectiveClassMetadata;
-import org.jboss.interceptor.spi.handler.InterceptionHandler;
-import org.jboss.interceptor.spi.handler.InterceptionHandlerFactory;
+package org.jboss.interceptor.spi.model;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandlerFactory implements InterceptionHandlerFactory<Class<?>>
+public enum InterceptionType
 {
-   private InterceptorMetadataRegistry interceptorMetadataRegistry;
 
-   public DirectClassInterceptionHandlerFactory(InterceptorMetadataRegistry interceptorMetadataRegistry)
+   AROUND_INVOKE(false, "javax.interceptor.AroundInvoke"),
+   AROUND_TIMEOUT(false, "javax.interceptor.AroundTimeout"),
+   POST_CONSTRUCT(true, "javax.annotation.PostConstruct"),
+   PRE_DESTROY(true, "javax.annotation.PreDestroy"),
+   POST_ACTIVATE(true, "javax.ejb.PostActivate"),
+   PRE_PASSIVATE(true, "javax.ejb.PrePassivate");
+
+   private boolean lifecycleCallback;
+   
+   private String annotationClassName;
+
+   InterceptionType(boolean lifecycleCallback, String annotationClassName)
    {
-      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
+      this.lifecycleCallback = lifecycleCallback;
+      this.annotationClassName = annotationClassName;
    }
 
-   public InterceptionHandler createFor(Class<?> clazz)
+   public boolean isLifecycleCallback()
    {
-      return new DirectClassInterceptionHandler(clazz, interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(clazz)));
+      return lifecycleCallback;
+   }
+
+   public String annotationClassName()
+   {
+      return annotationClassName;
    }
 }
