@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.metadataregistry;
+package org.jboss.interceptor.registry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

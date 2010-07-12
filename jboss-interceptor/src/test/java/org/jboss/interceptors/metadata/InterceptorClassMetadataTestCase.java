@@ -20,8 +20,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.metadataregistry.SimpleInterceptorMetadataRegistry;
+import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
+import org.jboss.interceptor.registry.SimpleInterceptorMetadataRegistry;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;

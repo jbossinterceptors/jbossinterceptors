@@ -17,7 +17,7 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
+import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
 import org.jboss.interceptor.spi.handler.InterceptionHandler;
 import org.jboss.interceptor.spi.handler.InterceptionHandlerFactory;

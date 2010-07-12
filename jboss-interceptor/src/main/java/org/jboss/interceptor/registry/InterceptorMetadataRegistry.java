@@ -1,4 +1,4 @@
-package org.jboss.interceptor.metadataregistry;
+package org.jboss.interceptor.registry;
 
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;

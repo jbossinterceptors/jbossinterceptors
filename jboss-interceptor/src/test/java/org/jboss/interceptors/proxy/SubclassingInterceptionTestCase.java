@@ -26,8 +26,8 @@ import java.util.Map;
 
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.builder.InterceptionModelBuilder;
-import org.jboss.interceptor.metadataregistry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.metadataregistry.SimpleInterceptorMetadataRegistry;
+import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
+import org.jboss.interceptor.registry.SimpleInterceptorMetadataRegistry;
 import org.jboss.interceptor.proxy.DirectClassInterceptionHandlerFactory;
 import org.jboss.interceptor.proxy.InterceptorProxyCreator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
