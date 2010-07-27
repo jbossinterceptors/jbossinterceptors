@@ -27,6 +27,8 @@ import org.jboss.interceptor.util.ReflectionUtils;
 
 
 /**
+ * Wrapper for a method. Allows serializing references to methods.
+ * 
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
 public class MethodReference implements Serializable

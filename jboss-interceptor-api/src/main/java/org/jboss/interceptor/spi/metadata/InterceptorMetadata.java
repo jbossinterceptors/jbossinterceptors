@@ -26,8 +26,6 @@ import org.jboss.interceptor.spi.model.InterceptionType;
  */
 public interface InterceptorMetadata
 {
-   ClassMetadata getInterceptorClass();
-
    /**
     * Returns the list of interceptor methods of this class for a given 
     * interception type.

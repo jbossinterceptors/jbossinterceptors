@@ -47,11 +47,6 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
       this.interceptorMethodMap = interceptorMethodMap;
    }
 
-   public ClassMetadata getInterceptorClass()
-   {
-      return interceptorClass;
-   }
-
    public List<MethodMetadata> getInterceptorMethods(InterceptionType interceptionType)
    {
       if (interceptorMethodMap != null)

@@ -8,16 +8,16 @@ import java.util.List;
 import javassist.util.proxy.MethodHandler;
 
 /**
+ * A wrapper for multiple Javassist method handlers.
+ * 
  * @author Marius Bogoevici
  */
 public class CompositeHandler implements MethodHandler, Serializable
 {
 
+   protected static final String OBJECT_CLASS_NAME = Object.class.getName();
+
    private List<MethodHandler> methodHandlers;
-
-   private Class<?> ignoredSuperclass = Object.class;
-
-   private boolean enabled = false;
 
    public CompositeHandler(List<MethodHandler> methodHandlers)
    {
@@ -27,19 +27,9 @@ public class CompositeHandler implements MethodHandler, Serializable
 
    private static ThreadLocal<Integer> currentHandlerIndex = new ThreadLocal<Integer>();
 
-   public void setIgnoredSuperclass(Class<?> ignoredSuperclass)
-   {
-      this.ignoredSuperclass = ignoredSuperclass;
-   }
-
-   private void setEnabled(boolean enabled)
-   {
-
-   }
-
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
    {
-      if (thisMethod.getDeclaringClass().equals(Object.class))
+      if (thisMethod.getDeclaringClass().getName().equals(OBJECT_CLASS_NAME))
          return proceed.invoke(self);
       boolean isOuter = false;
       if (currentHandlerIndex.get() == null)
