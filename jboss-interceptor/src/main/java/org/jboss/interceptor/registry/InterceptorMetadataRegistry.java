@@ -11,8 +11,8 @@ import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
  */
 public interface InterceptorMetadataRegistry
 {
-   InterceptorMetadata getInterceptorClassMetadata(ClassMetadata interceptorClass);
+   InterceptorMetadata getInterceptorClassMetadata(ClassMetadata<?> interceptorClass);
 
-   InterceptorMetadata getInterceptorClassMetadata(ClassMetadata interceptorClass, boolean isInterceptorTargetClass);
+   InterceptorMetadata getInterceptorClassMetadata(ClassMetadata<?> interceptorClass, boolean isInterceptorTargetClass);
 
 }

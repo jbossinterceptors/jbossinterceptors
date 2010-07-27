@@ -17,44 +17,35 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
-
+import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
+import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class DirectClassInterceptionHandler<I> extends AbstractClassInterceptionHandler
+public class DirectClassInterceptorInstantiator implements InterceptorInstantiator<ClassMetadata<?>, Object>
 {
+   private InterceptorMetadataRegistry interceptorMetadataRegistry;
 
-   private final Object interceptorInstance;
-
-   public DirectClassInterceptionHandler(Object interceptorInstance, InterceptorMetadata interceptorMetadata)
+   public DirectClassInterceptorInstantiator(InterceptorMetadataRegistry interceptorMetadataRegistry)
    {
-      super(interceptorMetadata);
-      this.interceptorInstance = interceptorInstance;
+      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
    }
 
-   public DirectClassInterceptionHandler(Class<?> simpleInterceptorClass, InterceptorMetadata interceptorMetadata)
+   public Object createFor(ClassMetadata<?> clazz)
    {
-      super(interceptorMetadata);
-      if (simpleInterceptorClass == null)
-         throw new IllegalArgumentException("Class must not be null");
       try
       {
-         this.interceptorInstance = simpleInterceptorClass.newInstance();
+         return clazz.getJavaClass().newInstance();
       }
-      catch (Exception e)
+      catch (InstantiationException e)
       {
-         throw new InterceptorException("Cannot create interceptor instance:", e);
+         throw new InterceptorException(e);
       }
-
+      catch (IllegalAccessException e)
+      {
+         throw new InterceptorException(e);
+      }
    }
-
-   public Object getInterceptorInstance()
-   {
-      return interceptorInstance;
-   }
-
-
 }
-

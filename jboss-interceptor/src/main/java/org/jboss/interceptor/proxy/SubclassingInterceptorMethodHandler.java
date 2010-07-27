@@ -6,18 +6,20 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
-import org.jboss.interceptor.util.InterceptionTypeRegistry;
-import org.jboss.interceptor.spi.handler.InterceptionHandler;
-import org.jboss.interceptor.spi.handler.InterceptionHandlerFactory;
+import org.jboss.interceptor.reader.InterceptorMetadataUtils;
+import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.jboss.interceptor.spi.model.InterceptionType;
+import org.jboss.interceptor.util.InterceptionTypeRegistry;
 import org.jboss.interceptor.util.InterceptionUtils;
 import org.jboss.interceptor.util.ReflectionUtils;
 
@@ -27,9 +29,9 @@ import org.jboss.interceptor.util.ReflectionUtils;
 public class SubclassingInterceptorMethodHandler implements MethodHandler,Serializable
 {
 
-   private Map<Object, InterceptionHandler> interceptorHandlerInstances = new HashMap<Object, InterceptionHandler>();
+   private Map<ClassMetadata<?>, Object> interceptorHandlerInstances = new HashMap<ClassMetadata<?>, Object>();
    private InterceptorMetadata targetClassInterceptorMetadata;
-   private InterceptionModel<Class<?>, ?> interceptionModel;
+   private InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel;
    private Object targetInstance;
 
    private static MethodHandler DEFAULT_METHOD_HANDLER = new MethodHandler() {
@@ -42,24 +44,24 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
         }
    };
 
-   public SubclassingInterceptorMethodHandler(Object targetInstance, InterceptionModel<Class<?>, ?> interceptionModel, InterceptionHandlerFactory<?> interceptionHandlerFactories, InterceptorMetadata targetClassMetadata)
+   public SubclassingInterceptorMethodHandler(Object target, ClassMetadata<?> targetClass, InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel, InterceptorInstantiator<ClassMetadata<?>, ?> interceptorInstantiator, InterceptorMetadata targetClassMetadata)
    {
-      this.targetInstance = targetInstance;
+      this.targetInstance = target;
       if (interceptionModel == null)
       {
          throw new IllegalArgumentException("Interception model must not be null");
       }
 
-      if (interceptionHandlerFactories == null)
+      if (interceptorInstantiator == null)
       {
          throw new IllegalArgumentException("Interception handler factory must not be null");
       }
 
       this.interceptionModel = interceptionModel;
 
-      for (Object interceptorReference : this.interceptionModel.getAllInterceptors())
+      for (ClassMetadata<?> interceptorReference : this.interceptionModel.getAllInterceptors())
       {
-         interceptorHandlerInstances.put(interceptorReference, ((InterceptionHandlerFactory) interceptionHandlerFactories).createFor(interceptorReference));
+         interceptorHandlerInstances.put(interceptorReference, (interceptorInstantiator).createFor(interceptorReference));
       }
       targetClassInterceptorMetadata = targetClassMetadata;
    }
@@ -99,19 +101,23 @@ public class SubclassingInterceptorMethodHandler implements MethodHandler,Serial
 
    private Object executeInterception(Object self, Method proceedingMethod, Method thisMethod, Object[] args, InterceptionType interceptionType) throws Throwable
    {
-      List<InterceptionHandler> interceptionHandlers = new ArrayList<InterceptionHandler>();
-      List<?> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
-      for (Object interceptorReference : interceptorList)
+
+      List<ClassMetadata> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
+      Collection<InterceptorInvocation<?>> interceptorInvocations = new ArrayList<InterceptorInvocation<?>>();
+
+      for (ClassMetadata<?> interceptorReference : interceptorList)
       {
-         interceptionHandlers.add(interceptorHandlerInstances.get(interceptorReference));
-      }
-      if (targetClassInterceptorMetadata != null && targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
-      {
-         interceptionHandlers.add(new DirectClassInterceptionHandler<Class<?>>(self, targetClassInterceptorMetadata));
+         interceptorInvocations.add(new InterceptorInvocation(interceptorHandlerInstances.get(interceptorReference), InterceptorMetadataUtils.readMetadataForInterceptorClass(interceptorReference), interceptionType));
       }
 
-      InterceptionChain chain = new InterceptionChain(interceptionHandlers, interceptionType, self, proceedingMethod);
+      if (targetClassInterceptorMetadata != null && targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
+      {
+         interceptorInvocations.add(new InterceptorInvocation(self, targetClassInterceptorMetadata, interceptionType));
+      }
+
+      InterceptionChain chain = new InterceptionChain(interceptorInvocations, interceptionType, self,proceedingMethod);
       return chain.invokeNext(new InterceptorInvocationContext(chain, self, thisMethod, args));
+            
    }
 
    private void writeObject(ObjectOutputStream objectOutputStream) throws IOException

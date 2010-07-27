@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.io.Serializable;
 
 import javassist.util.proxy.MethodHandler;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 
 /**
  * @author Marius Bogoevici
@@ -29,9 +30,9 @@ public abstract class TargetInstanceProxyMethodHandler<T> implements MethodHandl
 {
    private T targetInstance;
 
-   private Class<? extends T> targetClass;
+   private ClassMetadata<?> targetClass;
    
-   public TargetInstanceProxyMethodHandler(T targetInstance, Class<? extends T> targetClass)
+   public TargetInstanceProxyMethodHandler(T targetInstance, ClassMetadata<?> targetClass)
    {
       this.targetInstance = targetInstance;
       this.targetClass = targetClass;
@@ -69,7 +70,7 @@ public abstract class TargetInstanceProxyMethodHandler<T> implements MethodHandl
       return targetInstance;
    }
 
-   public Class<? extends T> getTargetClass()
+   public ClassMetadata getTargetClass()
    {
       return targetClass;
    }

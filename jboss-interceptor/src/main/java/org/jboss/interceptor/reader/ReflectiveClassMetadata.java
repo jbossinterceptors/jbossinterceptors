@@ -29,17 +29,17 @@ import org.jboss.interceptor.util.ImmutableIteratorWrapper;
 /**
  * @author Marius Bogoevici
  */
-public class ReflectiveClassMetadata implements ClassMetadata, Serializable
+public class ReflectiveClassMetadata<T> implements ClassMetadata<T>, Serializable
 {
 
-   private Class<?> clazz;
+   private Class<T> clazz;
 
-   private ReflectiveClassMetadata(Class<?> clazz)
+   private ReflectiveClassMetadata(Class<T> clazz)
    {
       this.clazz = clazz;
    }
 
-   public static ClassMetadata of(Class<?> clazz)
+   public static <T> ClassMetadata<T> of(Class<T> clazz)
    {
       return new ReflectiveClassMetadata(clazz);
    }
@@ -67,12 +67,12 @@ public class ReflectiveClassMetadata implements ClassMetadata, Serializable
       };     
    }
 
-   public Class<?> getJavaClass()
+   public Class<T> getJavaClass()
    {
       return clazz;
    }   
 
-   public ClassMetadata getSuperclass()
+   public ClassMetadata<?> getSuperclass()
    {
       Class<?> superClass = clazz.getSuperclass();
       return superClass == null? null : new ReflectiveClassMetadata(superClass);

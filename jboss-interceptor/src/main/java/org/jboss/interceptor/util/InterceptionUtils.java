@@ -26,10 +26,9 @@ import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
 import org.jboss.interceptor.proxy.InterceptorException;
 import org.jboss.interceptor.proxy.LifecycleMixin;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
 import org.jboss.interceptor.util.proxy.TargetInstanceProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -164,13 +163,13 @@ public class InterceptionUtils
       return clazz;
    }
 
-   public static <T> Class<T> createProxyClassWithHandler(Class<T> proxyClass, MethodHandler methodHandler)
+   public static <T> Class<T> createProxyClassWithHandler(ClassMetadata<T> proxyClass, MethodHandler methodHandler)
    {
       ProxyFactory proxyFactory = new ProxyFactory();
       proxyFactory.setUseWriteReplace(false);
       if (proxyClass != null)
       {
-         proxyFactory.setSuperclass(proxyClass);
+         proxyFactory.setSuperclass(proxyClass.getJavaClass());
       }
       proxyFactory.setInterfaces(new Class<?>[]{LifecycleMixin.class, TargetInstanceProxy.class});
       proxyFactory.setHandler(methodHandler);

@@ -26,15 +26,17 @@ import org.slf4j.LoggerFactory;
  */
 public class InterceptorMetadataUtils
 {
+   protected static final String OBJECT_CLASS_NAME = Object.class.getName();
 
    private static final Logger LOG = LoggerFactory.getLogger(InterceptorMetadataUtils.class);
 
-   public static InterceptorMetadata readMetadataForInterceptorClass(ClassMetadata classMetadata)
+
+   public static InterceptorMetadata readMetadataForInterceptorClass(ClassMetadata<?> classMetadata)
    {
       return new SimpleInterceptorMetadata(classMetadata, false, buildMethodMap(classMetadata, false));
    }
 
-   public static InterceptorMetadata readMetadataForTargetClass(ClassMetadata classMetadata)
+   public static InterceptorMetadata readMetadataForTargetClass(ClassMetadata<?> classMetadata)
    {
       return new SimpleInterceptorMetadata(classMetadata, true, buildMethodMap(classMetadata, true));
    }
@@ -95,7 +97,7 @@ public class InterceptorMetadataUtils
          {
             if (LOG.isDebugEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not return a " + Object.class.getName());
+               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not return a " + OBJECT_CLASS_NAME);
             }
             return false;
          }
@@ -131,10 +133,10 @@ public class InterceptorMetadataUtils
             + interceptionType.annotationClassName() + ", but ";
    }
 
-   static Map<InterceptionType, List<MethodMetadata>> buildMethodMap(ClassMetadata interceptorClass, boolean forTargetClass)
+   static Map<InterceptionType, List<MethodMetadata>> buildMethodMap(ClassMetadata<?> interceptorClass, boolean forTargetClass)
    {
       Map<InterceptionType, List<MethodMetadata>> methodMap = new HashMap<InterceptionType, List<MethodMetadata>>();
-      ClassMetadata currentClass = interceptorClass;
+      ClassMetadata<?> currentClass = interceptorClass;
       Set<MethodReference> foundMethods = new HashSet<MethodReference>();
       do
       {
@@ -170,7 +172,7 @@ public class InterceptorMetadataUtils
          }
          currentClass = currentClass.getSuperclass();
       }
-      while (!Object.class.equals(currentClass.getJavaClass()));
+      while (currentClass != null && !OBJECT_CLASS_NAME.equals(currentClass.getJavaClass()));
       return methodMap;
    }
 }

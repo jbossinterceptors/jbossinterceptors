@@ -34,13 +34,13 @@ import org.jboss.interceptor.spi.model.InterceptionType;
 public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializable
 {
 
-   private ClassMetadata interceptorClass;
+   private ClassMetadata<?> interceptorClass;
 
    private Map<InterceptionType, List<MethodMetadata>> interceptorMethodMap;
 
    private boolean targetClass;
 
-   public SimpleInterceptorMetadata(ClassMetadata interceptorClass, boolean targetClass, Map<InterceptionType, List<MethodMetadata>> interceptorMethodMap)
+   public SimpleInterceptorMetadata(ClassMetadata<?> interceptorClass, boolean targetClass, Map<InterceptionType, List<MethodMetadata>> interceptorMethodMap)
    {
       this.interceptorClass = interceptorClass;
       this.targetClass = targetClass;
@@ -73,10 +73,10 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
    private static class MetadataSerializationProxy implements Serializable
    {
 
-      private ClassMetadata classMetadata;
+      private ClassMetadata<?> classMetadata;
       private boolean targetClass;
 
-      MetadataSerializationProxy(ClassMetadata classMetadata, boolean targetClass)
+      MetadataSerializationProxy(ClassMetadata<?> classMetadata, boolean targetClass)
       {
          this.classMetadata = classMetadata;
          this.targetClass = targetClass;

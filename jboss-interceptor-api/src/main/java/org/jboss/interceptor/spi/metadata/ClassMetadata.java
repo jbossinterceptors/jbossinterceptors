@@ -26,14 +26,14 @@ import java.io.Serializable;
  * 
  * @author Marius Bogoevici
  */
-public interface ClassMetadata extends Serializable
+public interface ClassMetadata<T> extends Serializable
 {
    Iterable<MethodMetadata> getDeclaredMethods();
    
-   Class<?> getJavaClass();
+   Class<T> getJavaClass();
    
    String getClassName();
 
-   ClassMetadata getSuperclass();
+   ClassMetadata<?> getSuperclass();
 
 }

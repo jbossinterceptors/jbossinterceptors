@@ -18,6 +18,7 @@
 package org.jboss.interceptor.proxy;
 
 import javassist.util.proxy.MethodHandler;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 
 /**
@@ -26,11 +27,8 @@ import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 public interface InterceptorProxyCreator
 {
 
-   <T> T createProxyInstance(Class<T> proxyClass, MethodHandler interceptorMethodHandler);
+   <T> MethodHandler createMethodHandler(Object target, ClassMetadata<T> proxyClass, InterceptorMetadata interceptorMetadata);
 
-   <T> MethodHandler createMethodHandler(Object target, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
+   <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, ClassMetadata<T> proxyClass, InterceptorMetadata interceptorMetadata);
 
-   <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, Class<T> proxyClass, InterceptorMetadata interceptorMetadata);
-
-   <T> T createProxyFromClass(Class<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata);
 }

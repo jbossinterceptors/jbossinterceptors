@@ -25,7 +25,7 @@ package org.jboss.interceptor.spi.metadata;
  */
 public interface InterceptorMetadataReader
 {
-   InterceptorMetadata readForInterceptorClass(ClassMetadata clazz);
+   InterceptorMetadata readForInterceptorClass(ClassMetadata<?> clazz);
 
-   InterceptorMetadata readForTargetClass(ClassMetadata clazz);
+   InterceptorMetadata readForTargetClass(ClassMetadata<?> clazz);
 }

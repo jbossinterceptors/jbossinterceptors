@@ -14,17 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.interceptor.spi.handler;
-
-import javax.interceptor.InvocationContext;
-
-import org.jboss.interceptor.spi.model.InterceptionType;
+package org.jboss.interceptor.spi.instance;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionHandler
-{
-   public Object intercept(Object target, InterceptionType interceptionType, InvocationContext invocationContext) throws Exception;
-}
+public interface InterceptorInstantiator<I, T> {
 
+    T createFor(I clazz);
+}

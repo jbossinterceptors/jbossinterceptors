@@ -51,7 +51,7 @@ public class ReflectiveMethodMetadata implements MethodMetadata, Serializable
       return javaMethod;
    }
 
-   public ClassMetadata getReturnType()
+   public ClassMetadata<?> getReturnType()
    {
       return ReflectiveClassMetadata.of(javaMethod.getReturnType());
    }

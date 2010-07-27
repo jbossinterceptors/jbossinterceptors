@@ -19,11 +19,12 @@ package org.jboss.interceptor.proxy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.interceptor.InvocationContext;
 
-import org.jboss.interceptor.spi.handler.InterceptionHandler;
 import org.jboss.interceptor.spi.model.InterceptionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,55 +43,81 @@ public class InterceptionChain
 
    private int currentPosition;
 
-   private List<InterceptionHandler> interceptorHandlers;
-
    private final InterceptionType interceptionType;
 
-   public InterceptionChain(List<InterceptionHandler> interceptorHandlers, InterceptionType interceptionType, Object target, Method targetMethod)
+   private List<InterceptorInvocation.InterceptorMethodInvocation> interceptorMethodInvocations;
+
+   public InterceptionChain(Collection<InterceptorInvocation<?>> interceptorInvocations, InterceptionType interceptionType, Object target, Method targetMethod)
    {
-      this.interceptorHandlers = interceptorHandlers;
       this.interceptionType = interceptionType;
       this.target = target;
       this.targetMethod = targetMethod;
       this.currentPosition = 0;
+      interceptorMethodInvocations = new ArrayList<InterceptorInvocation.InterceptorMethodInvocation>();
+      for (InterceptorInvocation<?> interceptorInvocation : interceptorInvocations)
+      {
+         interceptorMethodInvocations.addAll(interceptorInvocation.getInterceptorMethodInvocations());
+      }
    }
 
    public Object invokeNext(InvocationContext invocationContext) throws Throwable
    {
 
-      if (hasNext())
+      try
       {
-         InterceptionHandler nextInterceptorHandler = interceptorHandlers.get(currentPosition++);
-         if (log.isTraceEnabled())
+         if (hasNext())
          {
-            log.trace("Invoking next interceptor in chain:" + nextInterceptorHandler.getClass().getName());
-         }
-         return nextInterceptorHandler.intercept(target, interceptionType, invocationContext);
-      }
-      else
-      {
-         if (targetMethod != null)
-         {
-            try
+            InterceptorInvocation.InterceptorMethodInvocation nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
+            if (log.isTraceEnabled())
             {
-               return targetMethod.invoke(target, invocationContext.getParameters());
+               log.trace("Invoking next interceptor in chain:" + nextInterceptorMethodInvocation.method.toString());
             }
-            catch (InvocationTargetException e)
+            if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 1)
             {
-               throw e.getCause();
+               return nextInterceptorMethodInvocation.invoke(invocationContext);
+            }
+            else if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 0)
+            {
+               nextInterceptorMethodInvocation.invoke(null);
+               while (hasNext())
+               {
+                  nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
+                  if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length != 0)
+                  {
+                     throw new IllegalStateException("Impossible state: lifecycle callback interceptor method on target class has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
+                  }
+                  nextInterceptorMethodInvocation.invoke(null);
+               }
+               return null;
+            }
+            else
+            {
+               throw new IllegalStateException("Impossible state: interceptor method has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
             }
          }
          else
          {
-            return null;
+            if (targetMethod != null)
+            {
+
+               return targetMethod.invoke(target, invocationContext.getParameters());
+
+            }
+            else
+            {
+               return null;
+            }
          }
+      }
+      catch (InvocationTargetException e)
+      {
+         throw e.getCause();
       }
    }
 
    public boolean hasNext()
    {
-      return currentPosition < interceptorHandlers.size();
+      return currentPosition < interceptorMethodInvocations.size();
    }
-
 
 }
