@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.builder.InterceptionModelBuilder;
+import org.jboss.interceptor.proxy.DefaultInvocationContextFactory;
 import org.jboss.interceptor.proxy.DirectClassInterceptorInstantiator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
@@ -94,6 +95,7 @@ public class SubclassingInterceptionTestCase
    private Map<Class<?>, InterceptionModel<ClassMetadata<?>,ClassMetadata>> interceptionModelRegistry;
 
    private DirectClassInterceptorInstantiator interceptionHandlerFactory;
+   private DefaultInvocationContextFactory invocationContextFactory;
 
    @Before
    public void setUp()
@@ -444,7 +446,8 @@ public class SubclassingInterceptionTestCase
    private <T> T createAdvisedInstance(Class<? extends T> targetClass, Object... args) throws Exception
    {
       InterceptionModel<ClassMetadata<?>, ClassMetadata> classMetadataInterceptionModel =  interceptionModelRegistry.get(targetClass);
-      InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, classMetadataInterceptionModel);
+      invocationContextFactory = new DefaultInvocationContextFactory();
+      InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, invocationContextFactory, classMetadataInterceptionModel);
       return ipc.createProxyFromClass(ReflectiveClassMetadata.of((Class<? extends T>) targetClass), new Class<?>[]{String.class}, args, InterceptorMetadataUtils.readMetadataForTargetClass(ReflectiveClassMetadata.of((Class<? extends T>) targetClass)));
    }
 

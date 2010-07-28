@@ -29,6 +29,7 @@ import java.util.Map;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.builder.InterceptionModelBuilder;
+import org.jboss.interceptor.proxy.DefaultInvocationContextFactory;
 import org.jboss.interceptor.proxy.DirectClassInterceptorInstantiator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
@@ -459,7 +460,8 @@ public class InterceptionTestCase
 
    private <T> T proxifyInstance(T instance, Class<? extends T> targetClass)
    {
-      InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, interceptionModelRegistry.get(targetClass));
+      DefaultInvocationContextFactory contextFactory = new DefaultInvocationContextFactory();
+      InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, contextFactory, interceptionModelRegistry.get(targetClass));
       InterceptorMetadata classMetadata = InterceptorMetadataUtils.readMetadataForTargetClass(ReflectiveClassMetadata.of(targetClass));
       ClassMetadata<? extends T> targetClassMetadata = ReflectiveClassMetadata.of(targetClass);
       MethodHandler methodHandler = ipc.createMethodHandler(instance, targetClassMetadata, classMetadata);

@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.interceptor.InvocationContext;
 
+import org.jboss.interceptor.spi.context.InterceptionChain;
 import org.jboss.interceptor.spi.model.InterceptionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,10 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionChain
+public class SimpleInterceptionChain implements InterceptionChain
 {
 
-   private final Logger log = LoggerFactory.getLogger(InterceptionChain.class);
+   private final Logger log = LoggerFactory.getLogger(SimpleInterceptionChain.class);
 
    private Object target;
 
@@ -47,7 +48,7 @@ public class InterceptionChain
 
    private List<InterceptorInvocation.InterceptorMethodInvocation> interceptorMethodInvocations;
 
-   public InterceptionChain(Collection<InterceptorInvocation<?>> interceptorInvocations, InterceptionType interceptionType, Object target, Method targetMethod)
+   public SimpleInterceptionChain(Collection<InterceptorInvocation<?>> interceptorInvocations, InterceptionType interceptionType, Object target, Method targetMethod)
    {
       this.interceptionType = interceptionType;
       this.target = target;
@@ -60,12 +61,12 @@ public class InterceptionChain
       }
    }
 
-   public Object invokeNext(InvocationContext invocationContext) throws Throwable
+   public Object invokeNextInterceptor(InvocationContext invocationContext) throws Throwable
    {
 
       try
       {
-         if (hasNext())
+         if (hasNextInterceptor())
          {
             InterceptorInvocation.InterceptorMethodInvocation nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
             if (log.isTraceEnabled())
@@ -79,7 +80,7 @@ public class InterceptionChain
             else if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 0)
             {
                nextInterceptorMethodInvocation.invoke(null);
-               while (hasNext())
+               while (hasNextInterceptor())
                {
                   nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
                   if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length != 0)
@@ -115,7 +116,7 @@ public class InterceptionChain
       }
    }
 
-   public boolean hasNext()
+   public boolean hasNextInterceptor()
    {
       return currentPosition < interceptorMethodInvocations.size();
    }

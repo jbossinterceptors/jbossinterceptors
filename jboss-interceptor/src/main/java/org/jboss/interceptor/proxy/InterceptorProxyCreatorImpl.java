@@ -23,6 +23,7 @@ import java.util.Arrays;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
+import org.jboss.interceptor.spi.context.InvocationContextFactory;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
@@ -36,13 +37,15 @@ import sun.reflect.ReflectionFactory;
 public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 {
 
+   private InvocationContextFactory invocationContextFactory;
    private InterceptionModel<ClassMetadata<?>,ClassMetadata> interceptionModel;
 
    private InterceptorInstantiator<ClassMetadata<?>, Object> interceptorInstantiator;
 
-      public InterceptorProxyCreatorImpl(InterceptorInstantiator<ClassMetadata<?>, Object> interceptorInstantiator, InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel)
+      public InterceptorProxyCreatorImpl(InterceptorInstantiator<ClassMetadata<?>, Object> interceptorInstantiator, InvocationContextFactory invocationContextFactory, InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel)
    {
       this.interceptorInstantiator = interceptorInstantiator;
+      this.invocationContextFactory = invocationContextFactory;
       this.interceptionModel = interceptionModel;
    }
 
@@ -105,12 +108,12 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
    public <T> MethodHandler createMethodHandler(Object target, ClassMetadata<T> proxyClass, InterceptorMetadata interceptorMetadata)
    {
-      return new InterceptorMethodHandler(target, interceptionModel, interceptorInstantiator, interceptorMetadata, true);
+      return new InterceptorMethodHandler(target, interceptorMetadata, interceptionModel, interceptorInstantiator, invocationContextFactory,  true);
    }
 
     public <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, ClassMetadata<T> proxyClass, InterceptorMetadata interceptorMetadata)
     {
-       return new InterceptorMethodHandler(targetInstance, interceptionModel, interceptorInstantiator, interceptorMetadata, false);
+       return new InterceptorMethodHandler(targetInstance,  interceptorMetadata, interceptionModel, interceptorInstantiator, invocationContextFactory, false);
     }
 
 

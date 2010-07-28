@@ -27,6 +27,8 @@ import java.util.Map;
 
 import javax.interceptor.InvocationContext;
 
+import org.jboss.interceptor.spi.context.InterceptionChain;
+
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
@@ -114,7 +116,7 @@ public class InterceptorInvocationContext implements InvocationContext
    {
       try
       {
-         return interceptionChain.invokeNext(this);
+         return interceptionChain.invokeNextInterceptor(this);
       }
       catch (Exception e)
       {

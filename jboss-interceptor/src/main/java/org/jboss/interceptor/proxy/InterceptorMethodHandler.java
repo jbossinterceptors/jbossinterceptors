@@ -14,6 +14,7 @@ import java.util.Map;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.reader.InterceptorMetadataUtils;
+import org.jboss.interceptor.spi.context.InvocationContextFactory;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
@@ -28,12 +29,6 @@ import org.jboss.interceptor.util.ReflectionUtils;
  */
 public class InterceptorMethodHandler implements MethodHandler, Serializable
 {
-
-   private Map<ClassMetadata<?>, Object> interceptorHandlerInstances = new HashMap<ClassMetadata<?>, Object>();
-   private InterceptorMetadata targetClassInterceptorMetadata;
-   private InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel;
-   private Object targetInstance;
-
    private static MethodHandler DEFAULT_METHOD_HANDLER = new MethodHandler()
    {
 
@@ -45,12 +40,22 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
       }
    };
 
+   private Map<ClassMetadata<?>, Object> interceptorHandlerInstances = new HashMap<ClassMetadata<?>, Object>();
+   private InterceptorMetadata targetClassInterceptorMetadata;
+   private InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel;
+   private Object targetInstance;
+   private InvocationContextFactory invocationContextFactory;
    private boolean proxy;
 
-   public InterceptorMethodHandler(Object targetInstance, InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel, InterceptorInstantiator<ClassMetadata<?>, ?> interceptorInstantiator, InterceptorMetadata targetClassMetadata, boolean proxy)
+   public InterceptorMethodHandler(Object targetInstance,
+                                   InterceptorMetadata targetClassMetadata,
+                                   InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel,
+                                   InterceptorInstantiator<ClassMetadata<?>, ?> interceptorInstantiator,
+                                   InvocationContextFactory invocationContextFactory,
+                                   boolean proxy )
    {
       this.targetInstance = targetInstance;
-
+      this.invocationContextFactory = invocationContextFactory;
       if (interceptionModel == null)
       {
          throw new IllegalArgumentException("Interception model must not be null");
@@ -66,6 +71,11 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
       }
       targetClassInterceptorMetadata = targetClassMetadata;
       this.proxy = proxy;
+   }
+
+   protected boolean isProxy()
+   {
+      return proxy;
    }
 
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
@@ -113,27 +123,17 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
 
       List<ClassMetadata> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
       Collection<InterceptorInvocation<?>> interceptorInvocations = new ArrayList<InterceptorInvocation<?>>();
-
       for (ClassMetadata<?> interceptorReference : interceptorList)
       {
          interceptorInvocations.add(new InterceptorInvocation(interceptorHandlerInstances.get(interceptorReference), InterceptorMetadataUtils.readMetadataForInterceptorClass(interceptorReference), interceptionType));
       }
-
       if (targetClassInterceptorMetadata != null && targetClassInterceptorMetadata.getInterceptorMethods(interceptionType) != null && !targetClassInterceptorMetadata.getInterceptorMethods(interceptionType).isEmpty())
       {
          interceptorInvocations.add(new InterceptorInvocation(isProxy() ? targetInstance : self, targetClassInterceptorMetadata, interceptionType));
       }
-
-      InterceptionChain chain = new InterceptionChain(interceptorInvocations, interceptionType, isProxy() ? targetInstance : self, isProxy() ? thisMethod : proceedingMethod);
-      return chain.invokeNext(new InterceptorInvocationContext(chain, isProxy() ? targetInstance : self, isProxy() ? thisMethod : proceedingMethod, args));
-
+      SimpleInterceptionChain chain = new SimpleInterceptionChain(interceptorInvocations, interceptionType, isProxy() ? targetInstance : self, isProxy() ? thisMethod : proceedingMethod);
+      return chain.invokeNextInterceptor(invocationContextFactory.newInvocationContext(chain, isProxy() ? targetInstance : self, isProxy() ? thisMethod : proceedingMethod, args));
    }
-
-   protected boolean isProxy()
-   {
-      return proxy;
-   }
-
 
    private void writeObject(ObjectOutputStream objectOutputStream) throws IOException
    {
