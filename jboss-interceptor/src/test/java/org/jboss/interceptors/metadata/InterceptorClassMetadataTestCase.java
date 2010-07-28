@@ -20,14 +20,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.registry.SimpleInterceptorMetadataRegistry;
+import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
 import org.jboss.interceptor.util.InterceptorMetadataException;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -36,18 +34,10 @@ import org.junit.Test;
 public class InterceptorClassMetadataTestCase
 {
 
-   InterceptorMetadataRegistry interceptorMetadataRegistry;
-
-   @Before
-   public void setUp()
-   {
-      interceptorMetadataRegistry = new SimpleInterceptorMetadataRegistry();
-   }
-
    @Test
    public void testInterceptorWithAllMethods()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
+      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 1);
@@ -74,7 +64,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInterceptorWithSomeMethods()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(InterceptorWithSomeMethods.class));
+      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithSomeMethods.class));
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 0);
@@ -99,7 +89,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testSimpleInheritance()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(SimpleInheritanceChildInterceptor.class));
+      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(SimpleInheritanceChildInterceptor.class));
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(1, postConstructMethods.size());
@@ -123,7 +113,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInheritanceWithAndWithoutOverriding()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(OverrideChildInterceptor.class));
+      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(OverrideChildInterceptor.class));
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 1);
@@ -149,7 +139,7 @@ public class InterceptorClassMetadataTestCase
    @Test(expected = InterceptorMetadataException.class)
    public void testDuplicateAnnotations()
    {
-      InterceptorMetadata interceptorClassMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(InterceptorWithDuplicateAnnotations.class));
+      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithDuplicateAnnotations.class));
 
    }
 

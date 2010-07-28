@@ -17,7 +17,6 @@
 
 package org.jboss.interceptor.proxy;
 
-import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 
@@ -26,11 +25,9 @@ import org.jboss.interceptor.spi.metadata.ClassMetadata;
  */
 public class DirectClassInterceptorInstantiator implements InterceptorInstantiator<ClassMetadata<?>, Object>
 {
-   private InterceptorMetadataRegistry interceptorMetadataRegistry;
 
-   public DirectClassInterceptorInstantiator(InterceptorMetadataRegistry interceptorMetadataRegistry)
+   public DirectClassInterceptorInstantiator()
    {
-      this.interceptorMetadataRegistry = interceptorMetadataRegistry;
    }
 
    public Object createFor(ClassMetadata<?> clazz)

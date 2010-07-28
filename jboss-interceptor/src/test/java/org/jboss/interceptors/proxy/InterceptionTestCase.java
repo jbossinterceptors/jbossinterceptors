@@ -32,9 +32,8 @@ import org.jboss.interceptor.builder.InterceptionModelBuilder;
 import org.jboss.interceptor.proxy.DirectClassInterceptorInstantiator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
+import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
-import org.jboss.interceptor.registry.InterceptorMetadataRegistry;
-import org.jboss.interceptor.registry.SimpleInterceptorMetadataRegistry;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
@@ -100,13 +99,10 @@ public class InterceptionTestCase
 
    private DirectClassInterceptorInstantiator interceptionHandlerFactory;
 
-   private InterceptorMetadataRegistry interceptorMetadataRegistry;
-
    @Before
    public void setUp()
    {
-      interceptorMetadataRegistry = new SimpleInterceptorMetadataRegistry();
-      interceptionHandlerFactory = new DirectClassInterceptorInstantiator(interceptorMetadataRegistry);
+      interceptionHandlerFactory = new DirectClassInterceptorInstantiator();
    }
 
    public void resetLogAndSetupClassesForMethod() throws Exception
@@ -464,7 +460,7 @@ public class InterceptionTestCase
    private <T> T proxifyInstance(T instance, Class<? extends T> targetClass)
    {
       InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, interceptionModelRegistry.get(targetClass));
-      InterceptorMetadata classMetadata = interceptorMetadataRegistry.getInterceptorClassMetadata(ReflectiveClassMetadata.of(targetClass), true);
+      InterceptorMetadata classMetadata = InterceptorMetadataUtils.readMetadataForTargetClass(ReflectiveClassMetadata.of(targetClass));
       ClassMetadata<? extends T> targetClassMetadata = ReflectiveClassMetadata.of(targetClass);
       MethodHandler methodHandler = ipc.createMethodHandler(instance, targetClassMetadata, classMetadata);
       Class<? extends T> proxyClassWithHandler = InterceptionUtils.createProxyClassWithHandler(targetClassMetadata, methodHandler);
