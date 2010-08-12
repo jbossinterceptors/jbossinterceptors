@@ -48,7 +48,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    private boolean proxy;
 
    public InterceptorMethodHandler(Object targetInstance,
-                                   InterceptorMetadata targetClassMetadata,
+                                   ClassMetadata<?> targetClassMetadata,
                                    InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel,
                                    InterceptorInstantiator<ClassMetadata<?>, ?> interceptorInstantiator,
                                    InvocationContextFactory invocationContextFactory,
@@ -69,7 +69,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
       {
          interceptorHandlerInstances.put(interceptorReference, interceptorInstantiator.createFor(interceptorReference));
       }
-      targetClassInterceptorMetadata = targetClassMetadata;
+      targetClassInterceptorMetadata = InterceptorMetadataUtils.readMetadataForTargetClass(targetClassMetadata);
       this.proxy = proxy;
    }
 

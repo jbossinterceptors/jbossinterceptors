@@ -22,14 +22,14 @@ import java.util.Arrays;
 
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
+
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
-import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.spi.context.InvocationContextFactory;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
-import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.jboss.interceptor.util.InterceptionUtils;
+
 import sun.reflect.ReflectionFactory;
 
 /**
@@ -109,12 +109,12 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
 
    public <T> MethodHandler createMethodHandler(Object target, ClassMetadata<T> proxyClass)
    {
-      return new InterceptorMethodHandler(target, InterceptorMetadataUtils.readMetadataForTargetClass(proxyClass), interceptionModel, interceptorInstantiator, invocationContextFactory,  true);
+      return new InterceptorMethodHandler(target, proxyClass, interceptionModel, interceptorInstantiator, invocationContextFactory,  true);
    }
 
     public <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, ClassMetadata<T> proxyClass)
     {
-       return new InterceptorMethodHandler(targetInstance,  InterceptorMetadataUtils.readMetadataForTargetClass(proxyClass), interceptionModel, interceptorInstantiator, invocationContextFactory, false);
+       return new InterceptorMethodHandler(targetInstance,  proxyClass, interceptionModel, interceptorInstantiator, invocationContextFactory, false);
     }
 
 
