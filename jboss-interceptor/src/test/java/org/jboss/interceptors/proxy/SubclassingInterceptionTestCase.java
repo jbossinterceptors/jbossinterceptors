@@ -448,7 +448,7 @@ public class SubclassingInterceptionTestCase
       InterceptionModel<ClassMetadata<?>, ClassMetadata> classMetadataInterceptionModel =  interceptionModelRegistry.get(targetClass);
       invocationContextFactory = new DefaultInvocationContextFactory();
       InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, invocationContextFactory, classMetadataInterceptionModel);
-      return ipc.createProxyFromClass(ReflectiveClassMetadata.of((Class<? extends T>) targetClass), new Class<?>[]{String.class}, args, InterceptorMetadataUtils.readMetadataForTargetClass(ReflectiveClassMetadata.of((Class<? extends T>) targetClass)));
+      return ipc.createProxyFromClass(ReflectiveClassMetadata.of((Class<? extends T>) targetClass), new Class<?>[]{String.class}, args);
    }
 
 }

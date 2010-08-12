@@ -23,6 +23,7 @@ import java.util.Arrays;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
+import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.spi.context.InvocationContextFactory;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
@@ -50,10 +51,10 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    }
 
 
-   public <T> T createProxyFromClass(ClassMetadata<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments, InterceptorMetadata interceptorClassMetadata)
+   public <T> T createProxyFromClass(ClassMetadata<T> proxifiedClass, Class<?>[] constructorTypes, Object[] constructorArguments)
    {
       T instance = createAdvisedSubclassInstance(proxifiedClass, constructorTypes, constructorArguments);
-      MethodHandler interceptorMethodHandler = createSubclassingMethodHandler(instance, proxifiedClass, interceptorClassMetadata);
+      MethodHandler interceptorMethodHandler = createSubclassingMethodHandler(instance, proxifiedClass);
       ((ProxyObject)instance).setHandler(new CompositeHandler(Arrays
             .asList(new MethodHandler[]{interceptorMethodHandler})));
       return instance;
@@ -106,14 +107,14 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       }
    }
 
-   public <T> MethodHandler createMethodHandler(Object target, ClassMetadata<T> proxyClass, InterceptorMetadata interceptorMetadata)
+   public <T> MethodHandler createMethodHandler(Object target, ClassMetadata<T> proxyClass)
    {
-      return new InterceptorMethodHandler(target, interceptorMetadata, interceptionModel, interceptorInstantiator, invocationContextFactory,  true);
+      return new InterceptorMethodHandler(target, InterceptorMetadataUtils.readMetadataForTargetClass(proxyClass), interceptionModel, interceptorInstantiator, invocationContextFactory,  true);
    }
 
-    public <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, ClassMetadata<T> proxyClass, InterceptorMetadata interceptorMetadata)
+    public <T> MethodHandler createSubclassingMethodHandler(Object targetInstance, ClassMetadata<T> proxyClass)
     {
-       return new InterceptorMethodHandler(targetInstance,  interceptorMetadata, interceptionModel, interceptorInstantiator, invocationContextFactory, false);
+       return new InterceptorMethodHandler(targetInstance,  InterceptorMetadataUtils.readMetadataForTargetClass(proxyClass), interceptionModel, interceptorInstantiator, invocationContextFactory, false);
     }
 
 

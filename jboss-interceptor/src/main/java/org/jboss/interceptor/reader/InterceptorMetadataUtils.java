@@ -80,7 +80,7 @@ public class InterceptorMetadataUtils
             return false;
          }
 
-         if (parameterTypes.length == 1 && !InvocationContext.class.equals(parameterTypes[0]))
+         if (parameterTypes.length == 1 && !InvocationContext.class.isAssignableFrom(parameterTypes[0]))
          {
             if (LOG.isDebugEnabled())
             {
@@ -113,7 +113,7 @@ public class InterceptorMetadataUtils
             return false;
          }
 
-         if (!InvocationContext.class.equals(parameterTypes[0]))
+         if (!InvocationContext.class.isAssignableFrom(parameterTypes[0]))
          {
             if (LOG.isDebugEnabled())
             {
