@@ -462,7 +462,6 @@ public class InterceptionTestCase
    {
       DefaultInvocationContextFactory contextFactory = new DefaultInvocationContextFactory();
       InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, contextFactory, interceptionModelRegistry.get(targetClass));
-      InterceptorMetadata classMetadata = InterceptorMetadataUtils.readMetadataForTargetClass(ReflectiveClassMetadata.of(targetClass));
       ClassMetadata<? extends T> targetClassMetadata = ReflectiveClassMetadata.of(targetClass);
       MethodHandler methodHandler = ipc.createMethodHandler(instance, targetClassMetadata);
       Class<? extends T> proxyClassWithHandler = InterceptionUtils.createProxyClassWithHandler(targetClassMetadata, methodHandler);

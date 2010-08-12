@@ -33,6 +33,8 @@ import org.jboss.interceptor.spi.model.InterceptionType;
  */
 public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializable
 {
+   
+   private static final long serialVersionUID = 1247010247012491L;
 
    private ClassMetadata<?> interceptorClass;
 

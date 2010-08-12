@@ -42,12 +42,13 @@ public class CustomInvocationContextTest
          }
       };
       
-      InterceptionModelBuilder<ClassMetadata<?>, ClassMetadata> builder = InterceptionModelBuilder.<ClassMetadata<?>,ClassMetadata>newBuilderFor(ReflectiveClassMetadata.of(Service.class), ClassMetadata.class);
+      ClassMetadata<Service> serviceClassMetadata = ReflectiveClassMetadata.of(Service.class);
+      InterceptionModelBuilder<ClassMetadata<?>, ClassMetadata> builder = InterceptionModelBuilder.<ClassMetadata<?>,ClassMetadata>newBuilderFor(serviceClassMetadata, ClassMetadata.class);
       builder.interceptAll().with(ReflectiveClassMetadata.of(CustomInterceptor.class));
       InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel = builder.build();
       InterceptorProxyCreatorImpl interceptorProxyCreator = new InterceptorProxyCreatorImpl(interceptorInstantiator, invocationContextFactory, interceptionModel);
       
-      Service serviceInstance = interceptorProxyCreator.createProxyFromClass(ReflectiveClassMetadata.of(Service.class), new Class<?>[]{}, new Object[]{} );
+      Service serviceInstance = interceptorProxyCreator.createSubclassingProxy(serviceClassMetadata, new Class<?>[]{}, new Object[]{} );
       
       serviceInstance.invoke();
       

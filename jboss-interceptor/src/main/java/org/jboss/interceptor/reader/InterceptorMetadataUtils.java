@@ -53,9 +53,9 @@ public class InterceptorMetadataUtils
       {
          if (!Void.TYPE.equals(method.getReturnType().getJavaClass()))
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
-              LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have a void return type");
+              LOG.warn(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have a void return type");
             }
             return false;
          }
@@ -64,27 +64,27 @@ public class InterceptorMetadataUtils
 
          if (forTargetClass && parameterTypes.length != 0)
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "is defined on the target class and does not have 0 arguments");
+               LOG.warn(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "is defined on the target class and does not have 0 arguments");
             }
             return false;
          }
 
          if (!forTargetClass && parameterTypes.length != 1)
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have exactly one parameter");
+               LOG.warn(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have exactly one parameter");
             }
             return false;
          }
 
          if (parameterTypes.length == 1 && !InvocationContext.class.isAssignableFrom(parameterTypes[0]))
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "its single argument is not a " + InvocationContext.class.getName());
+               LOG.warn(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "its single argument is not a " + InvocationContext.class.getName());
             }
             return false;
          }
@@ -95,9 +95,9 @@ public class InterceptorMetadataUtils
       {
          if (!Object.class.equals(method.getReturnType().getJavaClass()))
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
-               LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not return a " + OBJECT_CLASS_NAME);
+               LOG.warn(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not return a " + OBJECT_CLASS_NAME);
             }
             return false;
          }
@@ -106,7 +106,7 @@ public class InterceptorMetadataUtils
 
          if (parameterTypes.length != 1)
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
                LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have exactly 1 parameter");
             }
@@ -115,7 +115,7 @@ public class InterceptorMetadataUtils
 
          if (!InvocationContext.class.isAssignableFrom(parameterTypes[0]))
          {
-            if (LOG.isDebugEnabled())
+            if (LOG.isWarnEnabled())
             {
                LOG.debug(getStandardIgnoredMessage(interceptionType, method.getJavaMethod()) + "does not have a " + InvocationContext.class.getName() + " parameter ");
             }

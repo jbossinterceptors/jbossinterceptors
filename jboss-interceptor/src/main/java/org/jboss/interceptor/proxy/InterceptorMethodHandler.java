@@ -45,14 +45,12 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    private InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel;
    private Object targetInstance;
    private InvocationContextFactory invocationContextFactory;
-   private boolean proxy;
 
    public InterceptorMethodHandler(Object targetInstance,
                                    ClassMetadata<?> targetClassMetadata,
                                    InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel,
                                    InterceptorInstantiator<ClassMetadata<?>, ?> interceptorInstantiator,
-                                   InvocationContextFactory invocationContextFactory,
-                                   boolean proxy )
+                                   InvocationContextFactory invocationContextFactory )
    {
       this.targetInstance = targetInstance;
       this.invocationContextFactory = invocationContextFactory;
@@ -70,12 +68,11 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
          interceptorHandlerInstances.put(interceptorReference, interceptorInstantiator.createFor(interceptorReference));
       }
       targetClassInterceptorMetadata = InterceptorMetadataUtils.readMetadataForTargetClass(targetClassMetadata);
-      this.proxy = proxy;
    }
 
    protected boolean isProxy()
    {
-      return proxy;
+      return targetInstance != null;
    }
 
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
