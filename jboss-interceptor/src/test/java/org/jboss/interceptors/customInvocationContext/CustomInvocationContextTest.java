@@ -32,6 +32,7 @@ public class CustomInvocationContextTest
       
       CustomInterceptor.invocationCount = 0;
       InterceptorInstantiator<ClassMetadata<?>, Object> interceptorInstantiator = new DirectClassInterceptorInstantiator();
+      
       InvocationContextFactory invocationContextFactory = new InvocationContextFactory()
       {
          
@@ -43,9 +44,10 @@ public class CustomInvocationContextTest
       };
       
       ClassMetadata<Service> serviceClassMetadata = ReflectiveClassMetadata.of(Service.class);
-      InterceptionModelBuilder<ClassMetadata<?>, ClassMetadata> builder = InterceptionModelBuilder.<ClassMetadata<?>,ClassMetadata>newBuilderFor(serviceClassMetadata, ClassMetadata.class);
+      InterceptionModelBuilder<ClassMetadata<?>> builder = InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(serviceClassMetadata);
       builder.interceptAll().with(ReflectiveClassMetadata.of(CustomInterceptor.class));
-      InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel = builder.build();
+      InterceptionModel<ClassMetadata<?>> interceptionModel = builder.build();
+      
       InterceptorProxyCreatorImpl interceptorProxyCreator = new InterceptorProxyCreatorImpl(interceptorInstantiator, invocationContextFactory, interceptionModel);
       
       Service serviceInstance = interceptorProxyCreator.createSubclassingProxy(serviceClassMetadata, new Class<?>[]{}, new Object[]{} );

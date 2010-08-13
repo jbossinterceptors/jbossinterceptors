@@ -32,6 +32,8 @@ import org.jboss.interceptor.util.ImmutableIteratorWrapper;
 public class ReflectiveClassMetadata<T> implements ClassMetadata<T>, Serializable
 {
 
+   private static final long serialVersionUID = -2088679292389273922L;
+   
    private Class<T> clazz;
 
    private ReflectiveClassMetadata(Class<T> clazz)
@@ -41,7 +43,7 @@ public class ReflectiveClassMetadata<T> implements ClassMetadata<T>, Serializabl
 
    public static <T> ClassMetadata<T> of(Class<T> clazz)
    {
-      return new ReflectiveClassMetadata(clazz);
+      return new ReflectiveClassMetadata<T>(clazz);
    }
 
    public String getClassName()
@@ -55,7 +57,7 @@ public class ReflectiveClassMetadata<T> implements ClassMetadata<T>, Serializabl
       {
          public Iterator<MethodMetadata> iterator()
          {
-             return new ImmutableIteratorWrapper<Method>(new ArrayIterator(ReflectiveClassMetadata.this.clazz.getDeclaredMethods()))
+             return new ImmutableIteratorWrapper<Method>(new ArrayIterator<Method>(ReflectiveClassMetadata.this.clazz.getDeclaredMethods()))
              {
                 @Override
                 protected MethodMetadata wrapObject(Method method)
@@ -72,10 +74,42 @@ public class ReflectiveClassMetadata<T> implements ClassMetadata<T>, Serializabl
       return clazz;
    }   
 
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public ClassMetadata<?> getSuperclass()
    {
       Class<?> superClass = clazz.getSuperclass();
       return superClass == null? null : new ReflectiveClassMetadata(superClass);
    }
+
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      ReflectiveClassMetadata<?> other = (ReflectiveClassMetadata<?>) obj;
+      if (clazz == null)
+      {
+         if (other.clazz != null)
+            return false;
+      }
+      else if (!clazz.equals(other.clazz))
+         return false;
+      return true;
+   }
+   
+   
 
 }

@@ -42,13 +42,13 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
 
    private Map<ClassMetadata<?>, Object> interceptorHandlerInstances = new HashMap<ClassMetadata<?>, Object>();
    private InterceptorMetadata targetClassInterceptorMetadata;
-   private InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel;
+   private InterceptionModel<ClassMetadata<?>> interceptionModel;
    private Object targetInstance;
    private InvocationContextFactory invocationContextFactory;
 
    public InterceptorMethodHandler(Object targetInstance,
                                    ClassMetadata<?> targetClassMetadata,
-                                   InterceptionModel<ClassMetadata<?>, ClassMetadata> interceptionModel,
+                                   InterceptionModel<ClassMetadata<?>> interceptionModel,
                                    InterceptorInstantiator<ClassMetadata<?>, ?> interceptorInstantiator,
                                    InvocationContextFactory invocationContextFactory )
    {
@@ -118,7 +118,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    private Object executeInterception(Object self, Method proceedingMethod, Method thisMethod, Object[] args, InterceptionType interceptionType) throws Throwable
    {
 
-      List<ClassMetadata> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
+      List<ClassMetadata<?>> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
       Collection<InterceptorInvocation<?>> interceptorInvocations = new ArrayList<InterceptorInvocation<?>>();
       for (ClassMetadata<?> interceptorReference : interceptorList)
       {

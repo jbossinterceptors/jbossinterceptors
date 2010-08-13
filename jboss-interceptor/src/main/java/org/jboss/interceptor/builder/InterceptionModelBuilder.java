@@ -23,6 +23,7 @@ import static org.jboss.interceptor.spi.model.InterceptionType.PRE_PASSIVATE;
 
 import java.lang.reflect.Method;
 
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.jboss.interceptor.spi.model.InterceptionType;
 
@@ -30,20 +31,20 @@ import org.jboss.interceptor.spi.model.InterceptionType;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionModelBuilder<T, I>
+public class InterceptionModelBuilder<T>
 {
 
-   private BuildableInterceptionModel<T, I> interceptionModel;
+   private BuildableInterceptionModel<T> interceptionModel;
 
    private T interceptedEntity;
 
    private InterceptionModelBuilder(T interceptedEntity)
    {
       this.interceptedEntity = interceptedEntity;
-      this.interceptionModel = new InterceptionModelImpl<T, I>(interceptedEntity);
+      this.interceptionModel = new InterceptionModelImpl<T>(interceptedEntity);
    }
 
-   private InterceptionModelBuilder(BuildableInterceptionModel<T, I> interceptionModel)
+   private InterceptionModelBuilder(BuildableInterceptionModel<T> interceptionModel)
    {
       if (interceptionModel == null)
       {
@@ -53,12 +54,12 @@ public class InterceptionModelBuilder<T, I>
       this.interceptionModel = interceptionModel;
    }
 
-   public static <T,I> InterceptionModelBuilder<T,I> newBuilderFor(T entity, Class<I> interceptorType)
+   public static <T> InterceptionModelBuilder<T> newBuilderFor(T entity)
    {
-      return new InterceptionModelBuilder<T, I>(entity);
+      return new InterceptionModelBuilder<T>(entity);
    }
 
-   public static <T, I> InterceptionModelBuilder<T, I> changeBuilderFor(BuildableInterceptionModel<T,I> interceptionModel)
+   public static <T> InterceptionModelBuilder<T> changeBuilderFor(BuildableInterceptionModel<T> interceptionModel)
    {
       return new InterceptionModelBuilder(interceptionModel);
    }
@@ -68,7 +69,7 @@ public class InterceptionModelBuilder<T, I>
       return interceptedEntity;
    }
 
-   public InterceptionModel<T, I> build()
+   public InterceptionModel<T> build()
    {
       return interceptionModel;
    }
@@ -125,7 +126,7 @@ public class InterceptionModelBuilder<T, I>
          this.interceptionTypes = interceptionType;
       }
 
-      public void with(I... interceptors)
+      public void with(ClassMetadata<?> ... interceptors)
       {
          for (InterceptionType interceptionType: interceptionTypes)
          {

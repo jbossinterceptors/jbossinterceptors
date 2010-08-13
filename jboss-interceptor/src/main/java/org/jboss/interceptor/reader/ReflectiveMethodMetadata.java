@@ -29,6 +29,9 @@ import org.jboss.interceptor.spi.metadata.MethodMetadata;
  */
 public class ReflectiveMethodMetadata implements MethodMetadata, Serializable
 {
+   
+   private static final long serialVersionUID = -4538617003189564552L;
+   
    private Method javaMethod;
 
    private ReflectiveMethodMetadata(Method method)
@@ -54,6 +57,35 @@ public class ReflectiveMethodMetadata implements MethodMetadata, Serializable
    public ClassMetadata<?> getReturnType()
    {
       return ReflectiveClassMetadata.of(javaMethod.getReturnType());
+   }
+
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((javaMethod == null) ? 0 : javaMethod.hashCode());
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      ReflectiveMethodMetadata other = (ReflectiveMethodMetadata) obj;
+      if (javaMethod == null)
+      {
+         if (other.javaMethod != null)
+            return false;
+      }
+      else if (!javaMethod.equals(other.javaMethod))
+         return false;
+      return true;
    }
 
 }

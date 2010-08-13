@@ -29,21 +29,22 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.interceptor.proxy.InterceptorException;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
+class InterceptionModelImpl<T> implements BuildableInterceptionModel<T>
 {
 
-   private Map<InterceptionType, List<I>> globalInterceptors = new HashMap<InterceptionType, List<I>>();
+   private Map<InterceptionType, List<ClassMetadata<?>>> globalInterceptors = new HashMap<InterceptionType, List<ClassMetadata<?>>>();
 
-   private Map<InterceptionType, Map<MethodReference, List<I>>> methodBoundInterceptors = new HashMap<InterceptionType, Map<MethodReference, List<I>>>();
+   private Map<InterceptionType, Map<MethodReference, List<ClassMetadata<?>>>> methodBoundInterceptors = new HashMap<InterceptionType, Map<MethodReference, List<ClassMetadata<?>>>>();
 
    private Set<MethodReference> methodsIgnoringGlobals = new HashSet<MethodReference>();
 
-   private Set<I> allInterceptors = new LinkedHashSet<I>();
+   private Set<ClassMetadata<?>> allInterceptors = new LinkedHashSet<ClassMetadata<?>>();
 
    private T interceptedEntity;
 
@@ -52,7 +53,7 @@ class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
       this.interceptedEntity = interceptedEntity;
    }
 
-   public List<I> getInterceptors(InterceptionType interceptionType, Method method)
+   public List<ClassMetadata<?>> getInterceptors(InterceptionType interceptionType, Method method)
    {
       if (interceptionType.isLifecycleCallback() && method != null)
       {
@@ -73,7 +74,7 @@ class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
       }
       else
       {
-         ArrayList<I> returnedInterceptors = new ArrayList<I>();
+         ArrayList<ClassMetadata<?>> returnedInterceptors = new ArrayList<ClassMetadata<?>>();
          if (!methodsIgnoringGlobals.contains(methodHolder(method)) && globalInterceptors.containsKey(interceptionType))
          {
             returnedInterceptors.addAll(globalInterceptors.get(interceptionType));
@@ -87,7 +88,7 @@ class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
       return Collections.EMPTY_LIST;
    }
 
-   public Set<I> getAllInterceptors()
+   public Set<ClassMetadata<?>> getAllInterceptors()
    {
       return Collections.unmodifiableSet(allInterceptors);
    }
@@ -109,14 +110,14 @@ class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
       }
    }
 
-   public void appendInterceptors(InterceptionType interceptionType, Method method, I... interceptors)
+   public void appendInterceptors(InterceptionType interceptionType, Method method, ClassMetadata<?>... interceptors)
    {
       if (null == method)
       {
-         List<I> interceptorsList = globalInterceptors.get(interceptionType);
+         List<ClassMetadata<?>> interceptorsList = globalInterceptors.get(interceptionType);
          if (interceptorsList == null)
          {
-            interceptorsList = new ArrayList<I>();
+            interceptorsList = new ArrayList<ClassMetadata<?>>();
             globalInterceptors.put(interceptionType, interceptorsList);
          }
          appendInterceptorClassesToList(interceptionType, interceptorsList, interceptors);
@@ -125,12 +126,12 @@ class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
       {
          if (null == methodBoundInterceptors.get(interceptionType))
          {
-            methodBoundInterceptors.put(interceptionType, new HashMap<MethodReference, List<I>>());
+            methodBoundInterceptors.put(interceptionType, new HashMap<MethodReference, List<ClassMetadata<?>>>());
          }
-         List<I> interceptorsList = methodBoundInterceptors.get(interceptionType).get(methodHolder(method));
+         List<ClassMetadata<?>> interceptorsList = methodBoundInterceptors.get(interceptionType).get(methodHolder(method));
          if (interceptorsList == null)
          {
-            interceptorsList = new ArrayList<I>();
+            interceptorsList = new ArrayList<ClassMetadata<?>>();
             methodBoundInterceptors.get(interceptionType).put(methodHolder(method), interceptorsList);
          }
          if (globalInterceptors.containsKey(interceptionType))
@@ -142,15 +143,15 @@ class InterceptionModelImpl<T, I> implements BuildableInterceptionModel<T, I>
       allInterceptors.addAll(Arrays.asList(interceptors));
    }
 
-   private void appendInterceptorClassesToList(InterceptionType interceptionType, List<I> interceptorsList, I... interceptors)
+   private void appendInterceptorClassesToList(InterceptionType interceptionType, List<ClassMetadata<?>> interceptorsList, ClassMetadata<?>... interceptors)
    {
       validateDuplicateInterceptors(interceptionType, interceptorsList, interceptors);
       interceptorsList.addAll(Arrays.asList(interceptors));
    }
 
-   private void validateDuplicateInterceptors(InterceptionType interceptionType, List<I> interceptorsList, I[] interceptors)
+   private void validateDuplicateInterceptors(InterceptionType interceptionType, List<ClassMetadata<?>> interceptorsList, ClassMetadata<?>[] interceptors)
    {
-      for (I interceptor : interceptors)
+      for (ClassMetadata<?> interceptor : interceptors)
       {
          if (interceptorsList.contains(interceptor))
          {

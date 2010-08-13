@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.io.Serializable;
 
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
+
 /**
  * Describes the interceptors that apply to a particular entity.
  *
@@ -29,7 +31,7 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionModel<T, I> extends Serializable
+public interface InterceptionModel<T> extends Serializable
 {
 
    /**
@@ -41,13 +43,13 @@ public interface InterceptionModel<T, I> extends Serializable
     * @throws IllegalArgumentException if interceptionType is business method or around timeout
     * but method is null, as well as if interceptionType is callback and method is not null
     */
-   public List<I> getInterceptors(InterceptionType interceptionType, Method method);
+   public List<ClassMetadata<?>> getInterceptors(InterceptionType interceptionType, Method method);
 
    /**
     * Returns all interceptor classes that are applicable to the given intercepted entity
     * @return all interceptors
     */
-   public Set<I> getAllInterceptors();
+   public Set<ClassMetadata<?>> getAllInterceptors();
 
    /**
     * 
