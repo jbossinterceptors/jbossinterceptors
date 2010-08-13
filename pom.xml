@@ -31,8 +31,8 @@
   </properties>
 
   <modules>
-    <module>jboss-interceptor-api</module>
-    <module>jboss-interceptor</module>
+    <module>jboss-interceptor-spi</module>
+    <module>jboss-interceptor-core-impl</module>
   </modules>
 
   <build>
