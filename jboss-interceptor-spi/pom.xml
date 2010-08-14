@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jboss-interceptor-api</artifactId>
+    <artifactId>jboss-interceptor-spi</artifactId>
     <name>JBoss EJB 3.1 Common Interceptor Library API</name>
 
     <dependencies>

@@ -32,7 +32,7 @@
 
   <modules>
     <module>jboss-interceptor-spi</module>
-    <module>jboss-interceptor-core-impl</module>
+    <module>jboss-interceptor-core</module>
   </modules>
 
   <build>
@@ -177,13 +177,13 @@
 
       <dependency>
         <groupId>org.jboss.interceptor</groupId>
-        <artifactId>jboss-interceptor-api</artifactId>
+        <artifactId>jboss-interceptor-spi</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.jboss.interceptor</groupId>
-        <artifactId>jboss-interceptor-impl</artifactId>
+        <artifactId>jboss-interceptor-core</artifactId>
         <version>${project.version}</version>
       </dependency>
 
