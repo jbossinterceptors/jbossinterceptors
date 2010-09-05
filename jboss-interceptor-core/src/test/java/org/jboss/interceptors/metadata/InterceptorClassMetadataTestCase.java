@@ -20,8 +20,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
+import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
@@ -143,6 +146,54 @@ public class InterceptorClassMetadataTestCase
 
    }
 
+   /**
+    * Tests that the {@link InterceptorMetadata#isEligible(InterceptionType)} method works 
+    * as expected against interceptors with different {@link InterceptionType}s
+    */
+   @Test
+   public void testEligibilityForInterceptionType()
+   {
+      // test an interceptor which has interceptor methods for all InterceptionTypes
+      InterceptorMetadata interceptorWithAllInterceptionTypes = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
+      
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.POST_CONSTRUCT, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.POST_CONSTRUCT));
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.PRE_DESTROY, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.PRE_DESTROY));
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.PRE_PASSIVATE, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.PRE_PASSIVATE));
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.POST_ACTIVATE, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.POST_ACTIVATE));
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.AROUND_INVOKE, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.AROUND_INVOKE));
+   
+      // now test an interceptor which has interceptor methods for only a few InterceptionTypes
+      InterceptorMetadata interceptorWithAroundInvokeAndPostConstruct = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithPostConstructAndAroundInvoke.class));
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.POST_CONSTRUCT, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.POST_CONSTRUCT));
+      Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.AROUND_INVOKE, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.AROUND_INVOKE));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.PRE_DESTROY, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.PRE_DESTROY));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.PRE_PASSIVATE, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.PRE_PASSIVATE));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.POST_ACTIVATE, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.POST_ACTIVATE));
+      
+      
+      // test with a simple class which isn't eligible for any of the interception types
+      InterceptorMetadata notAnInterceptor = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(NotAnInterceptor.class));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.POST_CONSTRUCT, notAnInterceptor.isEligible(InterceptionType.POST_CONSTRUCT));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.AROUND_INVOKE, notAnInterceptor.isEligible(InterceptionType.AROUND_INVOKE));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.PRE_DESTROY, notAnInterceptor.isEligible(InterceptionType.PRE_DESTROY));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.PRE_PASSIVATE, notAnInterceptor.isEligible(InterceptionType.PRE_PASSIVATE));
+      Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.POST_ACTIVATE, notAnInterceptor.isEligible(InterceptionType.POST_ACTIVATE));
 
+      
+   }
+
+   /**
+    * Tests that the {@link InterceptorMetadata#getInterceptorClass()} returns the correct
+    * {@link ClassMetadata}
+    */
+   @Test
+   public void testInterceptorClassMetaData()
+   {
+      InterceptorMetadata interceptorWithAllInterceptionTypes = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
+      
+      ClassMetadata<?> interceptorClass = interceptorWithAllInterceptionTypes.getInterceptorClass();
+      Assert.assertNotNull("ClassMetadata not found on interceptor metadata created out of class: " + InterceptorWithAllMethods.class, interceptorClass);
+      Assert.assertEquals("Unexpected ClassMetadata found on interceptor metadata created out of class: " + InterceptorWithAllMethods.class, InterceptorWithAllMethods.class.getName(), interceptorClass.getClassName());
+   }
 
 }

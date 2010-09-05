@@ -49,6 +49,14 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
       this.interceptorMethodMap = interceptorMethodMap;
    }
 
+   /**
+    * {@inheritDoc}
+    */
+   public ClassMetadata<?> getInterceptorClass()
+   {
+      return this.interceptorClass;
+   }
+   
    public List<MethodMetadata> getInterceptorMethods(InterceptionType interceptionType)
    {
       if (interceptorMethodMap != null)
@@ -65,6 +73,20 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
    public boolean isTargetClass()
    {
       return targetClass;
+   }
+   
+   /**
+    * {@inheritDoc}
+    */
+   public boolean isEligible(InterceptionType interceptionType)
+   {
+      if (this.interceptorMethodMap == null)
+      {
+         return false;
+      }
+      List<MethodMetadata> interceptorMethods = this.interceptorMethodMap.get(interceptionType);
+      // return true if there are any interceptor methods for this interception type
+      return interceptorMethods != null && interceptorMethods.isEmpty() == false;
    }
 
    private Object writeReplace()

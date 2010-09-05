@@ -27,6 +27,13 @@ import org.jboss.interceptor.spi.model.InterceptionType;
 public interface InterceptorMetadata
 {
    /**
+    * Returns the class for which this interceptor metadata was created 
+    * 
+    * @return
+    */
+   ClassMetadata<?> getInterceptorClass();
+   
+   /**
     * Returns the list of interceptor methods of this class for a given 
     * interception type.
     *
@@ -34,6 +41,15 @@ public interface InterceptorMetadata
     * @return a list of methods
     */
    List<MethodMetadata> getInterceptorMethods(InterceptionType interceptionType);
+   
+   /**
+    * Returns true if the interceptor corresponding to this {@link InterceptorMetadata}
+    * has interceptor methods for the given <code>interceptionType</code>. Else returns false.
+    *   
+    * @param interceptionType The {@link InterceptionType}
+    * @return
+    */
+   boolean isEligible(InterceptionType interceptionType);
 
    boolean isTargetClass();
 }
