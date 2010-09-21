@@ -100,7 +100,7 @@ public class SimpleInterceptionChain implements InterceptionChain
          {
             if (targetMethod != null)
             {
-
+               targetMethod.setAccessible(true);
                return targetMethod.invoke(target, invocationContext.getParameters());
 
             }
