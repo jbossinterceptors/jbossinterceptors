@@ -1,20 +1,9 @@
 package org.jboss.interceptors.customInvocationContext;
 
-import java.awt.im.InputMethodRequests;
-import java.lang.reflect.Method;
-import java.util.Map;
-
-import javassist.util.proxy.MethodHandler;
-
-import javax.interceptor.InvocationContext;
-
 import junit.framework.Assert;
-
 import org.jboss.interceptor.builder.InterceptionModelBuilder;
 import org.jboss.interceptor.proxy.DirectClassInterceptorInstantiator;
-import org.jboss.interceptor.proxy.InterceptorProxyCreator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
-import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
 import org.jboss.interceptor.spi.context.InterceptionChain;
 import org.jboss.interceptor.spi.context.InvocationContextFactory;
@@ -22,6 +11,9 @@ import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.junit.Test;
+
+import javax.interceptor.InvocationContext;
+import java.lang.reflect.Method;
 
 public class CustomInvocationContextTest
 {
