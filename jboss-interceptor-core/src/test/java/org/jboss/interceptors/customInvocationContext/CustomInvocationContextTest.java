@@ -30,8 +30,12 @@ public class CustomInvocationContextTest
          
          public InvocationContext newInvocationContext(InterceptionChain chain, Object o, Method method, Object[] args)
          {
-            // TODO Auto-generated method stub
             return new CustomInvocationContextImpl(chain, o, method, args);
+         }
+
+         public InvocationContext newInvocationContext(InterceptionChain chain, Object o, Method method, Object timer)
+         {
+            throw new UnsupportedOperationException();
          }
       };
       

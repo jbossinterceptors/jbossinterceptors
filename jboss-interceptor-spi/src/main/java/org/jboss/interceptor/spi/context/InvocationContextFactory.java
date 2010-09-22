@@ -27,4 +27,6 @@ import javax.interceptor.InvocationContext;
 public interface InvocationContextFactory
 {
    InvocationContext newInvocationContext(InterceptionChain chain, Object o, Method method, Object[] args);
+
+   InvocationContext newInvocationContext(InterceptionChain chain, Object o, Method method, Object timer);
 }
