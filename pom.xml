@@ -17,11 +17,24 @@
   <name>JBoss EJB 3.1 Common Interceptor Library Parent</name>
   <description>JBoss EJB 3.1 Common Interceptor Library Parent</description>
 
-  <scm>
-    <connection>scm:svn:http://anonsvn.jboss.org/repos/jbossas/projects/interceptors/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.jboss.org/repos/jbossas/projects/interceptors/trunk/</developerConnection>
-    <url>http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbossas/projects/interceptors/trunk/</url>
-  </scm>
+   <scm>
+      <connection>scm:git:git://github.com/jbossinterceptor/jbossinterceptor.git</connection>
+      <developerConnection>scm:git:git://github.com/jbossinterceptor/jbossinterceptor.git</developerConnection>
+      <url>scm:git:git://github.com/jbossinterceptor/jbossinterceptor.git</url>
+   </scm>
+
+   <distributionManagement>
+      <repository>
+         <id>jboss-releases-repository</id>
+         <name>JBoss Releases Repository</name>
+         <url>${jboss.releases.repo.url}</url>
+      </repository>
+      <snapshotRepository>
+         <id>jboss-snapshots-repository</id>
+         <name>JBoss Snapshots Repository</name>
+         <url>${jboss.snapshots.repo.url}</url>
+      </snapshotRepository>
+   </distributionManagement>
 
   <properties>
     <version.interceptor.api>1.0.0.Beta1</version.interceptor.api>
@@ -97,41 +110,47 @@
     </pluginManagement>
   </build>
 
-  <repositories>
-    <repository>
-      <id>repository.jboss.org</id>
-      <name>JBoss Repository</name>
-      <layout>default</layout>
-      <url>http://repository.jboss.org/maven2/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>snapshots.jboss.org</id>
-      <name>JBoss Snapshots Repository</name>
-      <layout>default</layout>
-      <url>http://snapshots.jboss.org/maven2/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <!-- APIviz repository -->
-    <repository>
-      <id>apiviz.release</id>
-      <name>APIviz releases</name>
-      <url>http://apiviz.googlecode.com/svn/site/repo/mvn/release</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+ <profiles>
+      <profile>
+         <id>jboss-public-repository</id>
+         <activation>
+            <property>
+               <name>jboss-public-repository</name>
+               <value>!false</value>
+            </property>
+         </activation>
+         <repositories>
+            <repository>
+               <id>jboss-public-repository-group</id>
+               <name>JBoss Public Maven Repository Group</name>
+               <url>http://repository.jboss.org/nexus/content/groups/public</url>
+               <releases>
+                  <enabled>true</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </releases>
+               <snapshots>
+                  <enabled>true</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </snapshots>
+            </repository>
+         </repositories>
+         <pluginRepositories>
+            <pluginRepository>
+               <id>jboss-public-repository-group</id>
+               <name>JBoss Public Maven Repository Group</name>
+               <url>http://repository.jboss.org/nexus/content/groups/public</url>
+               <releases>
+                  <enabled>true</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </releases>
+               <snapshots>
+                  <enabled>false</enabled>
+                  <updatePolicy>never</updatePolicy>
+               </snapshots>
+            </pluginRepository>
+         </pluginRepositories>
+      </profile>
+   </profiles>
 
   <reporting>
     <plugins>
