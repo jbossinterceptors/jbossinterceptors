@@ -22,15 +22,19 @@ import java.util.List;
 import org.jboss.interceptor.spi.model.InterceptionType;
 
 /**
+ * This class is parametrized for
+ *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptorMetadata
+public interface InterceptorMetadata<T>
 {
    /**
     * Returns the class for which this interceptor metadata was created 
     * 
     * @return
     */
+   InterceptorReference<T> getInterceptorReference();
+
    ClassMetadata<?> getInterceptorClass();
    
    /**

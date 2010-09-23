@@ -24,6 +24,7 @@ import static org.jboss.interceptor.spi.model.InterceptionType.PRE_PASSIVATE;
 import java.lang.reflect.Method;
 
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
+import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.jboss.interceptor.spi.model.InterceptionType;
 
@@ -126,7 +127,7 @@ public class InterceptionModelBuilder<T>
          this.interceptionTypes = interceptionType;
       }
 
-      public void with(ClassMetadata<?> ... interceptors)
+      public void with(InterceptorMetadata... interceptors)
       {
          for (InterceptionType interceptionType: interceptionTypes)
          {

@@ -13,6 +13,7 @@ import javax.interceptor.InvocationContext;
 import org.jboss.interceptor.builder.MethodReference;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
+import org.jboss.interceptor.spi.metadata.InterceptorReference;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
 import org.jboss.interceptor.util.InterceptionTypeRegistry;
@@ -31,14 +32,14 @@ public class InterceptorMetadataUtils
    private static final Logger LOG = LoggerFactory.getLogger(InterceptorMetadataUtils.class);
 
 
-   public static InterceptorMetadata readMetadataForInterceptorClass(ClassMetadata<?> classMetadata)
+   public static InterceptorMetadata readMetadataForInterceptorClass(InterceptorReference<?> interceptorReference)
    {
-      return new SimpleInterceptorMetadata(classMetadata, false, buildMethodMap(classMetadata, false));
+      return new SimpleInterceptorMetadata(interceptorReference, false, buildMethodMap(interceptorReference.getClassMetadata(), false));
    }
 
    public static InterceptorMetadata readMetadataForTargetClass(ClassMetadata<?> classMetadata)
    {
-      return new SimpleInterceptorMetadata(classMetadata, true, buildMethodMap(classMetadata, true));
+      return new SimpleInterceptorMetadata(ClassMetadataInterceptorReference.of(classMetadata), true, buildMethodMap(classMetadata, true));
    }
 
    public static boolean isInterceptorMethod(InterceptionType interceptionType, MethodMetadata method, boolean forTargetClass)

@@ -200,6 +200,12 @@
         <scope>test</scope>
       </dependency>
 
+       <dependency>
+           <groupId>com.google.guava</groupId>
+           <artifactId>guava</artifactId>
+          <version>r06</version>
+        </dependency>
+
       <dependency>
         <groupId>javassist</groupId>
         <artifactId>javassist</artifactId>

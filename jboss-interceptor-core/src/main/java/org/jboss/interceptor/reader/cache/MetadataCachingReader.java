@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -15,35 +15,24 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.proxy;
+package org.jboss.interceptor.reader.cache;
 
-import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
+import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorReference;
 
 /**
- * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
+ *@author: Marius Bogoevici
  */
-public class DirectClassInterceptorInstantiator implements InterceptorInstantiator<Object, ClassMetadata<?>>
+public interface MetadataCachingReader
 {
+   <T> InterceptorMetadata<T> getInterceptorMetadata(InterceptorReference<T> interceptorReference);
 
-   public DirectClassInterceptorInstantiator()
-   {
-   }
+   <T> InterceptorMetadata<T> getTargetClassInterceptorMetadata(ClassMetadata<T> classMetadata);
 
-   public Object createFor(InterceptorReference<ClassMetadata<?>> clazz)
-   {
-      try
-      {
-         return clazz.getInterceptor().getJavaClass().newInstance();
-      }
-      catch (InstantiationException e)
-      {
-         throw new InterceptorException(e);
-      }
-      catch (IllegalAccessException e)
-      {
-         throw new InterceptorException(e);
-      }
-   }
+   <T> InterceptorMetadata<T> getInterceptorMetadata(Class<T> clazz);
+
+   <T> InterceptorMetadata<T> getTargetClassInterceptorMetadata(Class<T> clazz);
+
+   <T> ClassMetadata<T> getClassMetadata(Class<T> clazz);
 }

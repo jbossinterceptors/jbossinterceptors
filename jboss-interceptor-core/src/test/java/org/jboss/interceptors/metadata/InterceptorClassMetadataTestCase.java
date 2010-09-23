@@ -22,8 +22,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.jboss.interceptor.reader.InterceptorMetadataUtils;
-import org.jboss.interceptor.reader.ReflectiveClassMetadata;
+import org.jboss.interceptor.reader.cache.DefaultMetadataCachingReader;
+import org.jboss.interceptor.reader.cache.MetadataCachingReader;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;
@@ -36,11 +36,12 @@ import org.junit.Test;
  */
 public class InterceptorClassMetadataTestCase
 {
+   MetadataCachingReader metadataCachingReader = new DefaultMetadataCachingReader();
 
    @Test
    public void testInterceptorWithAllMethods()
    {
-      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
+      InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(InterceptorWithAllMethods.class);
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 1);
@@ -67,7 +68,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInterceptorWithSomeMethods()
    {
-      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithSomeMethods.class));
+      InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(InterceptorWithSomeMethods.class);
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 0);
@@ -92,7 +93,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testSimpleInheritance()
    {
-      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(SimpleInheritanceChildInterceptor.class));
+      InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(SimpleInheritanceChildInterceptor.class);
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(1, postConstructMethods.size());
@@ -116,7 +117,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInheritanceWithAndWithoutOverriding()
    {
-      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(OverrideChildInterceptor.class));
+      InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(OverrideChildInterceptor.class);
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
       assertEquals(true, postConstructMethods.size() == 1);
@@ -142,7 +143,7 @@ public class InterceptorClassMetadataTestCase
    @Test(expected = InterceptorMetadataException.class)
    public void testDuplicateAnnotations()
    {
-      InterceptorMetadata interceptorClassMetadata = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithDuplicateAnnotations.class));
+      InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(InterceptorWithDuplicateAnnotations.class);
 
    }
 
@@ -154,7 +155,7 @@ public class InterceptorClassMetadataTestCase
    public void testEligibilityForInterceptionType()
    {
       // test an interceptor which has interceptor methods for all InterceptionTypes
-      InterceptorMetadata interceptorWithAllInterceptionTypes = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
+      InterceptorMetadata interceptorWithAllInterceptionTypes = metadataCachingReader.getInterceptorMetadata(InterceptorWithAllMethods.class);
       
       Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.POST_CONSTRUCT, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.POST_CONSTRUCT));
       Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.PRE_DESTROY, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.PRE_DESTROY));
@@ -163,7 +164,7 @@ public class InterceptorClassMetadataTestCase
       Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.AROUND_INVOKE, interceptorWithAllInterceptionTypes.isEligible(InterceptionType.AROUND_INVOKE));
    
       // now test an interceptor which has interceptor methods for only a few InterceptionTypes
-      InterceptorMetadata interceptorWithAroundInvokeAndPostConstruct = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithPostConstructAndAroundInvoke.class));
+      InterceptorMetadata interceptorWithAroundInvokeAndPostConstruct = metadataCachingReader.getInterceptorMetadata(InterceptorWithPostConstructAndAroundInvoke.class);
       Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.POST_CONSTRUCT, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.POST_CONSTRUCT));
       Assert.assertTrue("Interceptor was expected to be eligible for: " + InterceptionType.AROUND_INVOKE, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.AROUND_INVOKE));
       Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.PRE_DESTROY, interceptorWithAroundInvokeAndPostConstruct.isEligible(InterceptionType.PRE_DESTROY));
@@ -172,7 +173,7 @@ public class InterceptorClassMetadataTestCase
       
       
       // test with a simple class which isn't eligible for any of the interception types
-      InterceptorMetadata notAnInterceptor = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(NotAnInterceptor.class));
+      InterceptorMetadata notAnInterceptor = metadataCachingReader.getInterceptorMetadata(NotAnInterceptor.class);
       Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.POST_CONSTRUCT, notAnInterceptor.isEligible(InterceptionType.POST_CONSTRUCT));
       Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.AROUND_INVOKE, notAnInterceptor.isEligible(InterceptionType.AROUND_INVOKE));
       Assert.assertFalse("Interceptor was expected to be ineligible for: " + InterceptionType.PRE_DESTROY, notAnInterceptor.isEligible(InterceptionType.PRE_DESTROY));
@@ -189,7 +190,7 @@ public class InterceptorClassMetadataTestCase
    @Test
    public void testInterceptorClassMetaData()
    {
-      InterceptorMetadata interceptorWithAllInterceptionTypes = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(InterceptorWithAllMethods.class));
+      InterceptorMetadata interceptorWithAllInterceptionTypes = metadataCachingReader.getInterceptorMetadata(InterceptorWithAllMethods.class);
       
       ClassMetadata<?> interceptorClass = interceptorWithAllInterceptionTypes.getInterceptorClass();
       Assert.assertNotNull("ClassMetadata not found on interceptor metadata created out of class: " + InterceptorWithAllMethods.class, interceptorClass);

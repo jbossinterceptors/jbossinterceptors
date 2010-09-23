@@ -30,8 +30,10 @@ import org.jboss.interceptor.proxy.DefaultInvocationContextFactory;
 import org.jboss.interceptor.proxy.DirectClassInterceptorInstantiator;
 import org.jboss.interceptor.proxy.InterceptorProxyCreatorImpl;
 import org.jboss.interceptor.proxy.javassist.CompositeHandler;
-import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.reader.ReflectiveClassMetadata;
+import org.jboss.interceptor.reader.cache.DefaultMetadataCachingReader;
+import org.jboss.interceptor.reader.cache.MetadataCachingReader;
+import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.jboss.interceptor.util.InterceptionUtils;
@@ -94,13 +96,15 @@ public class SubclassingInterceptionTestCase
 
    private Map<Class<?>, InterceptionModel<ClassMetadata<?>>> interceptionModelRegistry;
 
-   private DirectClassInterceptorInstantiator interceptionHandlerFactory;
+   private InterceptorInstantiator<?, ClassMetadata<?>> interceptorInstantiator;
    private DefaultInvocationContextFactory invocationContextFactory;
+   
+   private MetadataCachingReader metadataCachingReader = new DefaultMetadataCachingReader();
 
    @Before
    public void setUp()
    {
-      interceptionHandlerFactory = new DirectClassInterceptorInstantiator();
+      interceptorInstantiator = new DirectClassInterceptorInstantiator();
    }
 
    public void resetLogAndSetupClassesForMethod() throws Exception
@@ -110,9 +114,9 @@ public class SubclassingInterceptionTestCase
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
       builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(
-            ReflectiveClassMetadata.of(FirstInterceptor.class), ReflectiveClassMetadata.of(SecondInterceptor.class));
-      builder.interceptPostConstruct().with(ReflectiveClassMetadata.of(FirstInterceptor.class));
-      builder.interceptPreDestroy().with(ReflectiveClassMetadata.of(SecondInterceptor.class));
+            metadataCachingReader.getInterceptorMetadata(FirstInterceptor.class),  metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
+      builder.interceptPostConstruct().with( metadataCachingReader.getInterceptorMetadata((FirstInterceptor.class)));
+      builder.interceptPreDestroy().with( metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -124,11 +128,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAll().with(ReflectiveClassMetadata.of(FirstInterceptor.class), ReflectiveClassMetadata.of(SecondInterceptor.class));
+      builder.interceptAll().with( metadataCachingReader.getInterceptorMetadata((FirstInterceptor.class)),  metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -140,12 +144,12 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
-      builder.interceptAll().with(ReflectiveClassMetadata.of(FirstInterceptor.class));
-      builder.interceptPreDestroy().with(ReflectiveClassMetadata.of(SecondInterceptor.class));
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(ReflectiveClassMetadata.of(SecondInterceptor.class));
+      builder.interceptAll().with( metadataCachingReader.getInterceptorMetadata((FirstInterceptor.class)));
+      builder.interceptPreDestroy().with( metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with( metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -157,12 +161,12 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
-      builder.interceptAll().with(ReflectiveClassMetadata.of(FirstInterceptor.class));
-      builder.interceptPreDestroy().with(ReflectiveClassMetadata.of(SecondInterceptor.class));
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with(ReflectiveClassMetadata.of(SecondInterceptor.class));
+      builder.interceptAll().with( metadataCachingReader.getInterceptorMetadata((FirstInterceptor.class)));
+      builder.interceptPreDestroy().with( metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("getName")).with( metadataCachingReader.getInterceptorMetadata((SecondInterceptor.class)));
       builder.ignoreGlobalInterceptors(FootballTeam.class.getMethod("getName"));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
@@ -257,10 +261,10 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo", String.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptor.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo", String.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptor.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -275,11 +279,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoInt", int.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithInteger.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoInt", int.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithInteger.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -294,11 +298,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLongAsObject", Long.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithInteger.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLongAsObject", Long.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithInteger.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -313,11 +317,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLongAsObject", Long.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithLong.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLongAsObject", Long.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithLong.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -332,11 +336,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLong", long.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithInteger.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoLong", long.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithInteger.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -351,11 +355,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoInt", int.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithLong.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoInt", int.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithLong.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -370,11 +374,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoObjectArray", Object[].class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithLongArray.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoObjectArray", Object[].class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithLongArray.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -389,11 +393,11 @@ public class SubclassingInterceptionTestCase
    {
       InterceptorTestLogger.reset();
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoStringArray", String[].class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptorWithLongArray.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echoStringArray", String[].class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithLongArray.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -409,11 +413,11 @@ public class SubclassingInterceptionTestCase
       InterceptorTestLogger.reset();
 
 
-      ClassMetadata<?> footballTeamClass = ReflectiveClassMetadata.of(FootballTeam.class);
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
       InterceptionModelBuilder<ClassMetadata<?>> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
 
-      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo2", ValueBearer.class)).with(ReflectiveClassMetadata.of(ParameterOverridingInterceptor2.class));
+      builder.interceptAroundInvoke(FootballTeam.class.getMethod("echo2", ValueBearer.class)).with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptor2.class)));
       InterceptionModel<ClassMetadata<?>> interceptionModel;
       interceptionModel = builder.build();
       this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>>>();
@@ -447,8 +451,8 @@ public class SubclassingInterceptionTestCase
    {
       InterceptionModel<ClassMetadata<?>> classMetadataInterceptionModel =  interceptionModelRegistry.get(targetClass);
       invocationContextFactory = new DefaultInvocationContextFactory();
-      InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptionHandlerFactory, invocationContextFactory, classMetadataInterceptionModel);
-      return ipc.createSubclassingProxy(ReflectiveClassMetadata.of((Class<? extends T>) targetClass), new Class<?>[]{String.class}, args);
+      InterceptorProxyCreatorImpl ipc = new InterceptorProxyCreatorImpl(interceptorInstantiator, invocationContextFactory, classMetadataInterceptionModel);
+      return ipc.createSubclassingProxy( metadataCachingReader.getClassMetadata(targetClass), new Class<?>[]{String.class}, args);
    }
 
 }

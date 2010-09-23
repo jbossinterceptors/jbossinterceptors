@@ -32,8 +32,8 @@ import junit.framework.Assert;
 import org.jboss.interceptor.proxy.DefaultInvocationContextFactory;
 import org.jboss.interceptor.proxy.InterceptorInvocation;
 import org.jboss.interceptor.proxy.SimpleInterceptionChain;
-import org.jboss.interceptor.reader.InterceptorMetadataUtils;
-import org.jboss.interceptor.reader.ReflectiveClassMetadata;
+import org.jboss.interceptor.reader.cache.DefaultMetadataCachingReader;
+import org.jboss.interceptor.reader.cache.MetadataCachingReader;
 import org.jboss.interceptor.spi.context.InterceptionChain;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
@@ -48,7 +48,8 @@ import org.junit.Test;
  */
 public class LifecycleMethodInvocationTestCase
 {
-   
+
+   MetadataCachingReader metadataCachingReader = new DefaultMetadataCachingReader();
    /**
     * The interceptors spec allows the @PostConstruct method to have public, private, protected, or package level access. 
     * This test ensures that non-public @PostConstruct methods can be invoked during an interceptor invocation
@@ -57,7 +58,7 @@ public class LifecycleMethodInvocationTestCase
    public void testNonPublicPostConstructMethod() throws Exception
    {
       // create the interceptor invocation for @PostConstruct
-      InterceptorMetadata interceptorMetaData = InterceptorMetadataUtils.readMetadataForInterceptorClass(ReflectiveClassMetadata.of(SimpleInterceptor.class));
+      InterceptorMetadata interceptorMetaData = metadataCachingReader.getInterceptorMetadata(SimpleInterceptor.class);
       SimpleInterceptor interceptor = new SimpleInterceptor();
       InterceptorInvocation<?> interceptorInvocation = new InterceptorInvocation(interceptor, interceptorMetaData, InterceptionType.POST_CONSTRUCT);
       Collection<InterceptorInvocation<?>> interceptorInvocations = new HashSet<InterceptorInvocation<?>>();

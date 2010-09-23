@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source
- * Copyright 2009, Red Hat, Inc. and/or its affiliates, and individual
+ * Copyright 2010, Red Hat, Inc. and/or its affiliates, and individual
  * contributors by the @authors tag. See the copyright.txt in the
  * distribution for a full listing of individual contributors.
  *
@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.interceptor.spi.instance;
-
-import org.jboss.interceptor.spi.metadata.InterceptorReference;
+package org.jboss.interceptor.spi.metadata;
 
 /**
- * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
+ * Defines a minimal contract for an interceptor reference. Allows different types
+ * of interceptors to be used at the same time (classes, CDI interceptors)
  */
-public interface InterceptorInstantiator<T, I> {
+public interface InterceptorReference<T>
+{
+   T getInterceptor();
 
-    T createFor(InterceptorReference<I> interceptorReference);
+   ClassMetadata<?> getClassMetadata();
 }

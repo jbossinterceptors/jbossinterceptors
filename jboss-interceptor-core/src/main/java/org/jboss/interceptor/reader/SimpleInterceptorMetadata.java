@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
+import org.jboss.interceptor.spi.metadata.InterceptorReference;
 import org.jboss.interceptor.spi.metadata.MethodMetadata;
 import org.jboss.interceptor.spi.model.InterceptionType;
 
@@ -31,20 +32,20 @@ import org.jboss.interceptor.spi.model.InterceptionType;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializable
+public class SimpleInterceptorMetadata<T> implements InterceptorMetadata<T>, Serializable
 {
    
    private static final long serialVersionUID = 1247010247012491L;
 
-   private ClassMetadata<?> interceptorClass;
-
    private Map<InterceptionType, List<MethodMetadata>> interceptorMethodMap;
+
+   private final InterceptorReference<T> interceptorReference;
 
    private boolean targetClass;
 
-   public SimpleInterceptorMetadata(ClassMetadata<?> interceptorClass, boolean targetClass, Map<InterceptionType, List<MethodMetadata>> interceptorMethodMap)
+   public SimpleInterceptorMetadata(InterceptorReference<T> interceptorReference, boolean targetClass, Map<InterceptionType, List<MethodMetadata>> interceptorMethodMap)
    {
-      this.interceptorClass = interceptorClass;
+      this.interceptorReference = interceptorReference;
       this.targetClass = targetClass;
       this.interceptorMethodMap = interceptorMethodMap;
    }
@@ -54,9 +55,19 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
     */
    public ClassMetadata<?> getInterceptorClass()
    {
-      return this.interceptorClass;
+      return this.interceptorReference.getClassMetadata();
    }
-   
+
+   public InterceptorReference<T> getInterceptorReference()
+   {
+      return interceptorReference;
+   }
+
+   public boolean isTargetClass()
+   {
+      return targetClass;
+   }
+
    public List<MethodMetadata> getInterceptorMethods(InterceptionType interceptionType)
    {
       if (interceptorMethodMap != null)
@@ -70,11 +81,6 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
       }
    }
 
-   public boolean isTargetClass()
-   {
-      return targetClass;
-   }
-   
    /**
     * {@inheritDoc}
     */
@@ -91,26 +97,26 @@ public class SimpleInterceptorMetadata implements InterceptorMetadata, Serializa
 
    private Object writeReplace()
    {
-     return new MetadataSerializationProxy(interceptorClass, targetClass);
+     return new MetadataSerializationProxy(interceptorReference, targetClass);
    }
 
    private static class MetadataSerializationProxy implements Serializable
    {
 
-      private ClassMetadata<?> classMetadata;
+      private InterceptorReference<?> interceptorReference;
       private boolean targetClass;
 
-      MetadataSerializationProxy(ClassMetadata<?> classMetadata, boolean targetClass)
+      MetadataSerializationProxy(InterceptorReference<?> interceptorReference, boolean targetClass)
       {
-         this.classMetadata = classMetadata;
+         this.interceptorReference = interceptorReference;
          this.targetClass = targetClass;
       }
 
       public Object readResolve()
       {
          return targetClass?
-               InterceptorMetadataUtils.readMetadataForTargetClass(classMetadata):
-               InterceptorMetadataUtils.readMetadataForInterceptorClass(classMetadata);
+               InterceptorMetadataUtils.readMetadataForTargetClass(interceptorReference.getClassMetadata()):
+               InterceptorMetadataUtils.readMetadataForInterceptorClass(interceptorReference);
       }
    }
 }
