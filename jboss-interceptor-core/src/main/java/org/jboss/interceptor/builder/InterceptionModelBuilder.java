@@ -32,20 +32,20 @@ import org.jboss.interceptor.spi.model.InterceptionType;
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public class InterceptionModelBuilder<T>
+public class InterceptionModelBuilder<T, I>
 {
 
-   private BuildableInterceptionModel<T> interceptionModel;
+   private BuildableInterceptionModel<T, I> interceptionModel;
 
    private T interceptedEntity;
 
    private InterceptionModelBuilder(T interceptedEntity)
    {
       this.interceptedEntity = interceptedEntity;
-      this.interceptionModel = new InterceptionModelImpl<T>(interceptedEntity);
+      this.interceptionModel = new InterceptionModelImpl<T, I>(interceptedEntity);
    }
 
-   private InterceptionModelBuilder(BuildableInterceptionModel<T> interceptionModel)
+   private InterceptionModelBuilder(BuildableInterceptionModel<T, I> interceptionModel)
    {
       if (interceptionModel == null)
       {
@@ -55,12 +55,17 @@ public class InterceptionModelBuilder<T>
       this.interceptionModel = interceptionModel;
    }
 
-   public static <T> InterceptionModelBuilder<T> newBuilderFor(T entity)
+   public static <T, I> InterceptionModelBuilder<T, I> newBuilderFor(T entity, Class<I> clazz)
    {
-      return new InterceptionModelBuilder<T>(entity);
+      return new InterceptionModelBuilder<T, I>(entity);
    }
 
-   public static <T> InterceptionModelBuilder<T> changeBuilderFor(BuildableInterceptionModel<T> interceptionModel)
+   public static <T> InterceptionModelBuilder<T, ?> newBuilderFor(T entity)
+   {
+      return new InterceptionModelBuilder<T, Object>(entity);
+   }
+
+   public static <T, I> InterceptionModelBuilder<T, I> changeBuilderFor(BuildableInterceptionModel<T, I> interceptionModel)
    {
       return new InterceptionModelBuilder(interceptionModel);
    }
@@ -70,7 +75,7 @@ public class InterceptionModelBuilder<T>
       return interceptedEntity;
    }
 
-   public InterceptionModel<T> build()
+   public InterceptionModel<T, I> build()
    {
       return interceptionModel;
    }

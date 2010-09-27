@@ -32,7 +32,7 @@ import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
  *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptionModel<T> extends Serializable
+public interface InterceptionModel<T, I> extends Serializable
 {
 
    /**
@@ -44,13 +44,13 @@ public interface InterceptionModel<T> extends Serializable
     * @throws IllegalArgumentException if interceptionType is business method or around timeout
     * but method is null, as well as if interceptionType is callback and method is not null
     */
-   public List<InterceptorMetadata> getInterceptors(InterceptionType interceptionType, Method method);
+   public List<InterceptorMetadata<I>> getInterceptors(InterceptionType interceptionType, Method method);
 
    /**
     * Returns all interceptor classes that are applicable to the given intercepted entity
     * @return all interceptors
     */
-   public Set<InterceptorMetadata> getAllInterceptors();
+   public Set<InterceptorMetadata<I>> getAllInterceptors();
 
    /**
     * 

@@ -12,11 +12,11 @@ import org.jboss.interceptor.spi.model.InterceptionType;
  * 
  * @author Marius Bogoevici
  */
-public interface BuildableInterceptionModel<T> extends InterceptionModel<T>
+public interface BuildableInterceptionModel<T, I> extends InterceptionModel<T, I>
 {
 
    void setIgnoresGlobals(Method m, boolean b);
 
-   void appendInterceptors(InterceptionType interceptionType, Method method, InterceptorMetadata ... interceptors);
+   void appendInterceptors(InterceptionType interceptionType, Method method, InterceptorMetadata<I> ... interceptors);
 
 }

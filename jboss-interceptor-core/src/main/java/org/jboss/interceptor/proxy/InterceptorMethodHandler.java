@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
+import org.jboss.interceptor.builder.BuildableInterceptionModel;
 import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.spi.context.InvocationContextFactory;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
@@ -40,15 +41,15 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
       }
    };
 
-   private Map<InterceptorMetadata, Object> interceptorHandlerInstances = new HashMap<InterceptorMetadata, Object>();
+   private Map<InterceptorMetadata<?>, Object> interceptorHandlerInstances = new HashMap<InterceptorMetadata<?>, Object>();
    private InterceptorMetadata<ClassMetadata<?>> targetClassInterceptorMetadata;
-   private InterceptionModel<ClassMetadata<?>> interceptionModel;
+   private InterceptionModel<ClassMetadata<?>, ?> interceptionModel;
    private Object targetInstance;
    private InvocationContextFactory invocationContextFactory;
 
    public InterceptorMethodHandler(Object targetInstance,
                                    ClassMetadata<?> targetClassMetadata,
-                                   InterceptionModel<ClassMetadata<?>> interceptionModel,
+                                   InterceptionModel<ClassMetadata<?>, ?> interceptionModel,
                                    InterceptorInstantiator<?,ClassMetadata<?>> interceptorInstantiator,
                                    InvocationContextFactory invocationContextFactory )
    {
@@ -118,7 +119,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    private Object executeInterception(Object self, Method proceedingMethod, Method thisMethod, Object[] args, InterceptionType interceptionType) throws Throwable
    {
 
-      List<InterceptorMetadata> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
+      List<? extends InterceptorMetadata<?>> interceptorList = interceptionModel.getInterceptors(interceptionType, thisMethod);
       Collection<InterceptorInvocation<?>> interceptorInvocations = new ArrayList<InterceptorInvocation<?>>();
       for (InterceptorMetadata interceptorReference : interceptorList)
       {
