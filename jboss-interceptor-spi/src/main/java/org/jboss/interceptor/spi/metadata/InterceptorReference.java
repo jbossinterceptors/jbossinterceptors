@@ -16,11 +16,13 @@
  */
 package org.jboss.interceptor.spi.metadata;
 
+import java.io.Serializable;
+
 /**
  * Defines a minimal contract for an interceptor reference. Allows different types
  * of interceptors to be used at the same time (classes, CDI interceptors)
  */
-public interface InterceptorReference<T>
+public interface InterceptorReference<T> extends Serializable
 {
    T getInterceptor();
 

@@ -18,6 +18,8 @@
 package org.jboss.interceptor.util;
 
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -25,23 +27,54 @@ import java.lang.reflect.Method;
 public class ReflectionUtils
 {
 
-   public static void ensureAccessible(Method method)
+   public static void ensureAccessible(final Method method)
    {
-      if (!method.isAccessible())
+      doSecurely(new PrivilegedAction<Object>()
       {
-         method.setAccessible(true);
-      }
+         public Object run()
+         {
+            method.setAccessible(true);
+            return null;
+         }
+      });
+
    }
 
    public static Class<?> classForName(String className) throws ClassNotFoundException
    {
-      if (Thread.currentThread().getContextClassLoader() != null)
+      ClassLoader threadContextClassLoader = getThreadContextClassLoader();
+      if (threadContextClassLoader != null)
       {
-         return Thread.currentThread().getContextClassLoader().loadClass(className);
+         return threadContextClassLoader.loadClass(className);
       }
       else
       {
          return Class.forName(className);
       }
    }
+
+   public static ClassLoader getThreadContextClassLoader()
+   {
+      return doSecurely(new PrivilegedAction<ClassLoader>()
+      {
+         public ClassLoader run()
+         {
+            return Thread.currentThread().getContextClassLoader();
+         }
+      });
+   }
+
+   private static <O> O doSecurely(final PrivilegedAction<O> action)
+   {
+      SecurityManager sm = System.getSecurityManager();
+      if (sm != null)
+      {
+         return AccessController.doPrivileged(action);
+      }
+      else
+      {
+         return action.run();
+      }
+   }
+
 }

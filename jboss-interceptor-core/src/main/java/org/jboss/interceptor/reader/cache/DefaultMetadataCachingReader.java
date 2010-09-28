@@ -90,6 +90,22 @@ public class DefaultMetadataCachingReader implements MetadataCachingReader
       }
    }
 
+   public <T> InterceptorMetadata<T> getInterceptorMetadata(ClassMetadata<T> clazz)
+   {
+      try
+      {
+         return (InterceptorMetadata<T>) interceptorMetadataCache.get(ClassMetadataInterceptorReference.of(clazz));
+      }
+      catch (ComputationException e)
+      {
+         if (unwrapRuntimeExceptions && e.getCause() instanceof RuntimeException)
+         {
+            throw (RuntimeException) e.getCause();
+         }
+         throw e;
+      }
+   }
+
    public <T> InterceptorMetadata<T> getInterceptorMetadata(Class<T> clazz)
    {
       try

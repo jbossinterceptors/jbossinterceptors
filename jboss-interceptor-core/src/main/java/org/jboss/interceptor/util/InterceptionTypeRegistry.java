@@ -67,4 +67,5 @@ public final class InterceptionTypeRegistry
    {
       return interceptionAnnotationClasses.get(interceptionType);
    }
+  
 }

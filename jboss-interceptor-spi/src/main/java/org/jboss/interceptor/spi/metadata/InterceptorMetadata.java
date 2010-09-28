@@ -17,6 +17,7 @@
 
 package org.jboss.interceptor.spi.metadata;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.jboss.interceptor.spi.model.InterceptionType;
@@ -26,7 +27,7 @@ import org.jboss.interceptor.spi.model.InterceptionType;
  *
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
  */
-public interface InterceptorMetadata<T>
+public interface InterceptorMetadata<T> extends Serializable
 {
    /**
     * Returns the class for which this interceptor metadata was created 

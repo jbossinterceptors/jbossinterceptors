@@ -41,9 +41,9 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
    private InvocationContextFactory invocationContextFactory;
    private InterceptionModel<ClassMetadata<?>, ?> interceptionModel;
 
-   private InterceptorInstantiator<?,ClassMetadata<?>> interceptorInstantiator;
+   private InterceptorInstantiator<?,?> interceptorInstantiator;
 
-   public InterceptorProxyCreatorImpl(InterceptorInstantiator<?,ClassMetadata<?>> interceptorInstantiator, InvocationContextFactory invocationContextFactory, InterceptionModel<ClassMetadata<?>, ?> interceptionModel)
+   public InterceptorProxyCreatorImpl(InterceptorInstantiator<?,?> interceptorInstantiator, InvocationContextFactory invocationContextFactory, InterceptionModel<ClassMetadata<?>, ?> interceptionModel)
    {
       this.interceptorInstantiator = interceptorInstantiator;
       this.invocationContextFactory = invocationContextFactory;

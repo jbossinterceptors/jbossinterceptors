@@ -81,6 +81,21 @@ public class MethodReference implements Serializable
       return true;
    }
 
+   public String getMethodName()
+   {
+      return methodName;
+   }
+
+   public Class<?>[] getParameterTypes()
+   {
+      return parameterTypes;
+   }
+
+   public Class<?> getDeclaringClass()
+   {
+      return declaringClass;
+   }
+
    @Override
    public int hashCode()
    {

@@ -45,14 +45,14 @@ public class InterceptorMetadataUtils
    public static boolean isInterceptorMethod(InterceptionType interceptionType, MethodMetadata method, boolean forTargetClass)
    {
 
-      if (method.getAnnotation(InterceptionTypeRegistry.getAnnotationClass(interceptionType)) == null)
+      if (!method.getSupportedInterceptionTypes().contains(interceptionType))
       {
          return false;
       }
 
       if (interceptionType.isLifecycleCallback())
       {
-         if (!Void.TYPE.equals(method.getReturnType().getJavaClass()))
+         if (!Void.TYPE.equals(method.getReturnType()))
          {
             if (LOG.isWarnEnabled())
             {
@@ -94,7 +94,7 @@ public class InterceptorMetadataUtils
       }
       else
       {
-         if (!Object.class.equals(method.getReturnType().getJavaClass()))
+         if (!Object.class.equals(method.getReturnType()))
          {
             if (LOG.isWarnEnabled())
             {

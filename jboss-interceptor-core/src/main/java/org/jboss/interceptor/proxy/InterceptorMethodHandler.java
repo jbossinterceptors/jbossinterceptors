@@ -50,7 +50,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    public InterceptorMethodHandler(Object targetInstance,
                                    ClassMetadata<?> targetClassMetadata,
                                    InterceptionModel<ClassMetadata<?>, ?> interceptionModel,
-                                   InterceptorInstantiator<?,ClassMetadata<?>> interceptorInstantiator,
+                                   InterceptorInstantiator<?,?> interceptorInstantiator,
                                    InvocationContextFactory invocationContextFactory )
    {
       this.targetInstance = targetInstance;
@@ -79,7 +79,18 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable
    {
       ReflectionUtils.ensureAccessible(thisMethod);
-      if (null != proceed)
+      if (proceed == null)
+      {
+         if (thisMethod.getName().equals(InterceptionUtils.POST_CONSTRUCT))
+         {
+            return executeInterception(isProxy() ? null : self, null, null, null, InterceptionType.POST_CONSTRUCT);
+         }
+         else if (thisMethod.getName().equals(InterceptionUtils.PRE_DESTROY))
+         {
+            return executeInterception(isProxy() ? null : self, null, null, null, InterceptionType.PRE_DESTROY);
+         }
+      }
+      else
       {
          if (!InterceptionUtils.isInterceptionCandidate(thisMethod))
          {
@@ -99,17 +110,6 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
          else
          {
             return executeInterception(isProxy() ? null : self, thisMethod, thisMethod, args, InterceptionType.AROUND_INVOKE);
-         }
-      }
-      else
-      {
-         if (thisMethod.getName().equals(InterceptionUtils.POST_CONSTRUCT))
-         {
-            return executeInterception(isProxy() ? null : self, null, null, null, InterceptionType.POST_CONSTRUCT);
-         }
-         else if (thisMethod.getName().equals(InterceptionUtils.PRE_DESTROY))
-         {
-            return executeInterception(isProxy() ? null : self, null, null, null, InterceptionType.PRE_DESTROY);
          }
       }
       return null;
@@ -151,7 +151,7 @@ public class InterceptorMethodHandler implements MethodHandler, Serializable
       try
       {
          objectInputStream.defaultReadObject();
-         if (isProxy() && ((ProxyObject) targetInstance).getHandler() == null)
+         if (isProxy() && targetInstance instanceof ProxyObject && ((ProxyObject) targetInstance).getHandler() == null)
          {
             ((ProxyObject) targetInstance).setHandler(DEFAULT_METHOD_HANDLER);
          }

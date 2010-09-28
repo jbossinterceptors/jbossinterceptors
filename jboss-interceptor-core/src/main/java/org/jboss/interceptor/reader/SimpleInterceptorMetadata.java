@@ -94,29 +94,5 @@ public class SimpleInterceptorMetadata<T> implements InterceptorMetadata<T>, Ser
       // return true if there are any interceptor methods for this interception type
       return interceptorMethods != null && interceptorMethods.isEmpty() == false;
    }
-
-   private Object writeReplace()
-   {
-     return new MetadataSerializationProxy(interceptorReference, targetClass);
-   }
-
-   private static class MetadataSerializationProxy implements Serializable
-   {
-
-      private InterceptorReference<?> interceptorReference;
-      private boolean targetClass;
-
-      MetadataSerializationProxy(InterceptorReference<?> interceptorReference, boolean targetClass)
-      {
-         this.interceptorReference = interceptorReference;
-         this.targetClass = targetClass;
-      }
-
-      public Object readResolve()
-      {
-         return targetClass?
-               InterceptorMetadataUtils.readMetadataForTargetClass(interceptorReference.getClassMetadata()):
-               InterceptorMetadataUtils.readMetadataForInterceptorClass(interceptorReference);
-      }
-   }
+   
 }

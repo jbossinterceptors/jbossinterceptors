@@ -34,6 +34,7 @@ public class InterceptorInvocation<T>
    private T instance;
 
    private InterceptorMetadata<?> interceptorMetadata;
+   
    private InterceptionType interceptionType;
 
    public InterceptorInvocation(T instance, InterceptorMetadata<?> interceptorMetadata, InterceptionType interceptionType)

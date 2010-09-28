@@ -15,19 +15,17 @@
  * limitations under the License.
  */
 
-package org.jboss.interceptor.spi.context;
+package org.jboss.interceptor.reader;
 
-import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import javax.interceptor.InvocationContext;
-
 /**
- * @author Marius Bogoevici
+ * Allows entities to define their own strategy of reading metadata from an object
  */
-public interface InvocationContextFactory extends Serializable
+public interface AnnotatedMethodReader<M>
 {
-   InvocationContext newInvocationContext(InterceptionChain chain, Object o, Method method, Object[] args);
+   Annotation getAnnotation(Class<? extends Annotation> annotationClass, M methodReference);
 
-   InvocationContext newInvocationContext(InterceptionChain chain, Object o, Method method, Object timer);
+   Method getJavaMethod(M methodReference);
 }

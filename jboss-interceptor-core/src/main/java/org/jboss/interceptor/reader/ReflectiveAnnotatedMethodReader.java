@@ -14,28 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.jboss.interceptor.spi.metadata;
-
-import org.jboss.interceptor.spi.model.InterceptionType;
+package org.jboss.interceptor.reader;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 /**
- * Abstraction of a source of metadata information about a method. Allows the framework client
- * to configure their own way of providing method metadata, rather than relying exclusively on
- * Java reflection.
- * 
- * @author Marius Bogoevici
+ * A trivial implementation for handling methods
+ * @author
  */
-public interface MethodMetadata
+public class ReflectiveAnnotatedMethodReader implements AnnotatedMethodReader<Method>
 {
-   Method getJavaMethod();
+   private static ReflectiveAnnotatedMethodReader INSTANCE = new ReflectiveAnnotatedMethodReader();
 
-   Set<InterceptionType> getSupportedInterceptionTypes();
+   public static AnnotatedMethodReader<Method> getInstance()
+   {
+      return INSTANCE;
+   }
 
-   Class<?> getReturnType();
-   
+   public Annotation getAnnotation(Class<? extends Annotation> annotationClass, Method methodReference)
+   {
+      return methodReference.getAnnotation(annotationClass);
+   }
+
+   public Method getJavaMethod(Method methodReference)
+   {
+      // this looks a bit of an excessive indirection, but it is designed to accomodate the case when the
+      // method is wrapped in a more generic structure, like the CDI AnnotatedType
+      return methodReference;
+   }
 }

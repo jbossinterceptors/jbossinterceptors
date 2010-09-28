@@ -62,7 +62,7 @@ public class ReflectiveClassMetadata<T> implements ClassMetadata<T>, Serializabl
                 @Override
                 protected MethodMetadata wrapObject(Method method)
                 {
-                   return ReflectiveMethodMetadata.of(method);
+                   return DefaultMethodMetadata.of(method);
                 }
              };
          }
