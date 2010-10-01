@@ -19,9 +19,9 @@
    <description>JBoss EJB 3.1 Common Interceptor Library Parent</description>
 
    <scm>
-      <connection>scm:git:git://github.com/jbossinterceptor/jbossinterceptor.git</connection>
-      <developerConnection>scm:git:git://github.com/jbossinterceptor/jbossinterceptor.git</developerConnection>
-      <url>scm:git:git://github.com/jbossinterceptor/jbossinterceptor.git</url>
+      <connection>scm:git:git@github.com:jbossinterceptors/jbossinterceptors.git</connection>
+      <developerConnection>scm:git:git@github.com:jbossinterceptors/jbossinterceptors.git</developerConnection>
+      <url>scm:git:git@github.com:jbossinterceptors/jbossinterceptors.git</url>
    </scm>
 
    <distributionManagement>
