@@ -75,19 +75,33 @@ public class SimpleInterceptionChain implements InterceptionChain
             }
             if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 1)
             {
-               return nextInterceptorMethodInvocation.invoke(invocationContext);
+               try
+               {
+                  return nextInterceptorMethodInvocation.invoke(invocationContext);
+               }
+               finally
+               {
+                  currentPosition--;
+               }
             }
             else if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 0)
             {
                nextInterceptorMethodInvocation.invoke(null);
                while (hasNextInterceptor())
                {
-                  nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
-                  if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length != 0)
+                  try
                   {
-                     throw new IllegalStateException("Impossible state: lifecycle callback interceptor method on target class has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
+                     nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
+                     if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length != 0)
+                     {
+                        throw new IllegalStateException("Impossible state: lifecycle callback interceptor method on target class has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
+                     }
+                     nextInterceptorMethodInvocation.invoke(null);
                   }
-                  nextInterceptorMethodInvocation.invoke(null);
+                  finally
+                  {
+                     currentPosition --;
+                  }
                }
                return null;
             }

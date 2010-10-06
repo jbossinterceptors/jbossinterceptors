@@ -59,6 +59,7 @@ public class RetryTestCase
       InterceptionModelBuilder<ClassMetadata<?>, ?> builder =
              InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(classMetadata);
       builder.interceptAll().with(metadataCachingReader.getInterceptorMetadata(RetriableInterceptor.class));
+      builder.interceptAll().with(metadataCachingReader.getInterceptorMetadata(InternalInterceptor.class));
 
       InterceptionModel<ClassMetadata<?>,?> classMetadataInterceptionModel = builder.build();
 
@@ -66,6 +67,7 @@ public class RetryTestCase
       SimpleClass subclassingProxy = ipc.createSubclassingProxy(classMetadata, new Class<?>[]{int.class}, new Object[]{Integer.valueOf(3)});
       subclassingProxy.doSomething();
       Assert.assertEquals(2, RetriableInterceptor.interceptionsCount); // the interception is retried twice
+      Assert.assertEquals(3, InternalInterceptor.interceptionsCount); // the interception is retried twice
       Assert.assertEquals(3, subclassingProxy.getTries()); // the actual method is invoked three times
    }
 }
