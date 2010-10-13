@@ -68,47 +68,40 @@ public class SimpleInterceptionChain implements InterceptionChain
       {
          if (hasNextInterceptor())
          {
-            InterceptorInvocation.InterceptorMethodInvocation nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
-            if (log.isTraceEnabled())
+            int oldCurrentPosition = currentPosition;
+            try
             {
-               log.trace("Invoking next interceptor in chain:" + nextInterceptorMethodInvocation.method.toString());
-            }
-            if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 1)
-            {
-               try
+               InterceptorInvocation.InterceptorMethodInvocation nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
+               if (log.isTraceEnabled())
                {
+                  log.trace("Invoking next interceptor in chain:" + nextInterceptorMethodInvocation.method.toString());
+               }
+               if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 1)
+               {
+                  validateInterceptor(nextInterceptorMethodInvocation, invocationContext);
                   return nextInterceptorMethodInvocation.invoke(invocationContext);
                }
-               finally
+               else if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 0)
                {
-                  currentPosition--;
-               }
-            }
-            else if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length == 0)
-            {
-               nextInterceptorMethodInvocation.invoke(null);
-               while (hasNextInterceptor())
-               {
-                  try
+                  validateInterceptor(nextInterceptorMethodInvocation, null);
+                  nextInterceptorMethodInvocation.invoke(null);
+                  while (hasNextInterceptor())
                   {
                      nextInterceptorMethodInvocation = interceptorMethodInvocations.get(currentPosition++);
-                     if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length != 0)
-                     {
-                        throw new IllegalStateException("Impossible state: lifecycle callback interceptor method on target class has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
-                     }
+                     validateInterceptor(nextInterceptorMethodInvocation, null);
                      nextInterceptorMethodInvocation.invoke(null);
-                     return null;
                   }
-                  finally
-                  {
-                     currentPosition --;
-                  }
+                  return null;
+
                }
-               return null;
+               else
+               {
+                  throw new IllegalStateException("Impossible state: interceptor method has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
+               }
             }
-            else
+            finally
             {
-               throw new IllegalStateException("Impossible state: interceptor method has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
+               currentPosition = oldCurrentPosition;
             }
          }
          else
@@ -128,6 +121,17 @@ public class SimpleInterceptionChain implements InterceptionChain
       catch (InvocationTargetException e)
       {
          throw e.getCause();
+      }
+   }
+
+   private void validateInterceptor(InterceptorInvocation.InterceptorMethodInvocation nextInterceptorMethodInvocation, InvocationContext context) {
+      int expectedParameters = context == null? 0: 1;
+      if (nextInterceptorMethodInvocation.method.getJavaMethod().getParameterTypes().length != expectedParameters)
+      {
+         throw new IllegalStateException(
+               "Mismatch between number of expected and actual parameters on "
+                     + nextInterceptorMethodInvocation.getMethod() + ": expected " + expectedParameters
+                     + ", actual " + nextInterceptorMethodInvocation.getMethod().getJavaMethod().getParameterTypes().length);
       }
    }
 
