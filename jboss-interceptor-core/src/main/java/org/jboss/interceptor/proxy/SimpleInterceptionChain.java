@@ -97,6 +97,7 @@ public class SimpleInterceptionChain implements InterceptionChain
                         throw new IllegalStateException("Impossible state: lifecycle callback interceptor method on target class has more than one argument:" + nextInterceptorMethodInvocation.getMethod());
                      }
                      nextInterceptorMethodInvocation.invoke(null);
+                     return null;
                   }
                   finally
                   {
