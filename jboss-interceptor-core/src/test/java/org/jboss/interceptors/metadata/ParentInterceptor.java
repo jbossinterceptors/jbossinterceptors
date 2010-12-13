@@ -30,7 +30,7 @@ import javax.interceptor.InvocationContext;
  * @author Jaikiran Pai
  * @version $Revision: $
  */
-public class ParentInterceptor
+public class ParentInterceptor extends GrandParentInterceptor
 {
 
    @SuppressWarnings("unused")

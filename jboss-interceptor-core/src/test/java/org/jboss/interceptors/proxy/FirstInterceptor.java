@@ -30,7 +30,7 @@ public class FirstInterceptor implements Serializable
 {
 
    @AroundInvoke
-   private Object doAround(InvocationContext invocationContext) throws Exception
+   Object doAround(InvocationContext invocationContext) throws Exception
    {
       InterceptorTestLogger.add(FirstInterceptor.class, "aroundInvokeBefore");
       Object result = invocationContext.proceed();

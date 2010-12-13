@@ -1,6 +1,7 @@
 package org.jboss.interceptor.reader;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import javax.interceptor.InvocationContext;
 
+import com.sun.source.tree.ModifiersTree;
 import org.jboss.interceptor.builder.MethodReference;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
@@ -145,31 +147,38 @@ public class InterceptorMetadataUtils
 
          for (MethodMetadata method : currentClass.getDeclaredMethods())
          {
-            for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
+            MethodReference methodReference = MethodReference.of(method, Modifier.isPrivate(method.getJavaMethod().getModifiers()));
+            if (!foundMethods.contains(methodReference))
             {
-               if (isInterceptorMethod(interceptionType, method, forTargetClass))
+               for (InterceptionType interceptionType : InterceptionTypeRegistry.getSupportedInterceptionTypes())
                {
-                  if (methodMap.get(interceptionType) == null)
+                  if (isInterceptorMethod(interceptionType, method, forTargetClass))
                   {
-                     methodMap.put(interceptionType, new LinkedList<MethodMetadata>());
-                  }
-                  if (detectedInterceptorTypes.contains(interceptionType))
-                  {
-                     throw new InterceptorMetadataException("Same interception type cannot be specified twice on the same class");
-                  }
-                  else
-                  {
-                     detectedInterceptorTypes.add(interceptionType);
-                  }
-                  // add method in the list - if it is there already, it means that it has been added by a subclass
-                  ReflectionUtils.ensureAccessible(method.getJavaMethod());
-                  if (!foundMethods.contains(MethodReference.of(method, false)))
-                  {
-                     methodMap.get(interceptionType).add(0, method);
+                     if (methodMap.get(interceptionType) == null)
+                     {
+                        methodMap.put(interceptionType, new LinkedList<MethodMetadata>());
+                     }
+                     if (detectedInterceptorTypes.contains(interceptionType))
+                     {
+                        throw new InterceptorMetadataException("Same interception type cannot be specified twice on the same class");
+                     }
+                     else
+                     {
+                        detectedInterceptorTypes.add(interceptionType);
+                     }
+                     // add method in the list - if it is there already, it means that it has been added by a subclass
+                     // final methods are treated separately, as a final method cannot override another method nor be
+                     // overridden
+                     ReflectionUtils.ensureAccessible(method.getJavaMethod());
+                     if (!foundMethods.contains(methodReference));
+                     {
+                        methodMap.get(interceptionType).add(0, method);
+                     }
                   }
                }
+               // the method reference must be added anyway - overridden methods are not taken into consideration
+               foundMethods.add(methodReference);
             }
-            foundMethods.add(MethodReference.of(method, false));
          }
          currentClass = currentClass.getSuperclass();
       }

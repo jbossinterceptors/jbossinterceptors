@@ -44,7 +44,7 @@ public class InterceptorClassMetadataTestCase
       InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(InterceptorWithAllMethods.class);
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
-      assertEquals(true, postConstructMethods.size() == 1);
+      assertEquals(1, postConstructMethods.size());
       assertEquals(postConstructMethods.get(0).getJavaMethod().getName(), "doPostConstruct");
 
       List<MethodMetadata> preDestroyMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_DESTROY);
@@ -120,7 +120,7 @@ public class InterceptorClassMetadataTestCase
       InterceptorMetadata interceptorClassMetadata = metadataCachingReader.getInterceptorMetadata(OverrideChildInterceptor.class);
 
       List<MethodMetadata> postConstructMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.POST_CONSTRUCT);
-      assertEquals(true, postConstructMethods.size() == 1);
+      assertEquals(1, postConstructMethods.size());
       assertEquals(postConstructMethods.get(0).getJavaMethod().getName(), "methodOverriddenAndUsedAsInterceptor");
 
       List<MethodMetadata> preDestroyMethods = interceptorClassMetadata.getInterceptorMethods(InterceptionType.PRE_DESTROY);

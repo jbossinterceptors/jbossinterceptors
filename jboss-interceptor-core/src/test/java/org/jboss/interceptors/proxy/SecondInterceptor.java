@@ -29,7 +29,7 @@ import org.jboss.interceptors.proxy.FirstInterceptor;
 public class SecondInterceptor extends FirstInterceptor
 {
    @AroundInvoke
-   private Object doAround(InvocationContext invocationContext) throws Exception
+   Object doAround(InvocationContext invocationContext) throws Exception
    {
       InterceptorTestLogger.add(SecondInterceptor.class, "aroundInvokeBefore");
       Object result = invocationContext.proceed();
