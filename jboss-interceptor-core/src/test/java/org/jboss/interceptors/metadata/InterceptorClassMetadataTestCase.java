@@ -197,4 +197,19 @@ public class InterceptorClassMetadataTestCase
       Assert.assertEquals("Unexpected ClassMetadata found on interceptor metadata created out of class: " + InterceptorWithAllMethods.class, InterceptorWithAllMethods.class.getName(), interceptorClass.getClassName());
    }
 
+
+   /**
+    * Tests that @AroundInvoke methods on superclass of a interceptor class are included
+    * in the around-invoke methods collection. 
+    */
+   @Test
+   public void testInterceptorHierarchy()
+   {
+      InterceptorMetadata<?> interceptorMetaData = new DefaultMetadataCachingReader().getInterceptorMetadata(ChildInterceptor.class);
+      
+      List<MethodMetadata> aroundInvokeMethods = interceptorMetaData.getInterceptorMethods(InterceptionType.AROUND_INVOKE);
+      Assert.assertNotNull("No around-invoke methods found in " + ChildInterceptor.class.getName(), aroundInvokeMethods);
+      
+      Assert.assertEquals("Unexpected number of @AroundInvoke methods found on " + ChildInterceptor.class.getName(), 3, aroundInvokeMethods.size());
+   }
 }
