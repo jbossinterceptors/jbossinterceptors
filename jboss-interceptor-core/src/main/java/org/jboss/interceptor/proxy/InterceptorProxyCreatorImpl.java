@@ -29,8 +29,7 @@ import org.jboss.interceptor.spi.instance.InterceptorInstantiator;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.model.InterceptionModel;
 import org.jboss.interceptor.util.InterceptionUtils;
-
-import sun.reflect.ReflectionFactory;
+import org.jboss.interceptor.util.ReflectionFactoryUtils;
 
 /**
  * @author <a href="mailto:mariusb@redhat.com">Marius Bogoevici</a>
@@ -81,7 +80,7 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
          constructor = getNoArgConstructor(proxyClass);
          if (constructor == null)
          {
-            constructor = getReflectionFactoryConstructor(proxyClass);
+            constructor = ReflectionFactoryUtils.getReflectionFactoryConstructor(proxyClass);
          }
       }
       catch (Exception e)
@@ -116,8 +115,6 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
        return new InterceptorMethodHandler(targetInstance,  proxyClass, interceptionModel, interceptorInstantiator, invocationContextFactory);
     }
 
-
-
    private <T> Constructor<T> getNoArgConstructor(Class<T> clazz)
    {
       Constructor<T> constructor;
@@ -132,25 +129,6 @@ public class InterceptorProxyCreatorImpl implements InterceptorProxyCreator
       return constructor;
    }
 
-   private <T> Constructor<T> getReflectionFactoryConstructor(Class<T> proxyClass)
-         throws NoSuchMethodException
-   {
-      try
-      {
-         Constructor<T> constructor;
-         ReflectionFactory reflectionFactory = ReflectionFactory.getReflectionFactory();
-         constructor = reflectionFactory.newConstructorForSerialization(proxyClass, Object.class.getDeclaredConstructor());
-         return constructor;
-      }
-      catch (NoSuchMethodException e)
-      {
-         return null;
-      }
-      catch (SecurityException e)
-      {
-         return null;
-      }
-   }
 }
 
 
