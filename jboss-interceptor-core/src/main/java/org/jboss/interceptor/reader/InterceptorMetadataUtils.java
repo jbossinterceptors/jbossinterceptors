@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.interceptor.InvocationContext;
 
-import com.sun.source.tree.ModifiersTree;
 import org.jboss.interceptor.builder.MethodReference;
 import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
