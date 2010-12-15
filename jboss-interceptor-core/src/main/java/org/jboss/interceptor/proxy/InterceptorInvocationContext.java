@@ -207,9 +207,10 @@ public class InterceptorInvocationContext implements InvocationContext
                {
                   //identity ok
                   Class<? extends Object> newArgumentClass = params[i].getClass();
-                  if (methodParameterClass.isAssignableFrom(newArgumentClass))
                   if (newArgumentClass.equals(methodParameterClass))
+                  {
                      break;
+                  }
                   if (newArgumentClass.isPrimitive())
                   {
                      // argument is primitive - never actually a case for interceptors
@@ -239,7 +240,7 @@ public class InterceptorInvocationContext implements InvocationContext
                         // unboxing+widening primitive
                         Class<?> unboxedClass = getPrimitiveClass(newArgumentClass);
 
-                        if (!unboxedClass.equals(newArgumentClass) && !isWideningPrimitive(unboxedClass, methodParameterClass))
+                        if (!unboxedClass.equals(methodParameterClass) && !isWideningPrimitive(unboxedClass, methodParameterClass))
                         {
                            throw new IllegalArgumentException("Incompatible parameter type on position: " + i + " :" + newArgumentClass + " (expected type was " + methodParameterClass.getName() + ")");
                         }

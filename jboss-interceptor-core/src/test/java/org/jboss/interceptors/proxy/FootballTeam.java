@@ -75,6 +75,26 @@ public class FootballTeam extends Team
        return i;
     }
 
+    public char echoChar(char c)
+    {
+       return c;
+    }
+
+    public boolean echoBoolean(boolean b)
+    {
+       return b;
+    }
+
+    public Character echoCharacter(Character c)
+    {
+       return c;
+    }
+
+    public Boolean echoBooleanAsObject(Boolean b)
+    {
+       return b;
+    }
+
     @PrePassivate
     public void beforePassivating()
     {

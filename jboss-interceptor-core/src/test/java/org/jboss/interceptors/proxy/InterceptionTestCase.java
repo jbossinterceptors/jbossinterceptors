@@ -429,6 +429,68 @@ public class InterceptionTestCase
       Assert.assertEquals(42, proxy.echo2(new ValueBearerImpl(1)));
    }
 
+   @Test
+   public void testMethodParameterOverridingWithChar() throws Exception
+   {
+      InterceptorTestLogger.reset();
+
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
+      InterceptionModelBuilder<ClassMetadata<?>,?> builder =
+             InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
+      builder.interceptAll()
+            .with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithChar.class)),
+            metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithCharacter.class)));
+
+      InterceptionModel<ClassMetadata<?>,?> interceptionModel;
+      interceptionModel = builder.build();
+      this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>,?>>();
+      this.interceptionModelRegistry.put(FootballTeam.class, interceptionModel);
+
+      FootballTeam proxy = createAdvisedInstance(FootballTeam.class, TEAM_NAME);
+      Assert.assertEquals('z', proxy.echoChar('a'));
+      Assert.assertEquals((Object)'z', proxy.echoCharacter('a'));
+   }
+
+   @Test
+   public void testMethodParameterOverridingWithCharacterAndLong() throws Exception
+   {
+      InterceptorTestLogger.reset();
+
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
+      InterceptionModelBuilder<ClassMetadata<?>,?> builder =
+             InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
+      builder.interceptAll()
+            .with(metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithCharacterAndLong.class)));
+
+      InterceptionModel<ClassMetadata<?>,?> interceptionModel;
+      interceptionModel = builder.build();
+      this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>,?>>();
+      this.interceptionModelRegistry.put(FootballTeam.class, interceptionModel);
+
+      FootballTeam proxy = createAdvisedInstance(FootballTeam.class, TEAM_NAME);
+      Assert.assertEquals((long)'z', proxy.echoLong('a'));
+   }
+
+   @Test
+   public void testMethodParameterOverridingWithBoolean() throws Exception
+   {
+      InterceptorTestLogger.reset();
+
+      ClassMetadata<?> footballTeamClass =  metadataCachingReader.getClassMetadata(FootballTeam.class);
+      InterceptionModelBuilder<ClassMetadata<?>,?> builder =
+             InterceptionModelBuilder.<ClassMetadata<?>>newBuilderFor(footballTeamClass);
+      builder.interceptAll().with( metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithBoolean.class)),
+            metadataCachingReader.getInterceptorMetadata((ParameterOverridingInterceptorWithBooleanAsObject.class)));
+      InterceptionModel<ClassMetadata<?>,?> interceptionModel;
+      interceptionModel = builder.build();
+      this.interceptionModelRegistry = new HashMap<Class<?>, InterceptionModel<ClassMetadata<?>,?>>();
+      this.interceptionModelRegistry.put(FootballTeam.class, interceptionModel);
+
+      FootballTeam proxy = createAdvisedInstance(FootballTeam.class, TEAM_NAME);
+      Assert.assertEquals(false, proxy.echoBoolean(true));
+      Assert.assertEquals(false, proxy.echoBooleanAsObject(true));
+   }
+
    public void assertRawObject(FootballTeam proxy)
    {
 //      InterceptorTestLogger.reset();
