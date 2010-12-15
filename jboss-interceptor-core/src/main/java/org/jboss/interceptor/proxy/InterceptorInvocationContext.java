@@ -161,7 +161,7 @@ public class InterceptorInvocationContext implements InvocationContext
     */
    private static boolean isWideningPrimitive(Class argumentClass, Class targetClass)
    {
-      return WIDENING_TABLE.get(argumentClass).contains(targetClass);
+      return WIDENING_TABLE.containsKey(argumentClass) &&  WIDENING_TABLE.get(argumentClass).contains(targetClass);
    }
 
    private static Class<?> getWrapperClass(Class<?> primitiveClass)
