@@ -19,11 +19,14 @@ package org.jboss.interceptor.proxy;
 
 
 import java.lang.reflect.Method;
+import java.text.Collator;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.interceptor.InvocationContext;
 
@@ -46,7 +49,7 @@ public class InterceptorInvocationContext implements InvocationContext
    private InterceptionChain interceptionChain;
 
    private Object timer;
-   private static List<Class<?>> WIDENING_SEQUENCE = Arrays.<Class<?>>asList(byte.class, short.class, int.class, long.class, float.class, double.class);
+   private static Map<Class<?>, Set<Class<?>>> WIDENING_TABLE;
 
    private static Map<Class<?>, Class<?>> WRAPPER_CLASSES;
    private static Map<Class<?>, Class<?>> REVERSE_WRAPPER_CLASSES;
@@ -72,6 +75,20 @@ public class InterceptorInvocationContext implements InvocationContext
       }
 
       REVERSE_WRAPPER_CLASSES = Collections.unmodifiableMap(REVERSE_WRAPPER_CLASSES);
+
+      WIDENING_TABLE = new HashMap<Class<?>, Set<Class<?>>>();
+      WIDENING_TABLE.put(byte.class, setOf(short.class, int.class, long.class, float.class, double.class));
+      WIDENING_TABLE.put(short.class, setOf(int.class, long.class, float.class, double.class));
+      WIDENING_TABLE.put(char.class, setOf(int.class, long.class, float.class, double.class));
+      WIDENING_TABLE.put(int.class, setOf(long.class, float.class, double.class));
+      WIDENING_TABLE.put(long.class, setOf(float.class, double.class));
+      WIDENING_TABLE.put(float.class, Collections.<Class<?>>singleton(double.class));
+
+   }
+
+   private static Set<Class<?>> setOf(Class<?>... classes)
+   {
+      return new HashSet<Class<?>>(Arrays.asList(classes));
    }
 
    public InterceptorInvocationContext(InterceptionChain interceptionChain, Object target, Method targetMethod, Object[] parameters)
@@ -104,7 +121,14 @@ public class InterceptorInvocationContext implements InvocationContext
 
    public Object[] getParameters()
    {
-      return parameters;
+      if (this.method != null)
+      {
+         return parameters;
+      }
+      else
+      {
+         throw new IllegalStateException("Illegal invocation to getParameters() during lifecycle invocation");
+      }
    }
 
    public Object getTarget()
@@ -128,10 +152,16 @@ public class InterceptorInvocationContext implements InvocationContext
       }
    }
 
+   /**
+    * Checks that the targetClass is widening the argument class
+    *
+    * @param argumentClass
+    * @param targetClass
+    * @return
+    */
    private static boolean isWideningPrimitive(Class argumentClass, Class targetClass)
    {
-      int argumentClassIndex = WIDENING_SEQUENCE.indexOf(argumentClass);
-      return argumentClassIndex >= 0 && WIDENING_SEQUENCE.indexOf(targetClass) >= argumentClassIndex;
+      return WIDENING_TABLE.get(argumentClass).contains(targetClass);
    }
 
    private static Class<?> getWrapperClass(Class<?> primitiveClass)
@@ -178,7 +208,9 @@ public class InterceptorInvocationContext implements InvocationContext
                   //identity ok
                   Class<? extends Object> newArgumentClass = params[i].getClass();
                   if (newArgumentClass.equals(methodParameterClass))
+                  {
                      break;
+                  }
                   if (newArgumentClass.isPrimitive())
                   {
                      // argument is primitive - never actually a case for interceptors
@@ -207,7 +239,8 @@ public class InterceptorInvocationContext implements InvocationContext
                      {
                         // unboxing+widening primitive
                         Class<?> unboxedClass = getPrimitiveClass(newArgumentClass);
-                        if (!isWideningPrimitive(unboxedClass, methodParameterClass))
+
+                        if (!unboxedClass.equals(methodParameterClass) && !isWideningPrimitive(unboxedClass, methodParameterClass))
                         {
                            throw new IllegalArgumentException("Incompatible parameter type on position: " + i + " :" + newArgumentClass + " (expected type was " + methodParameterClass.getName() + ")");
                         }
