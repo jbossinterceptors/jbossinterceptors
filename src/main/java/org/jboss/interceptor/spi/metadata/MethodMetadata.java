@@ -19,7 +19,6 @@ package org.jboss.interceptor.spi.metadata;
 
 import org.jboss.interceptor.spi.model.InterceptionType;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
 

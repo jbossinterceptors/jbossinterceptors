@@ -21,8 +21,6 @@ import javax.annotation.PreDestroy;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 
-import org.jboss.interceptors.proxy.FirstInterceptor;
-
 /**
 * @author Marius Bogoevici
 */

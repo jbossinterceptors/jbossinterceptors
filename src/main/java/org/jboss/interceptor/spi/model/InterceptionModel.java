@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.io.Serializable;
 
-import org.jboss.interceptor.spi.metadata.ClassMetadata;
 import org.jboss.interceptor.spi.metadata.InterceptorMetadata;
 
 /**

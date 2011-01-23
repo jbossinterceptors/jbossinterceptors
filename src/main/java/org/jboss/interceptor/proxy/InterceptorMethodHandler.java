@@ -13,7 +13,6 @@ import java.util.Map;
 
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
-import org.jboss.interceptor.builder.BuildableInterceptionModel;
 import org.jboss.interceptor.reader.InterceptorMetadataUtils;
 import org.jboss.interceptor.spi.context.InvocationContextFactory;
 import org.jboss.interceptor.spi.instance.InterceptorInstantiator;

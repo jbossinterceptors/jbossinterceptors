@@ -18,7 +18,6 @@
 package org.jboss.interceptors.metadata;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.interceptor.InvocationContext;
 import javax.interceptor.AroundInvoke;
 

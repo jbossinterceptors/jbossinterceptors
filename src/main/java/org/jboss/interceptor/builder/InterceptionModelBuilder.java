@@ -97,22 +97,22 @@ public class InterceptionModelBuilder<T, I>
 
    public MethodInterceptorDescriptor interceptPostConstruct()
    {
-      return new MethodInterceptorDescriptor(null, POST_CONSTRUCT);
+      return new MethodInterceptorDescriptor(null, InterceptionType.POST_CONSTRUCT);
    }
 
    public MethodInterceptorDescriptor interceptPreDestroy()
    {
-      return new MethodInterceptorDescriptor(null, PRE_DESTROY);
+      return new MethodInterceptorDescriptor(null, InterceptionType.PRE_DESTROY);
    }
 
    public MethodInterceptorDescriptor interceptPrePassivate()
    {
-      return new MethodInterceptorDescriptor(null, PRE_PASSIVATE);
+      return new MethodInterceptorDescriptor(null, InterceptionType.PRE_PASSIVATE);
    }
 
    public MethodInterceptorDescriptor interceptPostActivate()
    {
-      return new MethodInterceptorDescriptor(null, POST_ACTIVATE);
+      return new MethodInterceptorDescriptor(null, InterceptionType.POST_ACTIVATE);
    }
 
    public void ignoreGlobalInterceptors(Method m)
