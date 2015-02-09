@@ -159,7 +159,7 @@ public class InterceptorMetadataUtils
                      }
                      if (detectedInterceptorTypes.contains(interceptionType))
                      {
-                        throw new InterceptorMetadataException("Same interception type cannot be specified twice on the same class");
+                        throw new InterceptorMetadataException("Same interception type (" + interceptionType.annotationClassName() + ") cannot be specified twice on the same class (" + interceptorClass.getJavaClass() + ")");
                      }
                      else
                      {
